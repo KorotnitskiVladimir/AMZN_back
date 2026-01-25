@@ -1,4 +1,5 @@
 using AMZN.Data;
+using AMZN.Services.KDF;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

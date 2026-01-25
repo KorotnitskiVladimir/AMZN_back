@@ -1,4 +1,10 @@
-﻿using AMZN.Data.Entities;
+﻿///
+/// Admin - CRUD
+/// Moderator - RD
+/// Editor - RU
+/// 
+
+using AMZN.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Data;
@@ -34,21 +40,19 @@ public class DataContext: DbContext
         modelBuilder.Entity<UserRole>().HasData(
             new UserRole()
             {
-                Id = "guest", Description = "solely registered user", CanCreate = 0, CanRead = 0, CanUpdate = 0,
-                CanDelete = 0
+                Id = "guest", Description = "solely registered user"
             },
             new UserRole()
             {
-                Id = "admin", Description = "full access to DB", CanCreate = 1, CanRead = 1, CanUpdate = 1,
-                CanDelete = 1
+                Id = "admin", Description = "full access to DB"
             },
             new UserRole()
             {
-                Id = "moderator", Description = "can block", CanCreate = 0, CanRead = 1, CanUpdate = 0, CanDelete = 1
+                Id = "moderator", Description = "can block"
             },
             new UserRole()
             {
-                Id = "editor", Description = "can edit", CanCreate = 0, CanRead = 1, CanUpdate = 1, CanDelete = 0
+                Id = "editor", Description = "can edit"
             });
     }
 }
