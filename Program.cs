@@ -1,4 +1,6 @@
 using AMZN.Data;
+using AMZN.Security;
+using AMZN.Security.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,13 +17,25 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+
+
 builder.Services.AddDbContext<DataContext>(options => options
     .UseSqlServer(builder
         .Configuration.GetConnectionString("LocalMs")));
 
+
+
 builder.Services.AddCors(options => 
     options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader();
     }));
+
+
+// DI services
+
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+
+
 
 var app = builder.Build();
 
