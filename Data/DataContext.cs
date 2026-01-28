@@ -1,4 +1,10 @@
-﻿using AMZN.Data.Entities;
+﻿///
+/// Admin - CRUD
+/// Moderator - RD
+/// Editor - RU
+/// 
+
+using AMZN.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Data;

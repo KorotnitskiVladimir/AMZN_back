@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 /*  TODO:
     
-    - сделать DB connection string и вынести в appsettings-Secrets.json
+    - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ DB connection string пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ appsettings-Secrets.json
  
     
  */
@@ -30,6 +30,8 @@ builder.Configuration.AddJsonFile("appsettings-Secrets.json", optional: true, re
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -63,7 +65,7 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
-        // .AllowCredentials();             // если будут cookies ?
+        // .AllowCredentials();             // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ cookies ?
     });
 });
 
