@@ -1,8 +1,9 @@
-﻿namespace AMZN.Data.Entities;
-
-public class UserRole
+﻿namespace AMZN.Data.Entities
 {
-    public string Id { get; set; } = null!;
-    public string Description { get; set; } = null!;
-
+    public enum UserRole
+    {
+        User,
+        Admin,
+        Moderator
+    }
 }

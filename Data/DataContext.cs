@@ -11,48 +11,39 @@ namespace AMZN.Data;
 
 public class DataContext: DbContext
 {
-    public DbSet<UserData> UsersData { get; private set; }
-    public DbSet<UserAccess> UsersAccess { get; private set; } 
-    public DbSet<UserRole> UserRoles { get; private set; }
-    
+    public DbSet<User> Users { get; private set; } = null!;
+    public DbSet<UserRefreshToken> UserRefreshTokens { get; private set; } = null!;
+
 
     public DataContext(DbContextOptions options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.HasDefaultSchema("AMZN");
 
-        modelBuilder.Entity<UserAccess>()
-            .HasIndex(ua => ua.Username)
-            .IsUnique();
 
-        modelBuilder.Entity<UserAccess>()
-            .HasOne(ua => ua.UserData)
-            .WithMany()
-            .HasForeignKey(ua => ua.UserId)
-            .HasPrincipalKey(ud => ud.Id);
+        modelBuilder.Entity<User>(u =>
+        {
+            u.HasIndex(x => x.Email)
+                .IsUnique();
 
-        modelBuilder.Entity<UserAccess>()
-            .HasOne(ua => ua.UserRole)
-            .WithMany()
-            .HasForeignKey(ua => ua.RoleId);
+            
+            u.Property(x => x.Role)
+                .HasConversion<string>();   // храним enum Role как строку в БД (Admin/User), а не как int (0/1)
+        });
 
-        modelBuilder.Entity<UserRole>().HasData(
-            new UserRole()
-            {
-                Id = "guest", Description = "solely registered user"
-            },
-            new UserRole()
-            {
-                Id = "admin", Description = "full access to DB"
-            },
-            new UserRole()
-            {
-                Id = "moderator", Description = "can block"
-            },
-            new UserRole()
-            {
-                Id = "editor", Description = "can edit"
-            });
+
+        modelBuilder.Entity<UserRefreshToken>(u =>
+        {
+            u.HasIndex(x => x.TokenHash)
+                .IsUnique();
+
+            u.HasOne(x => x.User)
+                .WithMany(x => x.RefreshTokens)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
