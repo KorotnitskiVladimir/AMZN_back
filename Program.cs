@@ -31,7 +31,7 @@ builder.Configuration.AddJsonFile("appsettings-Secrets.json", optional: true, re
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddSingleton<IKDFService, PBKDFService>();
+//builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
