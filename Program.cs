@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 /*  TODO:
     
-    - ������� DB connection string � ������� � appsettings-Secrets.json
+    - сделать DB connection string и вынести в appsettings-Secrets.json
+    - в RegisterReqyestDTO сделать валидацию на имена - только буквы.
  
     
  */
@@ -32,6 +33,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
 //builder.Services.AddSingleton<IKDFService, PBKDFService>();
+
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -65,7 +67,7 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
-        // .AllowCredentials();             // ���� ����� cookies ?
+        // .AllowCredentials();             // если будут cookies ?
     });
 });
 
@@ -82,6 +84,8 @@ builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenReposito
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        const int MinJwtKeyBytes = 32; // HS256 -> 256 bit secret
+
         var keyBase64 = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
 
         byte[] keyBytes;
@@ -93,6 +97,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             throw new InvalidOperationException("Jwt:Key must be a valid Base64 string.", ex);
         }
+
+        if (keyBytes.Length < MinJwtKeyBytes)
+            throw new InvalidOperationException($"Jwt:Key is too short. Need at least {MinJwtKeyBytes} bytes for HS256.");
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -113,7 +120,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();        //  .
+
+builder.Services.AddAuthorization();        //  .?
 
 
 var app = builder.Build();
