@@ -1,12 +1,11 @@
 ﻿using AMZN.Data.Entities;
-using AMZN.Security.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace AMZN.Security
+namespace AMZN.Security.Tokens
 {
     public class JwtService : IJwtService
     {

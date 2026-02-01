@@ -1,6 +1,4 @@
-﻿using AMZN.Security.Interfaces;
-
-namespace AMZN.Security
+﻿namespace AMZN.Security.Passwords
 {
     // Install-Package BCrypt.Net-Next
 

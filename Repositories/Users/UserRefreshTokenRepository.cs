@@ -1,9 +1,8 @@
 ﻿using AMZN.Data;
 using AMZN.Data.Entities;
-using AMZN.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace AMZN.Repositories
+namespace AMZN.Repositories.Users
 {
     public class UserRefreshTokenRepository : IUserRefreshTokenRepository
     {

@@ -1,8 +1,7 @@
 using AMZN.Data;
-using AMZN.Repositories;
-using AMZN.Repositories.Interfaces;
-using AMZN.Security;
-using AMZN.Security.Interfaces;
+using AMZN.Repositories.Users;
+using AMZN.Security.Passwords;
+using AMZN.Security.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +15,6 @@ var builder = WebApplication.CreateBuilder(args);
 /*  TODO:
     
     - сделать DB connection string и вынести в appsettings-Secrets.json
-    - в RegisterReqyestDTO сделать валидацию на имена - только буквы.
  
     
  */
