@@ -1,4 +1,4 @@
-﻿namespace AMZN.Security.Interfaces
+﻿namespace AMZN.Security.Passwords
 {
     public interface IPasswordHasher
     {

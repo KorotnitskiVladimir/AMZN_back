@@ -8,25 +8,28 @@ namespace AMZN.DTOs.Auth
         private const int NameMaxLength = 50;
         private const int EmailMaxLength = 100;
         private const int PasswordMinLength = 6;
-        private const int PasswordMaxLength = 64;
+        private const int PasswordMaxLength = 72;
+        private const string PersonNameRegex = @"^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$";      // Буквы (любой алфавит), между частями допустимы пробел/дефис/апостроф
 
 
         [Display(Name = "First name")]
-        [Required(ErrorMessage = "{0} is required")]     // {0} в ErrorMessage — плейсхолдер для имени поля из [Display] (выше) или имени свойства, упрощает локализацию и переиспользование сообщений об ошибках.
+        [Required(ErrorMessage = "{0} is required")]
         [StringLength(NameMaxLength, MinimumLength = NameMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
+        [RegularExpression(PersonNameRegex, ErrorMessage = "{0} may contain letters, spaces, hyphens and apostrophes")]
         public string FirstName { get; set; } = "";
 
 
         [Display(Name = "Last name")]
         [Required(ErrorMessage = "{0} is required")]
         [StringLength(NameMaxLength, MinimumLength = NameMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
+        [RegularExpression(PersonNameRegex, ErrorMessage = "{0} may contain letters, spaces, hyphens and apostrophes")]
         public string LastName { get; set; } = "";
 
 
         [Display(Name = "Email")]
         [Required(ErrorMessage = "{0} is required")]
         [EmailAddress(ErrorMessage = "Invalid {0} format")]
-        [StringLength(EmailMaxLength, MinimumLength = 5, ErrorMessage = "{0} must be 5-{1} characters")]
+        [StringLength(EmailMaxLength, ErrorMessage = "{0} must be {1} characters or less")]
         public string Email { get; set; } = "";
 
 
@@ -40,7 +43,6 @@ namespace AMZN.DTOs.Auth
 
         [Display(Name = "Password Repeat")]
         [Required(ErrorMessage = "{0} is required")]
-        [StringLength(PasswordMaxLength, MinimumLength = PasswordMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
         [Compare("Password", ErrorMessage = "Passwords do not match")]
         [DataType(DataType.Password)]
         public string PasswordRepeat { get; set; } = "";

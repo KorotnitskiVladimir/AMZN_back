@@ -1,6 +1,6 @@
 ﻿using AMZN.Data.Entities;
 
-namespace AMZN.Repositories.Interfaces
+namespace AMZN.Repositories.Users
 {
     public interface IUserRepository
     {

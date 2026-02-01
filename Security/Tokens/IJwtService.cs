@@ -1,6 +1,6 @@
 ﻿using AMZN.Data.Entities;
 
-namespace AMZN.Security.Interfaces
+namespace AMZN.Security.Tokens
 {
     public interface IJwtService
     {

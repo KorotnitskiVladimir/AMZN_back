@@ -1,6 +1,6 @@
 ﻿using AMZN.Data;
 using AMZN.Data.Entities;
-using AMZN.Repositories.Interfaces;
+using AMZN.Repositories.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Repositories
