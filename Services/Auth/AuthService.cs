@@ -3,12 +3,15 @@ using AMZN.DTOs.Auth;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
+using AMZN.Shared.Auth;
+using AMZN.Shared.Mapping;
+using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Services.Auth
 {
     public class AuthService : IAuthService
     {
-
+        // refresh token TTL берём из конфига Jwt:RefreshDays.  + ограничиваем на 1 - 365 дней (защита от кривого конфига)  // ps: в идеале валидировать конфиг на старте...
         private const int RefreshDaysDefault = 7;
         private const int RefreshDaysMin = 1;
         private const int RefreshDaysMax = 365;
@@ -38,21 +41,144 @@ namespace AMZN.Services.Auth
             _logger = logger;
         }
 
-
-
-        public Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
+        public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto dto)
         {
-            throw new NotImplementedException();
+            string email = NormalizeEmail(dto.Email);
+
+            _logger.LogInformation("Register attempt: email={Email}", email);
+
+            bool isTaken = await _users.IsEmailTakenAsync(email);
+            if(isTaken)
+            {
+                _logger.LogWarning("Register failed: email taken, email={Email}", email);
+                throw new AuthException(AuthErrors.EmailTaken, "Email already taken");
+            }
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+                Email = email,
+                PasswordHash = _passwordHasher.HashPassword(dto.Password),
+                Role = UserRole.User,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            try
+            {
+                await _users.AddUserAsync(user);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Register failed: DbUpdateException, email={Email}", email);
+                throw new AuthException(AuthErrors.DatabaseError, "Database error");
+            }
+
+            _logger.LogInformation("Register success: userId={UserId}, email={Email}", user.Id, email);
+            return await IssueTokenPairAsync(user);
+
         }
 
-        public Task<AuthResponseDto> RefreshAsync(RefreshRequestDto dto)
+
+
+        public async Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
         {
-            throw new NotImplementedException();
+            string email = NormalizeEmail(dto.Email);
+            _logger.LogInformation("Login attempt: email={Email}", email);
+
+            User? user = await _users.GetByEmailAsync(email);
+
+            if (user is null || !_passwordHasher.VerifyPassword(dto.Password, user.PasswordHash))
+            {
+                _logger.LogWarning("Login failed: invalid credentials, email={Email}", email);
+                throw new AuthException(AuthErrors.InvalidCredentials, "Invalid credentials");
+            }
+
+            _logger.LogInformation("Login success: userId={UserId}, email={Email}", user.Id, email);
+            return await IssueTokenPairAsync(user);
         }
 
-        public Task<AuthResponseDto> RegisterAsync(RegisterRequestDto dto)
+
+        public async Task<AuthResponseDto> RefreshAsync(RefreshRequestDto dto)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(dto.RefreshToken))
+                throw new AuthException(AuthErrors.InvalidRefreshToken, "Invalid refresh token");
+
+            _logger.LogInformation("Refresh Token attempt");
+
+            string refreshToken = dto.RefreshToken.Trim();
+            string tokenHash = _jwt.HashRefreshToken(refreshToken);
+
+            UserRefreshToken? storedToken = await _refreshTokens.GetValidByHashAsync(tokenHash);
+            if (storedToken == null)
+            {
+                _logger.LogWarning("Refresh failed: invalid refresh token");
+                throw new AuthException(AuthErrors.InvalidRefreshToken, "Invalid refresh token");
+            }
+
+            await _refreshTokens.RevokeAsync(storedToken);
+            _logger.LogInformation("Refresh success: userId={UserId}", storedToken.UserId);
+
+            return await IssueTokenPairAsync(storedToken.User);
         }
+
+
+
+
+        private static string NormalizeEmail(string email)
+        {
+            return email.Trim().ToLowerInvariant();
+        }
+
+        private int GetRefreshDays()
+        {
+            var valueText = _config["Jwt:RefreshDays"];
+
+            int days;
+            if (!int.TryParse(valueText, out days))
+            {
+                days = RefreshDaysDefault;
+            }
+
+            if (days < RefreshDaysMin) return RefreshDaysMin;
+            if (days > RefreshDaysMax) return RefreshDaysMax;
+
+            return days;
+        }
+
+
+        private async Task<AuthResponseDto> IssueTokenPairAsync(User user)
+        {
+            (string accessToken, int expiresInSeconds) = _jwt.GenerateAccessToken(user);
+
+            var refreshDays = GetRefreshDays();
+            var refreshToken = _jwt.GenerateRefreshToken();
+            var refreshHash = _jwt.HashRefreshToken(refreshToken);
+
+            var refreshTokenEntity = new UserRefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                TokenHash = refreshHash,
+                ExpiresAt = DateTime.UtcNow.AddDays(refreshDays),
+                IsRevoked = false,
+            };
+
+            await _refreshTokens.AddRefreshTokenAsync(refreshTokenEntity);
+
+            return new AuthResponseDto
+            {
+                AccessToken = accessToken,
+                ExpiresInSeconds = expiresInSeconds,
+                RefreshToken = refreshToken,
+                TokenType = "Bearer",
+                User = user.ToResponseDto()
+            };
+
+        }
+
+
+
     }
 }

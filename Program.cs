@@ -9,7 +9,12 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+/*  Note:
+    
+-  Старые refresh токены (revoked/expired) копятся в БД, можно добавить периодическую очистку (удалять ExpiresAt < UtcNow или IsRevoked=true).
 
+ 
+ */
 
 
 /*  TODO:
