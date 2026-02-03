@@ -2,9 +2,12 @@ using AMZN.Data;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
+using AMZN.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +23,8 @@ var builder = WebApplication.CreateBuilder(args);
 /*  TODO:
     
     - сделать DB connection string и вынести в appsettings-Secrets.json
+    - сделать глобальный обработчик ексепшенов и убрать try/catch из контроллеров.
+    - rate limiting на login/register/refresh ?
  
     
  */
@@ -38,6 +43,50 @@ builder.Services.AddHttpContextAccessor();
 //builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
 
+//  --- Swagger ---
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "AMZN API",
+        Version = "Swag v1"
+    });
+
+    c.ExampleFilters();
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer {your JWT access token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// examples
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+
+// -----------------------------------------------
+
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -47,17 +96,24 @@ builder.Services.AddSession(options =>
 });
 
 
+//  DbContext 
 
+//builder.Services.AddDbContext<DataContext>(options => options
+//    .UseSqlServer(builder
+//        .Configuration.GetConnectionString("LocalMs")));
+
+//  DbContext 
 builder.Services.AddDbContext<DataContext>(options => options
     .UseSqlServer(builder
-        .Configuration.GetConnectionString("LocalMs")));
+        .Configuration.GetConnectionString("DefaultConnection")));  // <- было LocalMs в appsettings
+
+
 
 
 
 //builder.Services.AddCors(options => 
 //    options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader();
 //    }));
-
 
 //  Cors
 builder.Services.AddCors(options =>
@@ -80,7 +136,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
-
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 // JWT auth
@@ -129,11 +185,23 @@ builder.Services.AddAuthorization();        //  .?
 
 var app = builder.Build();
 
+// Swagger
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AMZN API v1");
+        c.RoutePrefix = "swagger";
+    });
+
+}
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
