@@ -3,7 +3,7 @@ using AMZN.Data.Entities;
 using AMZN.Repositories.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace AMZN.Repositories
+namespace AMZN.Repositories.Users
 {
     public class UserRepository : IUserRepository
     {
@@ -17,7 +17,7 @@ namespace AMZN.Repositories
 
         public async Task<bool> IsEmailTakenAsync(string email)
         {
-            return await _db.Users.AnyAsync(x => x.Email == email);
+            return await _db.Users.AsNoTracking().AnyAsync(x => x.Email == email);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
