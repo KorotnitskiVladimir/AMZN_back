@@ -86,11 +86,11 @@ namespace AMZN.Security.Tokens
             }
             catch (FormatException ex)
             {
-                throw new InvalidOperationException("Jwt:Key must be a valid Base64 string", ex);
+                throw new InvalidOperationException("Jwt:Key (signing key secret) must be a valid Base64 string", ex);
             }
 
             if (keyBytes.Length < MinJwtKeyBytes)
-                throw new InvalidOperationException($"Jwt:Key is too short. Need at least {MinJwtKeyBytes} bytes for HS256.");
+                throw new InvalidOperationException($"Jwt:Key (signing key secret) is too short. Need at least {MinJwtKeyBytes} bytes for HS256.");
 
             return keyBytes;
         }
