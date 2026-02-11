@@ -1,4 +1,5 @@
 ﻿using AMZN.DTOs.Common;
+using AMZN.Shared.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AMZN.Shared.Api
@@ -21,7 +22,7 @@ namespace AMZN.Shared.Api
 
                     return new BadRequestObjectResult(new ApiErrorResponse
                     {
-                        Code = "validation.error",
+                        Code = ErrorCodes.ValidationError,
                         Message = "Validation failed",
                         TraceId = context.HttpContext.TraceIdentifier,
                         Errors = errors

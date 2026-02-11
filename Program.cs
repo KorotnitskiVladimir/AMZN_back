@@ -4,6 +4,7 @@ using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
 using AMZN.Services.Auth;
 using AMZN.Shared.Api;
+using AMZN.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -213,6 +214,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseMiddleware<ApiExceptionMiddleware>();
+
 app.UseCors();
 
 app.UseAuthentication();
