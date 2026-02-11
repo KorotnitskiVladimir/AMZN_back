@@ -3,9 +3,9 @@ using AMZN.DTOs.Auth;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
-using AMZN.Shared.Auth;
+using AMZN.Shared.Errors;
+using AMZN.Shared.Exceptions;
 using AMZN.Shared.Mapping;
-using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Services.Auth
 {
@@ -51,7 +51,7 @@ namespace AMZN.Services.Auth
             if(isTaken)
             {
                 _logger.LogWarning("Register failed: email taken, email={Email}", email);
-                throw new AuthException(AuthErrors.EmailTaken, "Email already taken");
+                throw new ApiException(ErrorCodes.AuthEmailTaken, "Email already taken", StatusCodes.Status409Conflict);
             }
 
             var user = new User
@@ -65,15 +65,7 @@ namespace AMZN.Services.Auth
                 CreatedAt = DateTime.UtcNow,
             };
 
-            try
-            {
-                await _users.AddUserAsync(user);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Register failed: DbUpdateException, email={Email}", email);
-                throw new AuthException(AuthErrors.DatabaseError, "Database error");
-            }
+            await _users.AddUserAsync(user);
 
             _logger.LogInformation("Register success: userId={UserId}, email={Email}", user.Id, email);
             return await IssueTokenPairAsync(user);
@@ -92,7 +84,7 @@ namespace AMZN.Services.Auth
             if (user is null || !_passwordHasher.VerifyPassword(dto.Password, user.PasswordHash))
             {
                 _logger.LogWarning("Login failed: invalid credentials, email={Email}", email);
-                throw new AuthException(AuthErrors.InvalidCredentials, "Invalid credentials");
+                throw new ApiException(ErrorCodes.AuthInvalidCredentials, "Invalid credentials", StatusCodes.Status401Unauthorized);
             }
 
             _logger.LogInformation("Login success: userId={UserId}, email={Email}", user.Id, email);
@@ -103,7 +95,7 @@ namespace AMZN.Services.Auth
         public async Task<AuthResponseDto> RefreshAsync(RefreshRequestDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.RefreshToken))
-                throw new AuthException(AuthErrors.InvalidRefreshToken, "Invalid refresh token");
+                throw new ApiException(ErrorCodes.AuthInvalidRefreshToken, "Invalid refresh token", StatusCodes.Status401Unauthorized);
 
             _logger.LogInformation("Refresh Token attempt");
 
@@ -114,7 +106,7 @@ namespace AMZN.Services.Auth
             if (storedToken == null)
             {
                 _logger.LogWarning("Refresh failed: invalid refresh token");
-                throw new AuthException(AuthErrors.InvalidRefreshToken, "Invalid refresh token");
+                throw new ApiException(ErrorCodes.AuthInvalidRefreshToken, "Invalid refresh token", StatusCodes.Status401Unauthorized);
             }
 
             await _refreshTokens.RevokeAsync(storedToken);
