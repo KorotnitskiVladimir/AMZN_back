@@ -4,6 +4,7 @@ using AMZN.Services.Auth;
 using AMZN.Shared.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AMZN.Controllers.Api
 {
@@ -71,6 +72,40 @@ namespace AMZN.Controllers.Api
                 return HandleAuthException(ex);
             }
         }
+
+        // GET api/auth/me
+        [HttpGet("me")]
+        [Authorize]
+        public ActionResult<MeResponseDto> Me()
+        {
+            string? userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? email = User.FindFirstValue(ClaimTypes.Email);
+            string? role = User.FindFirstValue(ClaimTypes.Role);
+
+            bool hasValidUserId = Guid.TryParse(userIdValue, out Guid userId);
+            bool hasEmail = !string.IsNullOrWhiteSpace(email);
+            bool hasRole = !string.IsNullOrWhiteSpace(role);
+
+            if (!hasValidUserId || !hasEmail || !hasRole)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new ApiErrorResponse
+                {
+                    Code = "AUTH_CLAIMS_INVALID",
+                    Message = "Invalid auth claims",
+                    TraceId = HttpContext.TraceIdentifier
+                });
+            }
+
+            return Ok(new MeResponseDto
+            {
+                Id = userId,
+                Email = email!,
+                Role = role!
+            });
+        }
+
+
+
 
 
         private ActionResult HandleAuthException(AuthException ex)

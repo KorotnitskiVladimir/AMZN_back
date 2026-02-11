@@ -3,6 +3,7 @@ using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
 using AMZN.Services.Auth;
+using AMZN.Shared.Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -39,6 +40,8 @@ builder.Configuration.AddJsonFile("appsettings-Secrets.json", optional: true, re
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddApiValidationErrors();      // единый формат 400 ответа для ошибок валидации DTO (ModelState)
 
 //builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
