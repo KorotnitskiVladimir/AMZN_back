@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@{
+    bool isAuthorized = Context.Items.ContainsKey("auth");
+    string? userName = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+    char? firstLetter = userName?[0];
+    string? userId = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -27,6 +34,17 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
                 </ul>
+                @if (isAuthorized)
+                {
+                    <span class="auth-letter" data-auth-ua-id="@userId" title="@userName" style="margin: 0.5em">@firstLetter</span>
+                    <a class="nav-link text-dark" href="?logout" style="margin: 0.5em">Logout</a>
+                }
+                else
+                {
+                    <span class="nav-link text-dark" style="cursor: pointer" data-bs-toggle="modal"
+                          data-bs-target="#authModal">Sing In</span>
+                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="SignUp">Register</a>
+                }
             </div>
         </div>
     </nav>
@@ -42,6 +60,37 @@
         &copy; 2026 - AMZN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
     </div>
 </footer>
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="authModalLabel">Sing In</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="auth-modal-form">
+                    <div class="mb-3">
+                        <span class="input-group-text" id="AuthLogin-addon"><i class="bi bi-box-arrow-in-right"></i></span>
+                        <input type="email" class="form-control" name="AuthEmail" placeholder="Email" 
+                               aria-label="AuthEmail" 
+                               aria-describedby="AuthEmail-addon">
+                    </div>
+                    <div class="mb-3">
+                        <span class="input-group-text" id="AuthPassword-addon"><i class="bi bi-box-arrow-in-right"></i></span>
+                        <input type="password" class="form-control" name="AuthPassword" placeholder="Password" 
+                               aria-label="AuthPassword" 
+                               aria-describedby="AuthPassword-addon">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <span id="message"></span>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dismiss</button>
+                <button type="submit" form="auth-modal-form" class="btn btn-primary">Enter</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>

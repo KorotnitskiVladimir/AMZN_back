@@ -1,0 +1,24 @@
+﻿@model AMZN.Models.User.UserSignUpViewModel
+@{
+    ViewData["Title"] = "Registration page";
+}
+<div class="text-center">
+    <h1 class="display-4">Registration page</h1>
+</div>
+<div class="row">
+    <div class="col">
+        <form id="user-registration-form" enctype="multipart/form-data">
+            First Name: <input type="text" name="firstName" /><br />
+            Last Name: <input type="text" name="lastName" /><br />
+            Email: <input type="email" name="email" /><br />
+            Password: <input type="password" name="password" /><br />
+            Confirm Password: <input type="password" name="confirmPassword" /><br />
+            Role: <select name="role">
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+                <option value="Moderator">Moderator</option>
+            </select><br />
+            <input type="submit" value="Register" />
+        </form>
+    </div>
+</div>

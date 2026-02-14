@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
+using AMZN.Middleware;
+using AMZN.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,7 +110,8 @@ builder.Services.AddDbContext<DataContext>(options => options
         .Configuration.GetConnectionString("DefaultConnection")));  // <- было LocalMs в appsettings
 
 
-
+builder.Services.AddScoped<FormsValidators>();
+builder.Services.AddScoped<DataAccessor>();
 
 
 //builder.Services.AddCors(options => 
@@ -140,6 +143,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 // JWT auth
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -216,6 +220,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
+app.UseAuthToken();
+app.UseAuthSession();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
