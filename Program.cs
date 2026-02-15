@@ -226,9 +226,13 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
-app.UseAuthToken();
-app.UseAuthSession();
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuilder =>
+{
+    appBuilder.UseSession();
+    appBuilder.UseAuthToken();
+    appBuilder.UseAuthSession();
+});
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
