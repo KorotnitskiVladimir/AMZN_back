@@ -38,6 +38,23 @@ document.addEventListener("submit", e => {
                 else {
                     alert(j.message);
                 }
-            })
+            });
+    }
+    if(form.id === "add-category-form") {
+        e.preventDefault();
+        fetch("/Admin/AddCategory", {
+            method: 'POST',
+            body: new FormData(form)
+        }).then(r => r.json())
+            .then(j => {
+                if(j.success) {
+                    alert("Category added successfully!");
+                    form.reset();
+                    window.location.reload();
+                }
+                else {
+                    alert(j.message);
+                }
+            });
     }
 })

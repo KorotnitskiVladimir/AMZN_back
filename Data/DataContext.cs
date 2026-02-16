@@ -14,6 +14,7 @@ public class DataContext: DbContext
     public DbSet<User> Users { get; private set; } = null!;
     public DbSet<UserRefreshToken> UserRefreshTokens { get; private set; } = null!;
 
+    public DbSet<Category> Categories { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -45,5 +46,14 @@ public class DataContext: DbContext
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<Category>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Category>()
+            .HasOne(c => c.ParentCategory)
+            .WithMany()
+            .HasForeignKey(c => c.ParentId);
     }
 }

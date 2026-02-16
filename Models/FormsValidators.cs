@@ -1,4 +1,5 @@
 ﻿using AMZN.Data;
+using AMZN.Models.Category;
 using AMZN.Models.User;
 
 namespace AMZN.Models;
@@ -101,4 +102,61 @@ public class FormsValidators
         
         return errors;
     }
+
+    public Dictionary<string, string> ValidateCategory(CategoryFormModel? formModel)
+    {
+        Dictionary<string, string> errors = new();
+        if (formModel != null)
+        {
+            if (string.IsNullOrEmpty(formModel.Name))
+            {
+                errors.Add("name", "Name is required");
+            }
+            
+            if (!string.IsNullOrEmpty(formModel.Name))
+            {
+                if (formModel.Name.Length < 2 || formModel.Name.Length > 20)
+                {
+                    errors.Add("name", "Name must be between 2 and 20 characters");
+                }
+                if (_dataContext.Categories.FirstOrDefault(c => c.Name == formModel.Name) != null)
+                {
+                    errors.Add("name", "Name already taken");
+                }
+            }
+
+            if (string.IsNullOrEmpty(formModel.Description))
+            {
+                errors.Add("description", "Description is required");
+            }
+            
+            if (!string.IsNullOrEmpty(formModel.Description))
+            {
+                if (formModel.Description.Length < 2 || formModel.Description.Length > 100)
+                {
+                    errors.Add("description", "Description must be between 2 and 100 characters");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(formModel.ParentCategory))
+            {
+                if (_dataContext.Categories.FirstOrDefault(c => c.Id.ToString() == formModel.ParentCategory) == null)
+                {
+                    errors.Add("parentCategory", "Parent category does not exist");
+                }
+            }
+
+            if (formModel.Image.Length == 0)
+            {
+                errors.Add("image", "Image is required");
+            }
+        }
+        else
+        {
+            errors.Add("formModel", "Form model is null");
+        }
+        
+        return errors;
+    }
+    
 }

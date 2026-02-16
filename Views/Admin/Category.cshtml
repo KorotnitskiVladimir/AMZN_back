@@ -29,7 +29,7 @@ else
         <div class="col">
             <form id="add-category-form" enctype="multipart/form-data">
                 Name: <input name="category-name"/><br/>
-                Parent: <select name="category-id">
+                Parent: <select name="parent-category">
                 @foreach (var category in Model.Categories)
                 {
                     <option value="@category.Id">@category.Name</option>
