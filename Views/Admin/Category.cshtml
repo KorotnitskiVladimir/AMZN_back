@@ -1,0 +1,44 @@
+﻿@model AMZN.Models.Category.CategoryViewModel
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Category page";
+}
+@{
+    bool isAuthorized = Context.Items.ContainsKey("auth");
+    string? role = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+}
+<div class="text-center">
+    <h1 class="display-4">Add category</h1>
+</div>
+@if (!isAuthorized)
+{
+<div class="alert alert-danger" role="alert">
+    You are not authorized to view this page.
+</div>
+}
+else
+{
+    @if (role != "Admin")
+    {
+    <div class="alert alert-danger" role="alert">
+        Should login as admin to add categories.
+    </div>
+    }
+    else
+    {
+        <div class="col">
+            <form id="add-category-form" enctype="multipart/form-data">
+                Name: <input name="category-name"/><br/>
+                Parent: <select name="category-id">
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+                </select><br/>
+                Description: <textarea name="category-description"></textarea><br/>
+                Picture: <input name="category-image" type="file"/><br/>
+                <button type="submit">Add category</button>
+            </form>
+        </div>
+    }
+}
