@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 using AMZN.Middleware;
 using AMZN.Models;
+using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -146,6 +147,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
+builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
 
 
 // JWT auth

@@ -5,8 +5,10 @@ using AMZN.Models;
 using AMZN.Models.Category;
 using AMZN.Models.User;
 using AMZN.Security.Passwords;
+using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 using Microsoft.AspNetCore.Mvc;
+using Azure.Storage.Blobs;
 
 namespace AMZN.Controllers;
 
@@ -17,18 +19,21 @@ public class AdminController : Controller
     private readonly FormsValidators _formsValidator;
     private readonly DataAccessor _dataAccessor;
     private readonly ILocalsStorageService _localsStorageService;
+    private readonly ICloudStorageService _cloudStorageService;
     
     public AdminController(DataContext dataContext,
         IPasswordHasher passwordHasher,
         FormsValidators formsValidator,
         DataAccessor dataAccessor,
-        ILocalsStorageService localsStorageService)
+        ILocalsStorageService localsStorageService,
+        ICloudStorageService cloudStorageService)
     {
         _dataContext = dataContext;
         _passwordHasher = passwordHasher;
         _formsValidator = formsValidator;
         _dataAccessor = dataAccessor;
         _localsStorageService = localsStorageService;
+        _cloudStorageService = cloudStorageService;
     }
 
     public IActionResult SignUp()
@@ -103,7 +108,7 @@ public class AdminController : Controller
     {
         CategoryViewModel viewModel = new()
         {
-            Categories = new()
+            Categories = _dataContext.Categories.ToList()
         };
         return View(viewModel);
     }
@@ -131,7 +136,8 @@ public class AdminController : Controller
                 Id = id,
                 Name = model.Name,
                 Description = model.Description,
-                ImageUrl = _localsStorageService.SaveFile(model.Image),
+                //ImageUrl = _localsStorageService.SaveFile(model.Image),
+                ImageUrl = _cloudStorageService.SaveFile(model.Image),
                 CreatedAt = DateTime.UtcNow,
             };
             if (parent != null)
@@ -145,4 +151,10 @@ public class AdminController : Controller
         }
         return Json(new { success = false, message = errors.Values });
     }
+
+    public FileResult Image([FromRoute] string id)
+    {
+        return File(System.IO.File.ReadAllBytes(_localsStorageService.GetRealPath(id)), "image/jpeg");
+    }
+    
 }
