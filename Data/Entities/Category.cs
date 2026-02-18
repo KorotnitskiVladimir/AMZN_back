@@ -13,5 +13,6 @@ public record Category
     public DateTime? UpdatedAt { get; set; }
     [JsonIgnore]
     public Category? ParentCategory { get; set; }
-    // public ICollection<Product> Products { get; set; } = new List<Product>();
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+
 }
