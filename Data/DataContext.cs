@@ -14,7 +14,13 @@ public class DataContext: DbContext
     public DbSet<User> Users { get; private set; } = null!;
     public DbSet<UserRefreshToken> UserRefreshTokens { get; private set; } = null!;
 
+    public DbSet<Product> Products { get; private set; } = null!;
+    public DbSet<ProductImage> ProductImages { get; private set; } = null!;
+    public DbSet<ProductRating> ProductRatings { get; private set; } = null!;
+
     public DbSet<Category> Categories { get; private set; } = null!;
+
+
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -46,6 +52,91 @@ public class DataContext: DbContext
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+
+        modelBuilder.Entity<Product>(p =>
+        {
+            p.HasIndex(x => x.CategoryId);
+
+            p.Property(x => x.Title)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            p.Property(x => x.PrimaryImageUrl)
+                .HasMaxLength(2048)
+                .IsRequired();
+
+            p.Property(x => x.CurrentPrice)
+                .HasColumnType("decimal(18,2)");
+
+            p.Property(x => x.OriginalPrice)
+                .HasColumnType("decimal(18,2)");
+
+            p.HasOne(x => x.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            p.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_Product_CurrentPrice", "[CurrentPrice] >= 0");
+
+                t.HasCheckConstraint("CK_Product_OriginalPrice",
+                    "[OriginalPrice] IS NULL OR [OriginalPrice] >= [CurrentPrice]");
+
+                t.HasCheckConstraint("CK_Product_RatingSum", "[RatingSum] >= 0");
+                t.HasCheckConstraint("CK_Product_RatingCount", "[RatingCount] >= 0");
+            });
+        });
+
+        modelBuilder.Entity<ProductImage>(i =>
+        {
+            i.HasIndex(x => x.ProductId);
+
+            i.Property(x => x.Url)
+                .HasMaxLength(2048)
+                .IsRequired();
+
+            i.HasOne(x => x.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            i.HasIndex(x => new { x.ProductId, x.SortOrder })
+                .IsUnique();
+
+            i.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_ProductImage_SortOrder", "[SortOrder] >= 0");
+            });
+        });
+
+
+        modelBuilder.Entity<ProductRating>(r =>
+        {
+            r.HasIndex(x => new { x.ProductId, x.UserId })
+                .IsUnique();
+
+            r.Property(x => x.Value)
+                .IsRequired();
+
+            r.HasOne(x => x.Product)
+                .WithMany(p => p.Ratings)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            r.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            r.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_ProductRating_Value", "[Value] >= 1 AND [Value] <= 5");
+            });
+        });
+
+
 
         modelBuilder.Entity<Category>()
             .HasIndex(c => c.Name)

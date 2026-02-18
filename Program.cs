@@ -221,19 +221,19 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseMiddleware<ApiExceptionMiddleware>();
-
-app.UseCors();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuilder =>
 {
     appBuilder.UseSession();
     appBuilder.UseAuthToken();
     appBuilder.UseAuthSession();
 });
+
+app.UseMiddleware<ApiExceptionMiddleware>();
+
+app.UseCors();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapStaticAssets();
 
