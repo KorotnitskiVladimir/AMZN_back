@@ -16,6 +16,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
+using AMZN.Middleware;
+using AMZN.Models;
+using AMZN.Services.Storage.Cloud;
+using AMZN.Services.Storage.Local;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -151,6 +155,7 @@ builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<HomeService>();
 
+builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
 
 
 // JWT auth

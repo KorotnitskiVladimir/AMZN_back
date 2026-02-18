@@ -30,10 +30,11 @@ else
             <form id="add-category-form" enctype="multipart/form-data">
                 Name: <input name="category-name"/><br/>
                 Parent: <select name="parent-category">
-                @foreach (var category in Model.Categories)
-                {
-                    <option value="@category.Id">@category.Name</option>
-                }
+                    <option value="">None</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
                 </select><br/>
                 Description: <textarea name="category-description"></textarea><br/>
                 Picture: <input name="category-image" type="file"/><br/>
