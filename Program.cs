@@ -1,10 +1,15 @@
 using AMZN.Data;
+using AMZN.Middleware;
+using AMZN.Middleware;
+using AMZN.Models;
+using AMZN.Repositories.Products;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
 using AMZN.Services.Auth;
+using AMZN.Services.Home;
+using AMZN.Services.Storage.Local;
 using AMZN.Shared.Api;
-using AMZN.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -147,6 +152,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<HomeService>();
+
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
 
 
