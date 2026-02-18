@@ -18,6 +18,8 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 using AMZN.Middleware;
 using AMZN.Models;
+using AMZN.Repositories.Categories;
+using AMZN.Services.Admin;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 
@@ -123,6 +125,9 @@ builder.Services.AddDbContext<DataContext>(options => options
 
 builder.Services.AddScoped<FormsValidators>();
 builder.Services.AddScoped<DataAccessor>();
+builder.Services.AddScoped<AdminUserService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<AdminCategoryService>();
 
 
 //builder.Services.AddCors(options => 

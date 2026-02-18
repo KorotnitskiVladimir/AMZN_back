@@ -5,6 +5,7 @@ using AMZN.Models;
 using AMZN.Models.Category;
 using AMZN.Models.User;
 using AMZN.Security.Passwords;
+using AMZN.Services.Admin;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 using Microsoft.AspNetCore.Mvc;
@@ -20,13 +21,15 @@ public class AdminController : Controller
     private readonly DataAccessor _dataAccessor;
     private readonly ILocalsStorageService _localsStorageService;
     private readonly ICloudStorageService _cloudStorageService;
+    private readonly AdminCategoryService _adminCategoryService;
     
     public AdminController(DataContext dataContext,
         IPasswordHasher passwordHasher,
         FormsValidators formsValidator,
         DataAccessor dataAccessor,
         ILocalsStorageService localsStorageService,
-        ICloudStorageService cloudStorageService)
+        ICloudStorageService cloudStorageService,
+        AdminCategoryService adminCategoryService)
     {
         _dataContext = dataContext;
         _passwordHasher = passwordHasher;
@@ -34,6 +37,7 @@ public class AdminController : Controller
         _dataAccessor = dataAccessor;
         _localsStorageService = localsStorageService;
         _cloudStorageService = cloudStorageService;
+        _adminCategoryService = adminCategoryService;
     }
 
     public IActionResult SignUp()
@@ -120,36 +124,9 @@ public class AdminController : Controller
         {
             return Json(new { success = false, message = "Form model is null" });
         }
-        
-        Dictionary<string, string> errors = _formsValidator.ValidateCategory(model);
-        if (errors.Count == 0)
-        {
-            Guid id = Guid.NewGuid();
-            var parent = _dataContext.Categories.FirstOrDefault(c => c.Id.ToString() == model.ParentCategory);
-            Guid? parentId = null;
-            if (parent != null)
-            {
-                parentId = parent.Id;
-            }
-            Category category = new()
-            {
-                Id = id,
-                Name = model.Name,
-                Description = model.Description,
-                //ImageUrl = _localsStorageService.SaveFile(model.Image),
-                ImageUrl = _cloudStorageService.SaveFile(model.Image),
-                CreatedAt = DateTime.UtcNow,
-            };
-            if (parent != null)
-            {
-                category.ParentId = parentId;
-                category.ParentCategory = parent;
-            }
-            _dataContext.Categories.Add(category);
-            _dataContext.SaveChanges();
-            return Json(new { success = true, message = "Category added successfully" });
-        }
-        return Json(new { success = false, message = errors.Values });
+
+        (bool success, object message) = _adminCategoryService.AddCategory(model);
+        return Json(new { success, message });
     }
 
     public FileResult Image([FromRoute] string id)

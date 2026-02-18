@@ -19,9 +19,9 @@ public class CloudStorageService : ICloudStorageService
     public string SaveFile(IFormFile file)
     {
         string path = "C:/Users/vladi/Downloads/"; // указываем путь к папке, из которой загружаем картинки
-        string savedName = file.FileName;
+        string savedName = Guid.NewGuid().ToString();
         BlobClient blob = _containerClient.GetBlobClient(savedName);
-        using (FileStream fs = File.OpenRead(path + savedName))
+        using (FileStream fs = File.OpenRead(path + file.FileName))
         {
             blob.Upload(fs, true);
         }

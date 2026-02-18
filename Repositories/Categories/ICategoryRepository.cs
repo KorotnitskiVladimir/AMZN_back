@@ -1,0 +1,9 @@
+﻿using AMZN.Data.Entities;
+
+namespace AMZN.Repositories.Categories;
+
+public interface ICategoryRepository
+{
+    Category? GetById(string id);
+    void AddCategory(Category category);
+}
