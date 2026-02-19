@@ -22,6 +22,7 @@ public class AdminController : Controller
     private readonly ILocalsStorageService _localsStorageService;
     private readonly ICloudStorageService _cloudStorageService;
     private readonly AdminCategoryService _adminCategoryService;
+    private readonly AdminUserService _adminUserService;
     
     public AdminController(DataContext dataContext,
         IPasswordHasher passwordHasher,
@@ -29,7 +30,8 @@ public class AdminController : Controller
         DataAccessor dataAccessor,
         ILocalsStorageService localsStorageService,
         ICloudStorageService cloudStorageService,
-        AdminCategoryService adminCategoryService)
+        AdminCategoryService adminCategoryService,
+        AdminUserService adminUserService)
     {
         _dataContext = dataContext;
         _passwordHasher = passwordHasher;
@@ -38,6 +40,7 @@ public class AdminController : Controller
         _localsStorageService = localsStorageService;
         _cloudStorageService = cloudStorageService;
         _adminCategoryService = adminCategoryService;
+        _adminUserService = adminUserService;
     }
 
     public IActionResult SignUp()
@@ -51,45 +54,15 @@ public class AdminController : Controller
     }
 
     [HttpPost]
-    public JsonResult Register(UserSignUpFormModel? model)
+    public async Task<JsonResult> Register(UserSignUpFormModel? model)
     {
         if (model == null)
         {
             return Json(new { success = false, message = "Form model is null" });
         }
         
-        Dictionary<string, string> errors = _formsValidator.ValidateUser(model);
-        if (errors.Count == 0)
-        {
-            Guid userId = Guid.NewGuid();
-            UserRole userRole = UserRole.User;
-            switch (model.Role)
-            {
-                case "User": userRole = UserRole.User; break;
-                case "Admin": userRole = UserRole.Admin; break;
-                case "Moderator": userRole = UserRole.Moderator; break;
-                default: ; break;
-            }
-
-
-            User user = new()
-            {
-                Id = userId,
-                FirstName = model.FirstName.Trim(),
-                LastName = model.LastName.Trim(),
-                Email = model.Email,
-                PasswordHash = _passwordHasher.HashPassword(model.Password),
-                Role = userRole,
-                CreatedAt = DateTime.UtcNow,
-            };
-            _dataContext.Users.Add(user);
-            _dataContext.SaveChanges();
-            return Json(new { success = true, message = "User registered successfully" });
-        }
-        else
-        {
-            return Json(new { success = false, message = errors.Values });
-        }
+        (bool success, object message) = await _adminUserService.RegisterUser(model);
+        return Json(new { success, message });
     }
     
     public IActionResult Login()
@@ -112,7 +85,7 @@ public class AdminController : Controller
     {
         CategoryViewModel viewModel = new()
         {
-            Categories = _dataContext.Categories.ToList()
+            Categories = _adminCategoryService.GetAll()
         };
         return View(viewModel);
     }

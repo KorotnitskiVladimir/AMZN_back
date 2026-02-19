@@ -126,7 +126,6 @@ builder.Services.AddDbContext<DataContext>(options => options
 builder.Services.AddScoped<FormsValidators>();
 builder.Services.AddScoped<DataAccessor>();
 builder.Services.AddScoped<AdminUserService>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<AdminCategoryService>();
 
 
@@ -156,11 +155,12 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
+builder.Services.AddScoped<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<HomeService>();
 
-builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
+builder.Services.AddScoped<ICloudStorageService, CloudStorageService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 // JWT auth

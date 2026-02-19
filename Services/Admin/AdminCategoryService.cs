@@ -9,12 +9,12 @@ namespace AMZN.Services.Admin;
 
 public class AdminCategoryService
 {
-    private readonly CategoryRepository _categoryRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly ILocalsStorageService _localStorageService;
     private readonly FormsValidators _formsValidator;
     private readonly ICloudStorageService _cloudStorageService;
     
-    public AdminCategoryService(CategoryRepository categoryRepository, 
+    public AdminCategoryService(ICategoryRepository categoryRepository, 
         ILocalsStorageService localStorageService, 
         FormsValidators formsValidator, 
         ICloudStorageService cloudStorageService)
@@ -57,5 +57,10 @@ public class AdminCategoryService
             return (true, "Category added successfully");
         }
         return (false, errors.Values);
+    }
+    
+    public List<Category> GetAll()
+    {
+        return _categoryRepository.GetAll();
     }
 }

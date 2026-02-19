@@ -22,4 +22,9 @@ public class CategoryRepository : ICategoryRepository
         _dataContext.Categories.Add(category);
         _dataContext.SaveChanges();
     }
+    
+    public List<Category> GetAll()
+    {
+        return _dataContext.Categories.ToList();
+    }
 }
