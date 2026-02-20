@@ -9,6 +9,5 @@ namespace AMZN.Repositories.Users
         Task<User?> GetByEmailAsync(string email);
         
 
-
     }
 }

@@ -14,6 +14,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
+using AMZN.Middleware;
+using AMZN.Models;
+using AMZN.Repositories.Categories;
+using AMZN.Services.Admin;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Extensions;
 
@@ -107,6 +111,16 @@ builder.Services.AddDbContext<DataContext>(options => options
     .UseSqlServer(builder
         .Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddScoped<FormsValidators>();
+builder.Services.AddScoped<DataAccessor>();
+builder.Services.AddScoped<AdminUserService>();
+builder.Services.AddScoped<AdminCategoryService>();
+
+
+//builder.Services.AddCors(options => 
+//    options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader();
+//    }));
 
 //  Cors
 builder.Services.AddCors(options =>
