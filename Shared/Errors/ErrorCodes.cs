@@ -20,6 +20,10 @@
         public const string InternalError = "internal.error";
 
 
+        // Rate limiting
+        public const string TooManyRequests = "rate_limited.too_many_requests";
+
+
     }
 
 }

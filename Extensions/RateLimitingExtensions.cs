@@ -1,4 +1,8 @@
-﻿using System.Threading.RateLimiting;
+﻿using AMZN.DTOs.Common;
+using AMZN.Shared.Errors;
+using System.Globalization;
+using System.Text.Json;
+using System.Threading.RateLimiting;
 
 namespace AMZN.Extensions
 {
@@ -10,10 +14,35 @@ namespace AMZN.Extensions
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+                // Наш ApiErrorResponse JSON response вместо "пустого 429"
+                options.OnRejected = async (context, cancellationToken) =>
+                {
+                    var http = context.HttpContext;
+
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+                    {
+                        var seconds = (int)Math.Ceiling(retryAfter.TotalSeconds);
+                        http.Response.Headers.RetryAfter = seconds.ToString(CultureInfo.InvariantCulture);
+                    }
+
+                    http.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    http.Response.ContentType = "application/json; charset=utf-8";
+
+                    var payload = new ApiErrorResponse
+                    {
+                        Code = ErrorCodes.TooManyRequests,
+                        Message = "Too many requests",
+                        TraceId = http.TraceIdentifier,
+                        Errors = null
+                    };
+
+                    await http.Response.WriteAsync(JsonSerializer.Serialize(payload), cancellationToken);
+                };
+
                 options.AddPolicy("Auth", context =>
                 {
-                    // В проде за прокси (Azure/Ingress) RemoteIpAddress может быть IP прокси.
-                    // Тогда лимит станет общим на всех. Решение: ForwardedHeaders + X-Forwarded-For.
+                    // При деплое за прокси(Azure/AWS/K8s) RemoteIpAddress может приходить в X-Forwarded-For.
+                    // Тогда нужен ForwardedHeaders (см. Extensions/ForwardedHeadersExtensions).
                     var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
                     return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions

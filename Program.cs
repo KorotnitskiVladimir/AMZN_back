@@ -112,16 +112,6 @@ builder.Services.AddDbContext<DataContext>(options => options
         .Configuration.GetConnectionString("DefaultConnection")));
 
 
-builder.Services.AddScoped<FormsValidators>();
-builder.Services.AddScoped<DataAccessor>();
-builder.Services.AddScoped<AdminUserService>();
-builder.Services.AddScoped<AdminCategoryService>();
-
-
-//builder.Services.AddCors(options => 
-//    options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader();
-//    }));
-
 //  Cors
 builder.Services.AddCors(options =>
 {
@@ -158,6 +148,9 @@ builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenReposito
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<HomeService>();
+builder.Services.AddScoped<AdminUserService>();
+builder.Services.AddScoped<AdminCategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
