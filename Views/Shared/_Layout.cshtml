@@ -33,6 +33,13 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
+
+                    <environment include="Development">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+                        </li>
+                    </environment>
+
                 </ul>
                 @if (isAuthorized)
                 {

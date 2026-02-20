@@ -1,6 +1,5 @@
 using AMZN.Data;
 using AMZN.Middleware;
-using AMZN.Middleware;
 using AMZN.Models;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Users;
@@ -9,33 +8,27 @@ using AMZN.Security.Tokens;
 using AMZN.Services.Auth;
 using AMZN.Services.Home;
 using AMZN.Services.Storage.Local;
-using AMZN.Shared.Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
-using AMZN.Middleware;
-using AMZN.Models;
 using AMZN.Services.Storage.Cloud;
-using AMZN.Services.Storage.Local;
+using AMZN.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 /*  Note:
     
 -  Старые refresh токены (revoked/expired) копятся в БД, можно добавить периодическую очистку (удалять ExpiresAt < UtcNow или IsRevoked=true).
+-  Rate limiting на Auth использует RemoteIpAddress. При деплое за прокси (Azure/AWS/K8s) реальный IP может приходить в X-Forwarded-For. Тогда нужен ForwardedHeaders (см. Extensions/ForwardedHeadersExtensions).
 
  
  */
 
 
 /*  TODO:
-    
-    - сделать DB connection string и вынести в appsettings-Secrets.json
-    - сделать глобальный обработчик ексепшенов и убрать try/catch из контроллеров.
-    - rate limiting на login/register/refresh ?
  
     
  */
@@ -110,24 +103,10 @@ builder.Services.AddSession(options =>
 
 
 //  DbContext 
-
-//builder.Services.AddDbContext<DataContext>(options => options
-//    .UseSqlServer(builder
-//        .Configuration.GetConnectionString("LocalMs")));
-
-//  DbContext 
 builder.Services.AddDbContext<DataContext>(options => options
     .UseSqlServer(builder
-        .Configuration.GetConnectionString("DefaultConnection")));  // <- было LocalMs в appsettings
+        .Configuration.GetConnectionString("DefaultConnection")));
 
-
-builder.Services.AddScoped<FormsValidators>();
-builder.Services.AddScoped<DataAccessor>();
-
-
-//builder.Services.AddCors(options => 
-//    options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader();
-//    }));
 
 //  Cors
 builder.Services.AddCors(options =>
@@ -144,22 +123,37 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Output cache (home page)
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("HomePage", policy =>
+    {
+        policy.Expire(TimeSpan.FromSeconds(10));
+        policy.SetVaryByQuery("take");
+    });
+});
+
 
 // DI services
+builder.Services.AddScoped<FormsValidators>();
+builder.Services.AddScoped<DataAccessor>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<HomeService>();
 
+builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
+
+builder.Services.AddAmznForwardedHeaders();
+builder.Services.AddAmznRateLimiting();
+
 
 
 // JWT auth
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -200,10 +194,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 
-builder.Services.AddAuthorization();        //  .?
+builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+app.UseAmznForwardedHeaders();
+app.UseMiddleware<ApiExceptionMiddleware>();
 
 // Swagger
 if (app.Environment.IsDevelopment())
@@ -225,8 +221,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -238,12 +232,13 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuil
     appBuilder.UseAuthSession();
 });
 
-app.UseMiddleware<ApiExceptionMiddleware>();
-
 app.UseCors();
 
+app.UseAmznRateLimiting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseOutputCache();
 
 app.MapStaticAssets();
 
@@ -253,7 +248,6 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapControllers();
-
 
 
 app.Run();

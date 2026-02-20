@@ -4,9 +4,9 @@ namespace AMZN.DTOs.Auth
 {
     public class RegisterRequestDto
     {
-        private const int NameMinLength = 2;
-        private const int NameMaxLength = 50;
-        private const int EmailMaxLength = 100;
+        private const int NameMinLength = 3;
+        private const int NameMaxLength = 64;
+        private const int EmailMaxLength = 128;
         private const int PasswordMinLength = 6;
         private const int PasswordMaxLength = 72;
         private const string PersonNameRegex = @"^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$";      // Буквы (любой алфавит), между частями допустимы пробел/дефис/апостроф
