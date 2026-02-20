@@ -2,9 +2,9 @@
 using AMZN.Shared.Errors;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AMZN.Shared.Api
+namespace AMZN.Extensions
 {
-    public static class ApiValidationConfig
+    public static class ApiValidationExtensions
     {
         public static IServiceCollection AddApiValidationErrors(this IServiceCollection services)
         {

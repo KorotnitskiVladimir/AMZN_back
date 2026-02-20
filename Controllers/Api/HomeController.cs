@@ -1,8 +1,8 @@
 ﻿using AMZN.DTOs.Home;
 using AMZN.Services.Home;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace AMZN.Controllers.Api
 {
@@ -19,6 +19,7 @@ namespace AMZN.Controllers.Api
 
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache(PolicyName = "HomePage")]
         public async Task<ActionResult<HomeResponseDto>> Get([FromQuery] int take = 20)
         {
             var dto = await _home.GetHomeAsync(take);

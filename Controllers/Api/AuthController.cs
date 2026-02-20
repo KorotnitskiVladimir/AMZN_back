@@ -4,6 +4,7 @@ using AMZN.Shared.Errors;
 using AMZN.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace AMZN.Controllers.Api
@@ -23,6 +24,7 @@ namespace AMZN.Controllers.Api
         // POST api/auth/register
         [HttpPost("register")]
         [AllowAnonymous]
+        [EnableRateLimiting("Auth")]
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto request)
         {
 
@@ -34,6 +36,7 @@ namespace AMZN.Controllers.Api
         // POST api/auth/login
         [HttpPost("login")]
         [AllowAnonymous]
+        [EnableRateLimiting("Auth")]
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody]  LoginRequestDto request)
         {
 
@@ -45,6 +48,7 @@ namespace AMZN.Controllers.Api
         // POST api/auth/refresh
         [HttpPost("refresh")]
         [AllowAnonymous]
+        [EnableRateLimiting("Auth")]
         public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] RefreshRequestDto request)
         {
 
@@ -56,6 +60,7 @@ namespace AMZN.Controllers.Api
         // GET api/auth/me
         [HttpGet("me")]
         [Authorize]
+        [EnableRateLimiting("Auth")]
         public ActionResult<MeResponseDto> Me()
         {
             string? userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
