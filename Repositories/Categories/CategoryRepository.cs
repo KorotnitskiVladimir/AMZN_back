@@ -1,5 +1,6 @@
 ﻿using AMZN.Data;
 using AMZN.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Repositories.Categories;
 
@@ -27,4 +28,21 @@ public class CategoryRepository : ICategoryRepository
     {
         return _dataContext.Categories.ToList();
     }
+
+
+    public Task<List<Category>> GetAllAsync()
+    {
+        return _dataContext.Categories
+            .AsNoTracking()
+            .OrderBy(x => x.Name)
+            .ToListAsync();
+    }
+
+    public Task<bool> ExistsAsync(Guid id)
+    {
+        return _dataContext.Categories
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == id);
+    }
+
 }

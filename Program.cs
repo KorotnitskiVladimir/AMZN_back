@@ -33,7 +33,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 /*  TODO:
- 
+       - upload limits ограничение общего размера multipart/form-data (защита от слишком больших аплоадов)
+       - CloudStirageServuce: sync методы сделать Async (блокирует поток)
     
  */
 
@@ -151,6 +152,7 @@ builder.Services.AddScoped<HomeService>();
 builder.Services.AddScoped<AdminUserService>();
 builder.Services.AddScoped<AdminCategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<AdminProductService>();
 
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();

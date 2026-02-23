@@ -8,4 +8,7 @@ public interface ICategoryRepository
     void AddCategory(Category category);
 
     List<Category> GetAll();
+
+    Task<List<Category>> GetAllAsync();
+    Task<bool> ExistsAsync(Guid id);
 }
