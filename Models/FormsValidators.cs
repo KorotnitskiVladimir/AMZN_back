@@ -146,7 +146,7 @@ public class FormsValidators
                 }
             }
 
-            if (formModel.Image.Length == 0)
+            if (formModel.Image == null || formModel.Image.Length == 0)
             {
                 errors.Add("image", "Image is required");
             }
