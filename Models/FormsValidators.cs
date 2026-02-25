@@ -1,4 +1,5 @@
 ﻿using AMZN.Data;
+using AMZN.Models.Action;
 using AMZN.Models.Category;
 using AMZN.Models.User;
 
@@ -149,6 +150,107 @@ public class FormsValidators
             if (formModel.Image == null || formModel.Image.Length == 0)
             {
                 errors.Add("image", "Image is required");
+            }
+        }
+        else
+        {
+            errors.Add("formModel", "Form model is null");
+        }
+        
+        return errors;
+    }
+
+    public Dictionary<string, string> ValidateAction(ActionFormModel? formModel)
+    {
+        Dictionary<string, string> errors = new();
+        if (formModel != null)
+        {
+            if (string.IsNullOrEmpty(formModel.Name))
+            {
+                errors.Add("name", "Name is required");
+            }
+
+            if (!string.IsNullOrEmpty(formModel.Name))
+            {
+                if (formModel.Name.Length < 2 || formModel.Name.Length > 20)
+                {
+                    errors.Add("name", "Name must be between 2 and 20 characters");
+                }
+
+                if (_dataContext.Actions.FirstOrDefault(a => a.Name == formModel.Name) != null)
+                {
+                    errors.Add("name", "Name already taken");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(formModel.Description))
+            {
+                if (formModel.Description.Length < 2 || formModel.Description.Length > 100)
+                {
+                    errors.Add("description", "Description must be between 2 and 100 characters");
+                }
+            }
+
+            if (string.IsNullOrEmpty(formModel.ApplyTo))
+            {
+                errors.Add("applyTo", "Application type to is required");
+            }
+
+            if (!string.IsNullOrEmpty(formModel.ApplyTo))
+            {
+                if (formModel.ApplyTo != "product" && formModel.ApplyTo != "category")
+                {
+                    errors.Add("applyTo", "Application type to is not valid");
+                }
+            }
+
+            if (string.IsNullOrEmpty(formModel.ProductTitle))
+            {
+                errors.Add("productTitle", "Product title is required");
+            }
+
+            if (!string.IsNullOrEmpty(formModel.ProductTitle))
+            {
+                if (formModel.ApplyTo == "product")
+                {
+                    if (_dataContext.Products.FirstOrDefault(p => p.Title == formModel.ProductTitle) == null)
+                    {
+                        errors.Add("productTitle", "Product does not exist");
+                    }
+                }
+
+                if (formModel.ApplyTo == "category")
+                {
+                    if (_dataContext.Categories.FirstOrDefault(c => c.Name == formModel.ProductTitle) == null)
+                    {
+                        errors.Add("productTitle", "Category does not exist");
+                    }
+                }
+            }
+
+            if (formModel.Amount <= 0 || formModel.Amount >= 100)
+            {
+                errors.Add("amount", "Amount must be between 1 and 99");
+            }
+
+            if (formModel.StartDate == default)
+            {
+                errors.Add("startDate", "Start date is required");
+            }
+
+            if (formModel.EndDate == default)
+            {
+                errors.Add("endDate", "End date is required");
+            }
+
+            if (formModel.StartDate > formModel.EndDate)
+            {
+                errors.Add("endDate", "End date must be after start date");
+            }
+
+            if (formModel.EndDate < DateTime.Now)
+            {
+                errors.Add("endDate", "End date must be in the future");
             }
         }
         else

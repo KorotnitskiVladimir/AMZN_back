@@ -17,4 +17,29 @@ public class ActionRepository : IActionRepository
         _dataContext.Actions.Add(action);
         _dataContext.SaveChanges();
     }
+    
+    public void ApplyAction(Action action)
+    {
+        var product = _dataContext.Products.FirstOrDefault(p => p.Id == action.ProductId);
+        if (product != null)
+        {
+            product.OriginalPrice = product.CurrentPrice;
+            product.CurrentPrice *= (decimal)((100 - action.Amount) * 0.01);
+            _dataContext.SaveChanges();
+        }
+    }
+
+    public void RemoveAction(Action action)
+    {
+        var product = _dataContext.Products.FirstOrDefault(p => p.Id == action.ProductId);
+        if (product != null)
+        {
+            if (product.OriginalPrice != null)
+            {
+                product.CurrentPrice = (decimal)product.OriginalPrice;
+                product.OriginalPrice = null;
+                _dataContext.SaveChanges();
+            }
+        }
+    }
 }
