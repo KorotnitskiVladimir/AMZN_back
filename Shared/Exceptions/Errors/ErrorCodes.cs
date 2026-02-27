@@ -1,4 +1,4 @@
-﻿namespace AMZN.Shared.Errors
+﻿namespace AMZN.Shared.Exceptions.Errors
 {
 
     public static class ErrorCodes
@@ -23,6 +23,8 @@
         // Rate limiting
         public const string TooManyRequests = "rate_limited.too_many_requests";
 
+        // Product
+        public const string ProductNotFound = "product.not_found";
 
     }
 

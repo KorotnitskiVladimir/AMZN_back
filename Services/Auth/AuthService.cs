@@ -3,8 +3,8 @@ using AMZN.DTOs.Auth;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
-using AMZN.Shared.Errors;
 using AMZN.Shared.Exceptions;
+using AMZN.Shared.Exceptions.Errors;
 using AMZN.Shared.Mapping;
 
 namespace AMZN.Services.Auth

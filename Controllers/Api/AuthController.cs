@@ -1,7 +1,7 @@
 ﻿using AMZN.DTOs.Auth;
 using AMZN.Services.Auth;
-using AMZN.Shared.Errors;
 using AMZN.Shared.Exceptions;
+using AMZN.Shared.Exceptions.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
