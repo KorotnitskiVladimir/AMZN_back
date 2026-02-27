@@ -50,7 +50,7 @@ namespace AMZN.Services.Admin
             IFormFile primaryFile = form.PrimaryImage ?? throw new InvalidOperationException("Primary image is required");
             string primaryUrl = _cloud.SaveFile(primaryFile);
 
-            var product = new Product
+            var product = new Data.Entities.Product
             {
                 Id = Guid.NewGuid(),
                 CategoryId = categoryId,

@@ -1,5 +1,5 @@
 ﻿using AMZN.DTOs.Common;
-using AMZN.Shared.Errors;
+using AMZN.Shared.Exceptions.Errors;
 using System.Globalization;
 using System.Text.Json;
 using System.Threading.RateLimiting;

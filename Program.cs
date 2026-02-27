@@ -20,6 +20,7 @@ using AMZN.Repositories.Categories;
 using AMZN.Services.Admin;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Extensions;
+using AMZN.Services.Product;
 using AMZN.Repositories.Actions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -149,6 +150,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<HomeService>();
 builder.Services.AddScoped<AdminUserService>();
 builder.Services.AddScoped<AdminCategoryService>();

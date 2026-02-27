@@ -66,6 +66,14 @@ namespace AMZN.Repositories.Products
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public Task<Product?> GetDetailsByIdAsync(Guid id)
+        {
+            return _db.Products
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
 
     }
 }

@@ -15,6 +15,7 @@ namespace AMZN.Repositories.Products
 
         Task<Product?> GetByIdAsync(Guid id);
         Task<Product?> GetByIdWithImagesAsync(Guid id);
+        Task<Product?> GetDetailsByIdAsync(Guid id);
     }
 
 }

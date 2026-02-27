@@ -1,6 +1,6 @@
 ﻿using AMZN.DTOs.Common;
-using AMZN.Shared.Errors;
 using AMZN.Shared.Exceptions;
+using AMZN.Shared.Exceptions.Errors;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Middleware

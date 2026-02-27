@@ -1,5 +1,5 @@
 ﻿using AMZN.DTOs.Common;
-using AMZN.Shared.Errors;
+using AMZN.Shared.Exceptions.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AMZN.Extensions
