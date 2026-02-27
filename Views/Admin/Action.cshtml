@@ -1,0 +1,45 @@
+﻿@model AMZN.Models.Action.ActionViewModel
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Category page";
+}
+@{
+    bool isAuthorized = Context.Items.ContainsKey("auth");
+    string? role = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+}
+<div class="text-center">
+    <h1 class="display-4">Add action</h1>
+</div>
+@if (!isAuthorized)
+{
+    <div class="alert alert-danger" role="alert">
+        You are not authorized to view this page.
+    </div>
+}
+else
+{
+    @if (role != "Admin")
+    {
+        <div class="alert alert-danger" role="alert">
+            Should login as admin to add categories.
+        </div>
+    }
+    else
+    {
+        <div class="col">
+            <form id="add-action-form" enctype="multipart/form-data">
+                Name: <input name="action-name"/><br/>
+                Description: <textarea name="action-description"></textarea><br/>
+                Apply to: <select name="apply-to">
+                    <option value="product">Single product</option>
+                    <option value="category">Whole category</option>
+                </select>
+                Applicant name: <input name="product-title"/><br/>
+                Amount: <input name="action-amount" type="number" min="1" max="99"/><br/>
+                Start Date: <input name="action-start-date" type="date"/><br/>
+                End Date: <input name="action-end-date" type="date"/><br/>
+                <button type="submit">Add action</button>
+            </form>
+        </div>
+    }
+}

@@ -2,6 +2,7 @@
 using AMZN.Data;
 using AMZN.Data.Entities;
 using AMZN.Models;
+using AMZN.Models.Action;
 using AMZN.Models.Category;
 using AMZN.Models.User;
 using AMZN.Security.Passwords;
@@ -105,6 +106,12 @@ public class AdminController : Controller
     public FileResult Image([FromRoute] string id)
     {
         return File(System.IO.File.ReadAllBytes(_localsStorageService.GetRealPath(id)), "image/jpeg");
+    }
+    
+    public IActionResult Action()
+    {
+        ActionViewModel viewModel = new();
+        return View(viewModel);
     }
     
 }

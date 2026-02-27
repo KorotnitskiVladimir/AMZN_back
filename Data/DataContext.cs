@@ -6,6 +6,7 @@
 
 using AMZN.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Action = AMZN.Data.Entities.Action;
 
 namespace AMZN.Data;
 
@@ -19,7 +20,7 @@ public class DataContext: DbContext
     public DbSet<ProductRating> ProductRatings { get; private set; } = null!;
 
     public DbSet<Category> Categories { get; private set; } = null!;
-
+    public DbSet<Action> Actions { get; private set; } = null!;
 
 
     public DataContext(DbContextOptions options) : base(options) {}
@@ -146,5 +147,11 @@ public class DataContext: DbContext
             .HasOne(c => c.ParentCategory)
             .WithMany()
             .HasForeignKey(c => c.ParentId);
+        
+        modelBuilder.Entity<Action>()
+            .HasOne(a => a.Product)
+            .WithMany()
+            .HasForeignKey(a => a.ProductId)
+            .HasPrincipalKey(p => p.Id);
     }
 }
