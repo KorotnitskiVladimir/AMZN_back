@@ -12,85 +12,84 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMZN.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260227181133_AddProducts_ProductImages_ProductRating_Fix")]
-    partial class AddProducts_ProductImages_ProductRating_Fix
+    [Migration("20260227203451_Initial_MySql")]
+    partial class Initial_MySql
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("AMZN")
                 .HasAnnotation("ProductVersion", "9.0.12")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("AMZN.Data.Entities.Action", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ProductTitle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Actions", "AMZN");
+                    b.ToTable("Actions");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid?>("ParentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -99,26 +98,26 @@ namespace AMZN.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Categories", "AMZN");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("CurrentPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("OriginalPrice")
                         .HasColumnType("decimal(18,2)");
@@ -126,7 +125,7 @@ namespace AMZN.Migrations
                     b.Property<string>("PrimaryImageUrl")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
+                        .HasColumnType("varchar(2048)");
 
                     b.Property<int>("RatingCount")
                         .HasColumnType("int");
@@ -137,21 +136,21 @@ namespace AMZN.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products", "AMZN", t =>
+                    b.ToTable("Products", t =>
                         {
-                            t.HasCheckConstraint("CK_Product_CurrentPrice", "[CurrentPrice] >= 0");
+                            t.HasCheckConstraint("CK_Product_CurrentPrice", "CurrentPrice >= 0");
 
-                            t.HasCheckConstraint("CK_Product_OriginalPrice", "[OriginalPrice] IS NULL OR [OriginalPrice] >= [CurrentPrice]");
+                            t.HasCheckConstraint("CK_Product_OriginalPrice", "OriginalPrice IS NULL OR OriginalPrice >= CurrentPrice");
 
-                            t.HasCheckConstraint("CK_Product_RatingCount", "[RatingCount] >= 0");
+                            t.HasCheckConstraint("CK_Product_RatingCount", "RatingCount >= 0");
 
-                            t.HasCheckConstraint("CK_Product_RatingSum", "[RatingSum] >= 0");
+                            t.HasCheckConstraint("CK_Product_RatingSum", "RatingSum >= 0");
                         });
                 });
 
@@ -159,10 +158,10 @@ namespace AMZN.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
@@ -170,7 +169,7 @@ namespace AMZN.Migrations
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
+                        .HasColumnType("varchar(2048)");
 
                     b.HasKey("Id");
 
@@ -179,9 +178,9 @@ namespace AMZN.Migrations
                     b.HasIndex("ProductId", "SortOrder")
                         .IsUnique();
 
-                    b.ToTable("ProductImages", "AMZN", t =>
+                    b.ToTable("ProductImages", t =>
                         {
-                            t.HasCheckConstraint("CK_ProductImage_SortOrder", "[SortOrder] >= 0");
+                            t.HasCheckConstraint("CK_ProductImage_SortOrder", "SortOrder >= 0");
                         });
                 });
 
@@ -189,16 +188,16 @@ namespace AMZN.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<byte>("Value")
-                        .HasColumnType("tinyint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.HasKey("Id");
 
@@ -207,9 +206,9 @@ namespace AMZN.Migrations
                     b.HasIndex("ProductId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ProductRatings", "AMZN", t =>
+                    b.ToTable("ProductRatings", t =>
                         {
-                            t.HasCheckConstraint("CK_ProductRating_Value", "[Value] >= 1 AND [Value] <= 5");
+                            t.HasCheckConstraint("CK_ProductRating_Value", "Value >= 1 AND Value <= 5");
                         });
                 });
 
@@ -217,57 +216,57 @@ namespace AMZN.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", "AMZN");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.UserRefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -276,7 +275,7 @@ namespace AMZN.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRefreshTokens", "AMZN");
+                    b.ToTable("UserRefreshTokens");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.Action", b =>
