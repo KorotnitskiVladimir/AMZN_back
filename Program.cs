@@ -1,27 +1,28 @@
 using AMZN.Data;
+using AMZN.Extensions;
+using AMZN.Middleware;
 using AMZN.Middleware;
 using AMZN.Models;
+using AMZN.Models;
+using AMZN.Repositories.Actions;
+using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
+using AMZN.Services.Admin;
 using AMZN.Services.Auth;
 using AMZN.Services.Home;
+using AMZN.Services.Product;
+using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
-using AMZN.Middleware;
-using AMZN.Models;
-using AMZN.Repositories.Categories;
-using AMZN.Services.Admin;
-using AMZN.Services.Storage.Cloud;
-using AMZN.Extensions;
-using AMZN.Services.Product;
-using AMZN.Repositories.Actions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,9 +111,22 @@ builder.Services.AddSession(options =>
 
 
 //  DbContext 
+// MSSQL
+//builder.Services.AddDbContext<DataContext>(options => options
+//    .UseSqlServer(builder
+//        .Configuration.GetConnectionString("DefaultConnection")));
+
+// MySQL
 builder.Services.AddDbContext<DataContext>(options => options
-    .UseSqlServer(builder
-        .Configuration.GetConnectionString("DefaultConnection")));
+    .UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+              ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+
+//builder.Services.AddDbContext<DataContext>(options => options
+//    .UseMySql(
+//        builder.Configuration.GetConnectionString("DefaultConnection"),
+//        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+//        mySqlOptions => mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore)  // ← Игнорировать schemas
+//    ));
 
 
 //  Cors

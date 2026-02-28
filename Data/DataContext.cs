@@ -29,7 +29,10 @@ public class DataContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.HasDefaultSchema("AMZN");
+        if (Database.ProviderName?.Contains("SqlServer") == true)
+        {
+            modelBuilder.HasDefaultSchema("AMZN");
+        }
 
 
         modelBuilder.Entity<User>(u =>
@@ -80,13 +83,12 @@ public class DataContext: DbContext
 
             p.ToTable(t =>
             {
-                t.HasCheckConstraint("CK_Product_CurrentPrice", "[CurrentPrice] >= 0");
+                t.HasCheckConstraint("CK_Product_CurrentPrice", "CurrentPrice >= 0");
 
                 t.HasCheckConstraint("CK_Product_OriginalPrice",
-                    "[OriginalPrice] IS NULL OR [OriginalPrice] >= [CurrentPrice]");
-
-                t.HasCheckConstraint("CK_Product_RatingSum", "[RatingSum] >= 0");
-                t.HasCheckConstraint("CK_Product_RatingCount", "[RatingCount] >= 0");
+                    "OriginalPrice IS NULL OR OriginalPrice >= CurrentPrice");
+                t.HasCheckConstraint("CK_Product_RatingSum", "RatingSum >= 0");
+                t.HasCheckConstraint("CK_Product_RatingCount", "RatingCount >= 0");
             });
         });
 
@@ -108,7 +110,7 @@ public class DataContext: DbContext
 
             i.ToTable(t =>
             {
-                t.HasCheckConstraint("CK_ProductImage_SortOrder", "[SortOrder] >= 0");
+                t.HasCheckConstraint("CK_ProductImage_SortOrder", "SortOrder >= 0");
             });
         });
 
@@ -133,7 +135,7 @@ public class DataContext: DbContext
 
             r.ToTable(t =>
             {
-                t.HasCheckConstraint("CK_ProductRating_Value", "[Value] >= 1 AND [Value] <= 5");
+                t.HasCheckConstraint("CK_ProductRating_Value", "Value >= 1 AND Value <= 5");
             });
         });
 
