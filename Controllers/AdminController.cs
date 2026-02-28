@@ -24,6 +24,7 @@ public class AdminController : Controller
     private readonly ICloudStorageService _cloudStorageService;
     private readonly AdminCategoryService _adminCategoryService;
     private readonly AdminUserService _adminUserService;
+    private readonly AdminActionService _adminActionService;
     
     public AdminController(DataContext dataContext,
         IPasswordHasher passwordHasher,
@@ -32,7 +33,8 @@ public class AdminController : Controller
         ILocalsStorageService localsStorageService,
         ICloudStorageService cloudStorageService,
         AdminCategoryService adminCategoryService,
-        AdminUserService adminUserService)
+        AdminUserService adminUserService,
+        AdminActionService adminActionService)
     {
         _dataContext = dataContext;
         _passwordHasher = passwordHasher;
@@ -42,6 +44,7 @@ public class AdminController : Controller
         _cloudStorageService = cloudStorageService;
         _adminCategoryService = adminCategoryService;
         _adminUserService = adminUserService;
+        _adminActionService = adminActionService;
     }
 
     public IActionResult SignUp()
@@ -112,6 +115,18 @@ public class AdminController : Controller
     {
         ActionViewModel viewModel = new();
         return View(viewModel);
+    }
+
+    [HttpPost]
+    public JsonResult AddAction(ActionFormModel? model)
+    {
+        if (model == null)
+        {
+            return Json(new { success = false, message = "Form model is null" });
+        }
+
+        (bool success, object message) = _adminActionService.AddAction(model);
+        return Json(new { success, message });
     }
     
 }

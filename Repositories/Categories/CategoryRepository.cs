@@ -44,5 +44,9 @@ public class CategoryRepository : ICategoryRepository
             .AsNoTracking()
             .AnyAsync(x => x.Id == id);
     }
-
+    
+    public Category? GetByName(string name)
+    {
+        return _dataContext.Categories.FirstOrDefault(x => x.Name == name);
+    }
 }

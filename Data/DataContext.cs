@@ -21,6 +21,9 @@ public class DataContext: DbContext
 
     public DbSet<Category> Categories { get; private set; } = null!;
     public DbSet<Action> Actions { get; private set; } = null!;
+    public DbSet<ProductAction> ProductActions { get; private set; } = null!;
+    
+    public DbSet<CategoryAction> CategoryActions { get; private set; } = null!;
 
 
     public DataContext(DbContextOptions options) : base(options) {}
@@ -147,11 +150,36 @@ public class DataContext: DbContext
             .HasOne(c => c.ParentCategory)
             .WithMany()
             .HasForeignKey(c => c.ParentId);
-        
+        /*
         modelBuilder.Entity<Action>()
             .HasOne(a => a.Product)
             .WithMany()
             .HasForeignKey(a => a.ProductId)
             .HasPrincipalKey(p => p.Id);
+        */
+        
+        modelBuilder.Entity<ProductAction>()
+            .HasOne(pa => pa.Product)
+            .WithMany()
+            .HasForeignKey(pa => pa.ProductId)
+            .HasPrincipalKey(p => p.Id);
+        
+        modelBuilder.Entity<ProductAction>()
+            .HasOne(pa => pa.Action)
+            .WithMany()
+            .HasForeignKey(pa => pa.ActionId)
+            .HasPrincipalKey(a => a.Id);
+        
+        modelBuilder.Entity<CategoryAction>()
+            .HasOne(ca => ca.Category)
+            .WithMany()
+            .HasForeignKey(ca => ca.CategoryId)
+            .HasPrincipalKey(c => c.Id);
+        
+        modelBuilder.Entity<CategoryAction>()
+            .HasOne(ca => ca.Action)
+            .WithMany()
+            .HasForeignKey(ca => ca.ActionId)
+            .HasPrincipalKey(a => a.Id);
     }
 }

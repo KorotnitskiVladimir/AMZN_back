@@ -235,6 +235,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Action validity check
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var checker = services.GetRequiredService<AdminActionService>();
+    checker.CheckActionsValidity();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
