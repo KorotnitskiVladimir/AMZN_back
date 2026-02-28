@@ -11,4 +11,6 @@ public interface ICategoryRepository
 
     Task<List<Category>> GetAllAsync();
     Task<bool> ExistsAsync(Guid id);
+    
+    Category? GetByName(string name);
 }

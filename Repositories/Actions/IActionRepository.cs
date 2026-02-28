@@ -4,9 +4,19 @@ namespace AMZN.Repositories.Actions;
 
 public interface IActionRepository
 {
-    void AddAction(Action action);
+    void AddProductAction(Action action);
     
-    void ApplyAction(Action action);
+    void AddCategoryAction(Action action);
     
-    void RemoveAction(Action action);
+    void ApplyProductAction(Action action);
+    
+    void ApplyCategoryAction(Action action);
+    
+    void RemoveProductAction(Action action);
+    
+    void RemoveCategoryAction(Action action);
+    
+    bool IsValid(Action action);
+    
+    List<Action> GetActions();
 }
