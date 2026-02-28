@@ -121,13 +121,6 @@ builder.Services.AddDbContext<DataContext>(options => options
     .UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
               ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
-//builder.Services.AddDbContext<DataContext>(options => options
-//    .UseMySql(
-//        builder.Configuration.GetConnectionString("DefaultConnection"),
-//        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
-//        mySqlOptions => mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore)  // ← Игнорировать schemas
-//    ));
-
 
 //  Cors
 builder.Services.AddCors(options =>
