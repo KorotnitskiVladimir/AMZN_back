@@ -21,6 +21,8 @@ public class DataContext: DbContext
 
     public DbSet<Category> Categories { get; private set; } = null!;
     public DbSet<Action> Actions { get; private set; } = null!;
+    public DbSet<Brand> Brands { get; private set; } = null!;
+
     public DbSet<ProductAction> ProductActions { get; private set; } = null!;
     
     public DbSet<CategoryAction> CategoryActions { get; private set; } = null!;
@@ -64,6 +66,7 @@ public class DataContext: DbContext
         modelBuilder.Entity<Product>(p =>
         {
             p.HasIndex(x => x.CategoryId);
+            p.HasIndex(x => x.BrandId);
 
             p.Property(x => x.Title)
                 .HasMaxLength(256)
@@ -82,6 +85,11 @@ public class DataContext: DbContext
             p.HasOne(x => x.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            p.HasOne(x => x.Brand)
+                .WithMany(b  => b.Products)
+                .HasForeignKey(x => x.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             p.ToTable(t =>
@@ -183,5 +191,17 @@ public class DataContext: DbContext
             .WithMany()
             .HasForeignKey(ca => ca.ActionId)
             .HasPrincipalKey(a => a.Id);
+
+
+        modelBuilder.Entity<Brand>(b =>
+        {
+            b.Property(x => x.Name)
+                .HasMaxLength(128)
+                .IsRequired();
+
+            b.HasIndex(x => x.Name)
+                .IsUnique();
+        });
+
     }
 }

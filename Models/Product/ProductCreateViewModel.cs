@@ -7,6 +7,8 @@ namespace AMZN.Models.Product
         public ProductCreateFormModel Form { get; set; } = new();
         public List<AMZN.Data.Entities.Category> Categories { get; set; } = new();
 
+        public List<Brand> Brands { get; set; } = new();
+
         public string? ErrorMessage { get; set; }
     }
 }

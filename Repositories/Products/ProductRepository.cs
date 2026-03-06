@@ -71,6 +71,7 @@ namespace AMZN.Repositories.Products
             return _db.Products
                 .AsNoTracking()
                 .Include(p => p.Category)
+                .Include(p => p.Brand)
                 .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }

@@ -24,5 +24,7 @@ namespace AMZN.Services.Product
 
             return product.ToDetailsDto();
         }
+
+
     }
 }

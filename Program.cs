@@ -5,6 +5,7 @@ using AMZN.Middleware;
 using AMZN.Models;
 using AMZN.Models;
 using AMZN.Repositories.Actions;
+using AMZN.Repositories.Brands;
 using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Users;
@@ -12,6 +13,7 @@ using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
 using AMZN.Services.Admin;
 using AMZN.Services.Auth;
+using AMZN.Services.BrandService;
 using AMZN.Services.Home;
 using AMZN.Services.Product;
 using AMZN.Services.Storage.Cloud;
@@ -51,10 +53,7 @@ builder.Configuration.AddJsonFile("appsettings-Secrets.json", optional: true, re
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddApiValidationErrors();      // единый формат 400 ответа для ошибок валидации DTO (ModelState)
-
-//builder.Services.AddSingleton<IKDFService, PBKDFService>();
 
 
 //  --- Swagger ---
@@ -110,16 +109,13 @@ builder.Services.AddSession(options =>
 });
 
 
-//  DbContext 
-// MSSQL
-//builder.Services.AddDbContext<DataContext>(options => options
-//    .UseSqlServer(builder
-//        .Configuration.GetConnectionString("DefaultConnection")));
-
-// MySQL
+// MySQL DbContext 
 builder.Services.AddDbContext<DataContext>(options => options
-    .UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-              ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+    .UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+        mySqlOptions => mySqlOptions.CommandTimeout(30)
+    ));
 
 
 //  Cors
@@ -137,6 +133,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 // Output cache (home page)
 builder.Services.AddOutputCache(options =>
 {
@@ -146,6 +143,7 @@ builder.Services.AddOutputCache(options =>
         policy.SetVaryByQuery("take");
     });
 });
+
 
 
 // DI services
@@ -165,6 +163,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<AdminProductService>();
 builder.Services.AddScoped<IActionRepository, ActionRepository>();
 builder.Services.AddScoped<AdminActionService>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<BrandService>();
 
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
@@ -252,8 +252,13 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/api"), appBuilder =>
+{
+    appBuilder.UseStatusCodePagesWithReExecute("/Home/AuthStatus", "?code={0}");
+});
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuilder =>
 {
     appBuilder.UseSession();
@@ -261,11 +266,11 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuil
     appBuilder.UseAuthSession();
 });
 
+app.UseAuthorization();
+
 app.UseCors();
 
 app.UseAmznRateLimiting();
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseOutputCache();
 
