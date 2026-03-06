@@ -1,4 +1,5 @@
 ﻿using AMZN.Data.Entities;
+using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Home;
 using AMZN.DTOs.Products;
@@ -8,9 +9,9 @@ namespace AMZN.Shared.Mapping
     public static class ProductMapper
     {
 
-        public static HomeProductDto ToHomeDto(this Product p)
+        public static ProductCardDto ToCardDto(this Product p)
         {
-            return new HomeProductDto
+            return new ProductCardDto
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -51,7 +52,13 @@ namespace AMZN.Shared.Mapping
                 {
                     Id = p.CategoryId,
                     Name = p.Category?.Name ?? "",
-                }
+                },
+
+                Brand = new BrandDto
+                {
+                    Id = p.BrandId,
+                    Name = p.Brand.Name
+                },
             };
 
         }

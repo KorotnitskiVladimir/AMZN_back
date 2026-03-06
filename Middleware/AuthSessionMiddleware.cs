@@ -20,10 +20,12 @@ public class AuthSessionMiddleware
         {
             context.Session.Remove("userId");
             context.Response.Redirect(context.Request.Path);
+            return;
         }
         if (context.Session.Keys.Contains("userId"))
         {
-            context.Items.Add("auth", "OK");
+            //context.Items.Add("auth", "OK");  // Add() падал при повторном проходе пайплайна (re execute) из за попытки повторно добавить ключ, лучше использовать перезапись
+            context.Items["auth"] = "OK";
 
             if (dataContext.UserRefreshTokens.FirstOrDefault(t =>
                     t.UserId.ToString() == context.Session.GetString("userId")) != null)

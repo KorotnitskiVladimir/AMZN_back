@@ -1,5 +1,6 @@
 ﻿using AMZN.Data.Entities;
 using AMZN.Models.Product;
+using AMZN.Repositories.Brands;
 using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Services.Storage.Cloud;
@@ -11,15 +12,18 @@ namespace AMZN.Services.Admin
         private readonly IProductRepository _products;
         private readonly ICategoryRepository _categories;
         private readonly ICloudStorageService _cloud;
+        private readonly IBrandRepository _brands;
 
         public AdminProductService(
             IProductRepository products,
             ICategoryRepository categories,
-            ICloudStorageService cloud)
+            ICloudStorageService cloud,
+            IBrandRepository brand)
         {
             _products = products;
             _categories = categories;
             _cloud = cloud;
+            _brands = brand;
         }
 
 
@@ -29,6 +33,7 @@ namespace AMZN.Services.Admin
             {
                 Form = form ?? new ProductCreateFormModel(),
                 Categories = await _categories.GetAllAsync(),
+                Brands = await _brands.GetAllAsync(),
                 ErrorMessage = error
             };
         }
@@ -37,9 +42,12 @@ namespace AMZN.Services.Admin
         public async Task CreateAsync(ProductCreateFormModel form)
         {
             Guid categoryId = form.CategoryId ?? throw new InvalidOperationException("CategoryId is required");
+            Guid brandId = form.BrandId ?? throw new InvalidOperationException("BrandId is required");
 
             if (!await _categories.ExistsAsync(categoryId))
                 throw new InvalidOperationException("Category does not exist");
+            if (await _brands.GetByIdAsync(brandId) == null)
+                throw new InvalidOperationException("Brand does not exist");
 
             decimal currentPrice = decimal.Round(form.CurrentPrice, 2);
 
@@ -54,6 +62,7 @@ namespace AMZN.Services.Admin
             {
                 Id = Guid.NewGuid(),
                 CategoryId = categoryId,
+                BrandId = brandId,
                 Title   = form.Title.Trim(),
                 Description   = string.IsNullOrWhiteSpace(form.Description) ? null : form.Description.Trim(),
                 CurrentPrice  = currentPrice,

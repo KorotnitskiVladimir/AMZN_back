@@ -18,10 +18,17 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public IActionResult AuthStatus(int code)
     {
-        return View();
+        if (code == 401)
+            return View("NotAuthorized");
+
+        if (code == 403)
+            return View("Forbidden");
+
+        return View("Error");
     }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

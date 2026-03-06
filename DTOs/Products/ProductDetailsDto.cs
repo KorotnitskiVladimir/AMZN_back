@@ -1,4 +1,5 @@
-﻿using AMZN.DTOs.Common;
+﻿using AMZN.DTOs.Brands;
+using AMZN.DTOs.Common;
 
 namespace AMZN.DTOs.Products
 {
@@ -17,6 +18,7 @@ namespace AMZN.DTOs.Products
         public List<ImageDto> Images { get; set; } = new();
 
         public CategoryDto Category { get; set; } = new();
+        public BrandDto Brand { get; set; } = new();
 
     }
 

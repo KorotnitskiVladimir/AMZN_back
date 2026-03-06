@@ -43,6 +43,18 @@
     </div>
 
     <div class="mb-3">
+        <label class="form-label">Brand</label>
+        <select asp-for="Form.BrandId" class="form-select">
+            <option value="">-- select --</option>
+            @foreach (var b in Model.Brands)
+            {
+                <option value="@b.Id">@b.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Form.BrandId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">Description</label>
         <textarea asp-for="Form.Description" class="form-control"></textarea>
         <span asp-validation-for="Form.Description" class="text-danger"></span>

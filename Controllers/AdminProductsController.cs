@@ -18,12 +18,9 @@ public class AdminProductsController : Controller
 
 
     [HttpGet("Create")]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> Create()
     {
-        if (!(User?.Identity?.IsAuthenticated ?? false))
-            return View("NotAuthorized");
-
         var vm = await _adminProductService.BuildCreateVmAsync();
         return View(vm);
     }

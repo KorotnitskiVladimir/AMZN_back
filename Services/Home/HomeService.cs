@@ -23,7 +23,7 @@ namespace AMZN.Services.Home
             var items = await _products.GetHomeProductsAsync(take);
 
             var response = new HomeResponseDto();
-            response.Products = items.Select(x => x.ToHomeDto()).ToList();
+            response.Products = items.Select(x => x.ToCardDto()).ToList();
 
             return response;
         }
