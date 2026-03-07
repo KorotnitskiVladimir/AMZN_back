@@ -66,7 +66,9 @@ public class DataContext: DbContext
         modelBuilder.Entity<Product>(p =>
         {
             p.HasIndex(x => x.CategoryId);
+            p.HasIndex(x => new { x.CategoryId, x.CreatedAt });
             p.HasIndex(x => x.BrandId);
+            p.HasIndex(x => x.SellerId);
 
             p.Property(x => x.Title)
                 .HasMaxLength(256)
@@ -90,6 +92,11 @@ public class DataContext: DbContext
             p.HasOne(x => x.Brand)
                 .WithMany(b  => b.Products)
                 .HasForeignKey(x => x.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            p.HasOne(x => x.Seller)
+                .WithMany(u => u.Products)
+                .HasForeignKey(x => x.SellerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             p.ToTable(t =>
