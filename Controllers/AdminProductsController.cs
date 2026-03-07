@@ -2,6 +2,7 @@
 using AMZN.Services.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AMZN.Controllers;
 
@@ -10,10 +11,12 @@ namespace AMZN.Controllers;
 public class AdminProductsController : Controller
 {
     private readonly AdminProductService _adminProductService;
+    private readonly ILogger<AdminProductsController> _logger;
 
-    public AdminProductsController(AdminProductService adminProductService)
+    public AdminProductsController(AdminProductService adminProductService, ILogger<AdminProductsController> logger)
     {
         _adminProductService = adminProductService;
+        _logger = logger;
     }
 
 
@@ -37,9 +40,19 @@ public class AdminProductsController : Controller
             return View(vmInvalid);
         }
 
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null || !Guid.TryParse(userId, out var sellerId))
+        {
+            _logger.LogError("Auth claims NameIdentifier missing/invalid. TraceId={TraceId}, Path={Path}",
+                HttpContext.TraceIdentifier,
+                HttpContext.Request.Path);
+
+            return Forbid();
+        }
+
         try
         {
-            await _adminProductService.CreateAsync(form);
+            await _adminProductService.CreateAsync(form, sellerId);
             TempData["Success"] = "Product created";
             return RedirectToAction(nameof(Create));
         }

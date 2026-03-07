@@ -39,7 +39,7 @@ namespace AMZN.Services.Admin
         }
 
 
-        public async Task CreateAsync(ProductCreateFormModel form)
+        public async Task CreateAsync(ProductCreateFormModel form, Guid sellerId)
         {
             Guid categoryId = form.CategoryId ?? throw new InvalidOperationException("CategoryId is required");
             Guid brandId = form.BrandId ?? throw new InvalidOperationException("BrandId is required");
@@ -63,6 +63,8 @@ namespace AMZN.Services.Admin
                 Id = Guid.NewGuid(),
                 CategoryId = categoryId,
                 BrandId = brandId,
+                SellerId = sellerId,
+
                 Title   = form.Title.Trim(),
                 Description   = string.IsNullOrWhiteSpace(form.Description) ? null : form.Description.Trim(),
                 CurrentPrice  = currentPrice,

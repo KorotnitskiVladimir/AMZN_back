@@ -21,10 +21,11 @@
 
 
         //
+        public Guid SellerId { get; set; }
+        public User Seller { get; set; } = null!;
         public Category Category { get; set; } = null!;
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductRating> Ratings { get; set; } = new List<ProductRating>();
-
         public Guid BrandId { get; set; }
         public Brand Brand { get; set; } = null!;
 
