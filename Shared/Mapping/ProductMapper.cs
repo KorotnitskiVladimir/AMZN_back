@@ -60,9 +60,16 @@ namespace AMZN.Shared.Mapping
                     Name = p.Brand.Name
                 },
             };
-
         }
 
+        public static BrandDto ToBrandDto(this Brand b)
+        {
+            return new BrandDto
+            {
+                Id = b.Id,
+                Name = b.Name
+            };
+        }
 
         // округляет средний рейтинг до 0.5 для UI звезд
         private static decimal CalcRatingHalfStep(int sum, int count)

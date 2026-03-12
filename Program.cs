@@ -15,7 +15,7 @@ using AMZN.Services.Admin;
 using AMZN.Services.Auth;
 using AMZN.Services.BrandService;
 using AMZN.Services.Home;
-using AMZN.Services.Product;
+using AMZN.Services.Products;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -134,18 +134,6 @@ builder.Services.AddCors(options =>
 });
 
 
-// Output cache (home page)
-builder.Services.AddOutputCache(options =>
-{
-    options.AddPolicy("HomePage", policy =>
-    {
-        policy.Expire(TimeSpan.FromSeconds(10));
-        policy.SetVaryByQuery("take");
-    });
-});
-
-
-
 // DI services
 builder.Services.AddScoped<FormsValidators>();
 builder.Services.AddScoped<DataAccessor>();
@@ -214,13 +202,38 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
+builder.Services.AddOutputCache();
 builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
 app.UseAmznForwardedHeaders();
 app.UseMiddleware<ApiExceptionMiddleware>();
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.Use(async (context, next) =>
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        try
+        {
+            await next();
+        }
+        finally
+        {
+            sw.Stop();
+
+            app.Logger.LogInformation(
+                "HTTP {Method} {Path} -> {StatusCode} in {ElapsedMs} ms",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response.StatusCode,
+                sw.ElapsedMilliseconds);
+        }
+    });
+}
 
 // Swagger
 if (app.Environment.IsDevelopment())
@@ -257,6 +270,7 @@ app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/api"), appBuilder =>
     appBuilder.UseStatusCodePagesWithReExecute("/Home/AuthStatus", "?code={0}");
 });
 app.UseRouting();
+app.UseCors();
 
 app.UseAuthentication();
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuilder =>
@@ -267,8 +281,6 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), appBuil
 });
 
 app.UseAuthorization();
-
-app.UseCors();
 
 app.UseAmznRateLimiting();
 

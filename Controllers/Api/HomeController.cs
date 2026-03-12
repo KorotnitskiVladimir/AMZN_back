@@ -19,7 +19,7 @@ namespace AMZN.Controllers.Api
 
         [HttpGet]
         [AllowAnonymous]
-        [OutputCache(PolicyName = "HomePage")]
+        [OutputCache(Duration = 15, VaryByQueryKeys = new[] { "take" })]
         public async Task<ActionResult<HomeResponseDto>> Get([FromQuery] int take = 20)
         {
             var dto = await _home.GetHomeAsync(take);

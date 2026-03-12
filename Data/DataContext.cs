@@ -65,8 +65,8 @@ public class DataContext: DbContext
 
         modelBuilder.Entity<Product>(p =>
         {
-            p.HasIndex(x => x.CategoryId);
             p.HasIndex(x => new { x.CategoryId, x.CreatedAt });
+            p.HasIndex(x => x.CategoryId);    // <- Надо дропнуть миграции и убрать дублирование         
             p.HasIndex(x => x.BrandId);
             p.HasIndex(x => x.SellerId);
 
