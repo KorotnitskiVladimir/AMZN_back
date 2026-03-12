@@ -1,4 +1,6 @@
 ﻿using AMZN.Data.Entities;
+using AMZN.DTOs.Products;
+using AMZN.Repositories.Products.Queries;
 
 namespace AMZN.Repositories.Products
 {
@@ -16,6 +18,13 @@ namespace AMZN.Repositories.Products
         Task<Product?> GetByIdAsync(Guid id);
         Task<Product?> GetByIdWithImagesAsync(Guid id);
         Task<Product?> GetDetailsByIdAsync(Guid id);
+      
+
+        Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams);
+        Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take);
+
+        Task<List<Brand>> GetCatalogBrandsAsync(Guid? categoryId);
+
     }
 
 }

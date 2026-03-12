@@ -24,7 +24,6 @@ public class AuthSessionMiddleware
         }
         if (context.Session.Keys.Contains("userId"))
         {
-            //context.Items.Add("auth", "OK");  // Add() падал при повторном проходе пайплайна (re execute) из за попытки повторно добавить ключ, лучше использовать перезапись
             context.Items["auth"] = "OK";
 
             if (dataContext.UserRefreshTokens.FirstOrDefault(t =>

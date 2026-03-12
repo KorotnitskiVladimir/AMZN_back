@@ -69,11 +69,9 @@ public class AuthTokenMiddleware
                             new Claim(ClaimTypes.Role, user.Role.ToString())
                         },
                         nameof(AuthTokenMiddleware)));
-                //context.Items.Add("UserRefreshToken", token);
                 context.Items["UserRefreshToken"] = token;
             }
         }
-        //context.Items.Add(nameof(AuthTokenMiddleware), errorMessage);     // Add() падал при повторном проходе пайплайна (re execute) из за попытки повторно добавить ключ, лучше использовать перезапись
         context.Items[nameof(AuthTokenMiddleware)] = errorMessage;
         await _next(context);
     }
