@@ -1,5 +1,6 @@
 ﻿using AMZN.Data;
 using AMZN.Data.Entities;
+using AMZN.DTOs.Categories;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Repositories.Categories;
@@ -49,4 +50,44 @@ public class CategoryRepository : ICategoryRepository
     {
         return _dataContext.Categories.FirstOrDefault(x => x.Name == name);
     }
+
+    public Task<List<CategoryListItemDto>> GetRootAsync()
+    {
+        return _dataContext.Categories
+            .AsNoTracking()
+            .Where(x => x.ParentId == null)
+            .OrderBy(x => x.Name)
+            .Select(x => new CategoryListItemDto
+            {
+                Id = x.Id,
+                ParentId = x.ParentId,
+                Name = x.Name,
+                ImageUrl = x.ImageUrl,
+                HasChildren = _dataContext.Categories.Any(c => c.ParentId == x.Id)
+            })
+            .ToListAsync();
+    }
+
+    public Task<List<CategoryListItemDto>> GetByParentAsync(Guid parentId)
+    {
+        return _dataContext.Categories
+            .AsNoTracking()
+            .Where(x => x.ParentId == parentId)
+            .OrderBy(x => x.Name)
+            .Select(x => new CategoryListItemDto
+            {
+                Id = x.Id,
+                ParentId = x.ParentId,
+                Name = x.Name,
+                ImageUrl = x.ImageUrl,
+                HasChildren = _dataContext.Categories.Any(c => c.ParentId == x.Id)
+            })
+            .ToListAsync();
+    }
+
+    public Task SaveChangesAsync()
+    {
+        return _dataContext.SaveChangesAsync();
+    }
+
 }

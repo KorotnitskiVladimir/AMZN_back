@@ -26,6 +26,9 @@
         // Product
         public const string ProductNotFound = "product.not_found";
 
+        // Category
+        public const string CategoryNotFound = "category.not_found";
+
     }
 
 }
