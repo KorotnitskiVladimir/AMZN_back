@@ -1,10 +1,4 @@
-﻿///
-/// Admin - CRUD
-/// Moderator - RD
-/// Editor - RU
-/// 
-
-using AMZN.Data.Entities;
+﻿using AMZN.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Action = AMZN.Data.Entities.Action;
 
@@ -47,7 +41,9 @@ public class DataContext: DbContext
 
             
             u.Property(x => x.Role)
-                .HasConversion<string>();   // храним enum Role как строку в БД (Admin/User), а не как int (0/1)
+                .HasConversion<string>()   // храним enum Role как строку в БД (Admin/User), а не как int (0/1)
+                .HasMaxLength(32)
+                .IsRequired();
         });
 
 

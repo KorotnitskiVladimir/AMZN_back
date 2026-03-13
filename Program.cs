@@ -14,6 +14,7 @@ using AMZN.Security.Tokens;
 using AMZN.Services.Admin;
 using AMZN.Services.Auth;
 using AMZN.Services.BrandService;
+using AMZN.Services.Categories;
 using AMZN.Services.Home;
 using AMZN.Services.Products;
 using AMZN.Services.Storage.Cloud;
@@ -153,6 +154,7 @@ builder.Services.AddScoped<IActionRepository, ActionRepository>();
 builder.Services.AddScoped<AdminActionService>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<BrandService>();
+builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
