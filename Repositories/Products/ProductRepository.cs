@@ -77,7 +77,7 @@ namespace AMZN.Repositories.Products
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // catalog
+        // Catalog Page
         // кол-во Products подходящих под фильтры запроса
         public Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams)
         {
@@ -94,7 +94,6 @@ namespace AMZN.Repositories.Products
                 .Take(take)
                 .ToListAsync();
         }
-
 
         public Task<List<Brand>> GetCatalogBrandsAsync(Guid? categoryId)
         {
@@ -113,7 +112,6 @@ namespace AMZN.Repositories.Products
                 .OrderBy(b => b.Name)
                 .ToListAsync();
         }
-
 
         private IQueryable<Product> BuildCatalogQuery(ProductListQueryParams q)
         {
@@ -141,7 +139,6 @@ namespace AMZN.Repositories.Products
 
             return query;
         }
-
 
         private static IQueryable<Product> ApplySort(IQueryable<Product> query, string? sort)
         {
@@ -171,6 +168,16 @@ namespace AMZN.Repositories.Products
             };
         }
 
+        // Prodcut Ratings
+        public Task<ProductRating?> GetUserRatingAsync(Guid productId, Guid userId)
+        {
+            return _db.ProductRatings.FirstOrDefaultAsync(x => x.ProductId == productId && x.UserId == userId);
+        }
+
+        public void AddRating(ProductRating rating)
+        {
+            _db.ProductRatings.Add(rating);
+        }
 
     }
 }

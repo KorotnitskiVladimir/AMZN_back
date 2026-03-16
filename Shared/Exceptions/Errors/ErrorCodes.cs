@@ -29,6 +29,9 @@
         // Category
         public const string CategoryNotFound = "category.not_found";
 
+        // Product Ratings
+        public const string CannotRateOwnProduct = "product.cannot_rate_own";
+
     }
 
 }
