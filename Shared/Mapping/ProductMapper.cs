@@ -72,9 +72,10 @@ namespace AMZN.Shared.Mapping
         }
 
         // округляет средний рейтинг до 0.5 для UI звезд
-        private static decimal CalcRatingHalfStep(int sum, int count)
+        public static decimal CalcRatingHalfStep(int sum, int count)
         {
-            if (count <= 0) return 0m;
+            if (count <= 0) 
+                return 0m;
 
             decimal avg = (decimal)sum / count;
             return Math.Round(avg * 2m, MidpointRounding.AwayFromZero) / 2m;

@@ -1,9 +1,9 @@
 ﻿using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Products;
+using AMZN.Extensions;
 using AMZN.Services.Products;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 
@@ -15,9 +15,9 @@ namespace AMZN.Controllers.Api
     {
         private readonly ProductService _productService;
 
-        public ProductsController(ProductService products) 
+        public ProductsController(ProductService productService) 
         {
-            _productService = products;            
+            _productService = productService;
         }
 
 
@@ -48,6 +48,15 @@ namespace AMZN.Controllers.Api
             return Ok(dto);
         }
 
+        [HttpPut("{productId:guid}/rating")]
+        [Authorize]
+        public async Task<ActionResult<ProductRatingResponseDto>> SetRating([FromRoute] Guid productId, [FromBody] SetProductRatingRequestDto request)
+        {
+            var userId = User.GetRequiredUserId();
+
+            var dto = await _productService.SetRatingAsync(productId, userId, request.Rating);
+            return Ok(dto);
+        }
     }
 
 

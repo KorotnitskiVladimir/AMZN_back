@@ -20,10 +20,14 @@ namespace AMZN.Repositories.Products
         Task<Product?> GetDetailsByIdAsync(Guid id);
       
 
+        // Catalog Page
         Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams);
         Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take);
-
         Task<List<Brand>> GetCatalogBrandsAsync(Guid? categoryId);
+
+        // Product Rating
+        Task<ProductRating?> GetUserRatingAsync(Guid productId, Guid userId);
+        void AddRating(ProductRating rating);
 
     }
 
