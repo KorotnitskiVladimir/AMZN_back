@@ -8,6 +8,9 @@ namespace AMZN.Repositories.Users
         Task<bool> IsEmailTakenAsync(string email);
         Task<User?> GetByEmailAsync(string email);
         
+        Task<User?> GetUserByIdAsync(string id);
+        
+        Task UpdateUserAsync(User user);
 
     }
 }

@@ -31,7 +31,16 @@ namespace AMZN.Repositories.Users
             await _db.SaveChangesAsync();
         }
 
+        public async Task<User?> GetUserByIdAsync(string id)
+        {
+            return await _db.Users.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        }
 
+        public async Task UpdateUserAsync(User user)
+        {
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+        }
 
     }
 }

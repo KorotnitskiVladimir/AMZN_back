@@ -26,6 +26,7 @@ using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
+using AMZN.Services.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,7 +111,8 @@ builder.Services.AddSession(options =>
 });
 
 
-// MySQL DbContext 
+// MySQL DbContext
+
 builder.Services.AddDbContext<DataContext>(options => options
     .UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -118,6 +120,12 @@ builder.Services.AddDbContext<DataContext>(options => options
         mySqlOptions => mySqlOptions.CommandTimeout(30)
     ));
 
+
+/*
+builder.Services.AddDbContext<DataContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalMS"),
+        sqlOptions => sqlOptions.CommandTimeout(30)));
+*/
 
 //  Cors
 builder.Services.AddCors(options =>
@@ -155,6 +163,7 @@ builder.Services.AddScoped<AdminActionService>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
