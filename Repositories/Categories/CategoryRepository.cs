@@ -62,6 +62,7 @@ public class CategoryRepository : ICategoryRepository
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Name = x.Name,
+                Description = x.Description,
                 ImageUrl = x.ImageUrl,
                 HasChildren = _dataContext.Categories.Any(c => c.ParentId == x.Id)
             })
@@ -79,6 +80,7 @@ public class CategoryRepository : ICategoryRepository
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Name = x.Name,
+                Description = x.Description,
                 ImageUrl = x.ImageUrl,
                 HasChildren = _dataContext.Categories.Any(c => c.ParentId == x.Id)
             })
