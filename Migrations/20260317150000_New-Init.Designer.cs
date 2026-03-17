@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMZN.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260227203451_Initial_MySql")]
-    partial class Initial_MySql
+    [Migration("20260317150000_New-Init")]
+    partial class NewInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,9 +47,6 @@ namespace AMZN.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("ProductTitle")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -59,9 +56,26 @@ namespace AMZN.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.ToTable("Actions");
+                });
+
+            modelBuilder.Entity("AMZN.Data.Entities.Brand", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.Category", b =>
@@ -101,10 +115,34 @@ namespace AMZN.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("AMZN.Data.Entities.CategoryAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ActionId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActionId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("CategoryActions");
+                });
+
             modelBuilder.Entity("AMZN.Data.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("BrandId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("CategoryId")
@@ -133,6 +171,12 @@ namespace AMZN.Migrations
                     b.Property<int>("RatingSum")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -140,7 +184,11 @@ namespace AMZN.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("CategoryId", "CreatedAt");
 
                     b.ToTable("Products", t =>
                         {
@@ -151,7 +199,30 @@ namespace AMZN.Migrations
                             t.HasCheckConstraint("CK_Product_RatingCount", "RatingCount >= 0");
 
                             t.HasCheckConstraint("CK_Product_RatingSum", "RatingSum >= 0");
+
+                            t.HasCheckConstraint("CK_Product_StockQuantity", "StockQuantity >= 0");
                         });
+                });
+
+            modelBuilder.Entity("AMZN.Data.Entities.ProductAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ActionId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActionId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductActions");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.ProductImage", b =>
@@ -239,7 +310,8 @@ namespace AMZN.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
                     b.HasKey("Id");
 
@@ -278,17 +350,6 @@ namespace AMZN.Migrations
                     b.ToTable("UserRefreshTokens");
                 });
 
-            modelBuilder.Entity("AMZN.Data.Entities.Action", b =>
-                {
-                    b.HasOne("AMZN.Data.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("AMZN.Data.Entities.Category", b =>
                 {
                     b.HasOne("AMZN.Data.Entities.Category", "ParentCategory")
@@ -298,15 +359,69 @@ namespace AMZN.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("AMZN.Data.Entities.CategoryAction", b =>
+                {
+                    b.HasOne("AMZN.Data.Entities.Action", "Action")
+                        .WithMany()
+                        .HasForeignKey("ActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AMZN.Data.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Action");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("AMZN.Data.Entities.Product", b =>
                 {
+                    b.HasOne("AMZN.Data.Entities.Brand", "Brand")
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("AMZN.Data.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AMZN.Data.Entities.User", "Seller")
+                        .WithMany("Products")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
                     b.Navigation("Category");
+
+                    b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("AMZN.Data.Entities.ProductAction", b =>
+                {
+                    b.HasOne("AMZN.Data.Entities.Action", "Action")
+                        .WithMany()
+                        .HasForeignKey("ActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AMZN.Data.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Action");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.ProductImage", b =>
@@ -350,6 +465,11 @@ namespace AMZN.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("AMZN.Data.Entities.Brand", b =>
+                {
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("AMZN.Data.Entities.Category", b =>
                 {
                     b.Navigation("Products");
@@ -364,6 +484,8 @@ namespace AMZN.Migrations
 
             modelBuilder.Entity("AMZN.Data.Entities.User", b =>
                 {
+                    b.Navigation("Products");
+
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

@@ -8,11 +8,12 @@
 
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public int StockQuantity { get; set; }
 
         public decimal CurrentPrice { get; set; }
         public decimal? OriginalPrice { get; set; }             // null ->  скидки нет
 
-        public string PrimaryImageUrl { get; set; } = null!;    // главная картинка продукта, что-бы не делать join ради одной фотки
+        public string PrimaryImageUrl { get; set; } = null!;
 
         public int RatingSum { get; set; } = 0;
         public int RatingCount { get; set; } = 0;

@@ -25,6 +25,9 @@ namespace AMZN.Models.Product
         [StringLength(DescriptionMaxLength, ErrorMessage = "Description is too long")]
         public string? Description { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "StockQuantity must be >= 1")]
+        public int StockQuantity { get; set; }
+
         [Required(ErrorMessage = "Brand is required")]
         public Guid? BrandId { get; set; }
 
