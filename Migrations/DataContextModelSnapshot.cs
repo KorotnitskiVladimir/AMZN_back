@@ -171,6 +171,9 @@ namespace AMZN.Migrations
                     b.Property<Guid>("SellerId")
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -179,8 +182,6 @@ namespace AMZN.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("SellerId");
 
@@ -195,6 +196,8 @@ namespace AMZN.Migrations
                             t.HasCheckConstraint("CK_Product_RatingCount", "RatingCount >= 0");
 
                             t.HasCheckConstraint("CK_Product_RatingSum", "RatingSum >= 0");
+
+                            t.HasCheckConstraint("CK_Product_StockQuantity", "StockQuantity >= 0");
                         });
                 });
 
@@ -304,7 +307,8 @@ namespace AMZN.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
                     b.HasKey("Id");
 

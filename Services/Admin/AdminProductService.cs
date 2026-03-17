@@ -67,6 +67,7 @@ namespace AMZN.Services.Admin
 
                 Title   = form.Title.Trim(),
                 Description   = string.IsNullOrWhiteSpace(form.Description) ? null : form.Description.Trim(),
+                StockQuantity = form.StockQuantity,
                 CurrentPrice  = currentPrice,
                 OriginalPrice = originalPrice,
                 PrimaryImageUrl = primaryUrl,

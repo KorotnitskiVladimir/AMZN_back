@@ -9,6 +9,8 @@ namespace AMZN.DTOs.Products
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public int StockQuantity { get; set; }
+        public bool IsInStock { get; set; }
 
         public decimal Rating { get; set; }
         public int RatingCount { get; set; }

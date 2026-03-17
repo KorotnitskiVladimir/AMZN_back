@@ -61,8 +61,7 @@ public class DataContext: DbContext
 
         modelBuilder.Entity<Product>(p =>
         {
-            p.HasIndex(x => new { x.CategoryId, x.CreatedAt });
-            p.HasIndex(x => x.CategoryId);    // <- Надо дропнуть миграции и убрать дублирование         
+            p.HasIndex(x => new { x.CategoryId, x.CreatedAt });       
             p.HasIndex(x => x.BrandId);
             p.HasIndex(x => x.SellerId);
 
@@ -103,6 +102,7 @@ public class DataContext: DbContext
                     "OriginalPrice IS NULL OR OriginalPrice >= CurrentPrice");
                 t.HasCheckConstraint("CK_Product_RatingSum", "RatingSum >= 0");
                 t.HasCheckConstraint("CK_Product_RatingCount", "RatingCount >= 0");
+                t.HasCheckConstraint("CK_Product_StockQuantity", "StockQuantity >= 0");
             });
         });
 

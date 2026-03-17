@@ -41,6 +41,9 @@ namespace AMZN.Shared.Mapping
                     Original = CalcOriginalPrice(p.CurrentPrice, p.OriginalPrice)
                 },
 
+                StockQuantity = p.StockQuantity,
+                IsInStock = p.StockQuantity > 0,
+
                 PrimaryImage = new ImageUrlDto { Url = p.PrimaryImageUrl },
 
                 Images = p.Images
@@ -51,7 +54,7 @@ namespace AMZN.Shared.Mapping
                 Category = new CategoryDto
                 {
                     Id = p.CategoryId,
-                    Name = p.Category?.Name ?? "",
+                    Name = p.Category.Name
                 },
 
                 Brand = new BrandDto
