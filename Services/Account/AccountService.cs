@@ -10,21 +10,17 @@ namespace AMZN.Services.Account;
 public class AccountService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPasswordHasher _passwordHasher;
     
     public AccountService(
-        IUserRepository userRepository,
-        ILogger<AuthService> logger,
-        IPasswordHasher passwordHasher)
+        IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        _passwordHasher = passwordHasher;
     }
 
     
     public async Task<ProfileUpdateResponseDto> UpdateProfileAsync(ProfileUpdateRequestDto dto, string userId)
     {
-        var user = _userRepository.GetUserByIdAsync(userId).Result;
+        var user = await _userRepository.GetUserByIdAsync(userId);
         if (user == null)
         {
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
@@ -41,14 +37,13 @@ public class AccountService
         }
         if (!string.IsNullOrEmpty(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
         if (!string.IsNullOrEmpty(dto.LastName)) user.LastName = dto.LastName.Trim();
-        if (!string.IsNullOrEmpty(dto.Password)) user.PasswordHash = _passwordHasher.HashPassword(dto.Password);
         if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
         if (dto.BirthDate != null)
         {
             if (CheckUserAge(dto.BirthDate) < 18)
             {
                 throw new ApiException(ErrorCodes.ValidationError, "User must be at least 18 years old",
-                    StatusCodes.Status403Forbidden);
+                    StatusCodes.Status400BadRequest);
             }
             user.BirthDate = dto.BirthDate;
         }
@@ -67,7 +62,7 @@ public class AccountService
     }
     
     
-    public int CheckUserAge(DateTime? birthDate)
+    public int CheckUserAge(DateOnly? birthDate)
     {
         if (birthDate != null)
         {

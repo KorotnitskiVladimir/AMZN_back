@@ -17,20 +17,16 @@ public class ProfileUpdateRequestDto
     public string FirstName { get; set; } = "";
     
     [Display(Name = "Last name")]
+    [Required]
     [StringLength(NameMaxLength, MinimumLength = NameMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
     [RegularExpression(PersonNameRegex, ErrorMessage = "{0} may contain letters, spaces, hyphens and apostrophes")]
     public string LastName { get; set; } = "";
     
     [Display(Name = "Email")]
+    [Required]
     [EmailAddress(ErrorMessage = "Invalid {0} format")]
     [StringLength(EmailMaxLength, ErrorMessage = "{0} must be {1} characters or less")]
     public string Email { get; set; } = "";
-    
-    [Display(Name = "Password")]
-    [StringLength(PasswordMaxLength, MinimumLength = PasswordMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
-    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "{0} must include uppercase, lowercase, and a number")]
-    [DataType(DataType.Password)]
-    public string Password { get; set; } = "";
     
     [Display(Name = "Phone number")]
     [StringLength(15, ErrorMessage = "{0} must be {1} characters or less")]
@@ -39,6 +35,6 @@ public class ProfileUpdateRequestDto
     
     [Display(Name = "Date of Birth")]
     [DataType(DataType.Date)]
-    public DateTime? BirthDate { get; set; }
+    public DateOnly? BirthDate { get; set; }
     
 }

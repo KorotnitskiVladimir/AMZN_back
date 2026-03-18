@@ -24,6 +24,7 @@ public class UserAccountController : ControllerBase
     }
     // POST api/user/update
     [HttpPost("update")]
+    [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<ProfileUpdateResponseDto>> Update([FromBody] ProfileUpdateRequestDto request)
     {
