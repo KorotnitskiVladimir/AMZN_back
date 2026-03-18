@@ -42,5 +42,11 @@ namespace AMZN.Repositories.Users
             await _db.SaveChangesAsync();
         }
 
+        public async Task DeleteUserAsync(User user)
+        {
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
+        }
+
     }
 }

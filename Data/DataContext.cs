@@ -20,6 +20,8 @@ public class DataContext: DbContext
     public DbSet<ProductAction> ProductActions { get; private set; } = null!;
     
     public DbSet<CategoryAction> CategoryActions { get; private set; } = null!;
+    
+    public DbSet<DeletedUser>  DeletedUsers { get; private set; } = null!;
 
 
     public DataContext(DbContextOptions options) : base(options) {}

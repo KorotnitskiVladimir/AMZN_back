@@ -11,6 +11,8 @@ namespace AMZN.Repositories.Users
         Task<User?> GetUserByIdAsync(string id);
         
         Task UpdateUserAsync(User user);
+        
+        Task DeleteUserAsync(User user);
 
     }
 }

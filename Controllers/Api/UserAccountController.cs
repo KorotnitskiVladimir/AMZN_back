@@ -37,4 +37,21 @@ public class UserAccountController : ControllerBase
         return StatusCode(StatusCodes.Status200OK, response);
     }
     
+    // POST api/user/delete
+    
+    [HttpPost("delete")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult> DeleteUser()
+    {
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new ApiException(ErrorCodes.AuthClaimsInvalid, "Invalid auth claims", StatusCodes.Status401Unauthorized);
+        }
+        await _accountService.DeleteUserAsync(userId);
+        return StatusCode(StatusCodes.Status200OK);
+    }
+    
+    
 }

@@ -1,4 +1,5 @@
-﻿using AMZN.DTOs.Auth;
+﻿using AMZN.Data.Entities;
+using AMZN.DTOs.Auth;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Services.Auth;
@@ -10,11 +11,14 @@ namespace AMZN.Services.Account;
 public class AccountService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IDeletedUserRepository _deletedUserRepository;
     
     public AccountService(
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        DeletedUserRepository deletedUserRepository)
     {
         _userRepository = userRepository;
+        _deletedUserRepository = deletedUserRepository;
     }
 
     
@@ -75,5 +79,27 @@ public class AccountService
             return age;
         }
         return 0;
+    }
+    
+    public async Task DeleteUserAsync(string userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+
+        DeletedUser deletedUser = new()
+        {
+            Id = Guid.NewGuid(),
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            BirthDate = user.BirthDate,
+            DeletedAt = DateTime.UtcNow,
+        };
+        await _userRepository.DeleteUserAsync(user);
+        await _deletedUserRepository.AddAsync(deletedUser);
     }
 }
