@@ -22,7 +22,7 @@ public class AccountService
     }
 
     
-    public async Task<ProfileUpdateResponseDto> UpdateProfileAsync(ProfileUpdateRequestDto dto, string userId)
+    public async Task<ProfileUpdateResponseDto> UpdateProfileAsync(ProfileUpdateRequestDto dto, Guid userId)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user == null)
@@ -81,7 +81,7 @@ public class AccountService
         return 0;
     }
     
-    public async Task DeleteUserAsync(string userId)
+    public async Task DeleteUserAsync(Guid userId)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user == null)

@@ -22,7 +22,8 @@ public class DataContext: DbContext
     public DbSet<CategoryAction> CategoryActions { get; private set; } = null!;
     
     public DbSet<DeletedUser>  DeletedUsers { get; private set; } = null!;
-
+    
+    public DbSet<PaymentMethod> PaymentMethods { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -207,6 +208,12 @@ public class DataContext: DbContext
             b.HasIndex(x => x.Name)
                 .IsUnique();
         });
+        
+        modelBuilder.Entity<PaymentMethod>()
+            .HasOne(p => p.User)
+            .WithMany(u => u.PaymentMethods)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

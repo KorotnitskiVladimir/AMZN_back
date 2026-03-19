@@ -15,6 +15,8 @@
 
         public ICollection<UserRefreshToken> RefreshTokens { get; set; } = new List<UserRefreshToken>();
         public ICollection<Product> Products { get; set; } = new List<Product>();
+        
+        public ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
 
 
     }
