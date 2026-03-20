@@ -1,5 +1,6 @@
 ﻿using AMZN.Data;
 using AMZN.Data.Entities;
+using AMZN.DTOs.Products.Reviews;
 using AMZN.Repositories.Products.Queries;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,6 +66,11 @@ namespace AMZN.Repositories.Products
             return _db.Products
                 .Include(x => x.Images)
                 .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public Task<bool> ExistsAsync(Guid id)
+        {
+            return _db.Products.AnyAsync(x => x.Id == id);
         }
 
         public Task<Product?> GetDetailsByIdAsync(Guid id)
@@ -178,6 +184,94 @@ namespace AMZN.Repositories.Products
         {
             _db.ProductRatings.Add(rating);
         }
+
+        // Product Review
+        public void AddReview(ProductReview review)
+        {
+            _db.ProductReviews.Add(review);
+        }
+
+        public Task<ProductReview?> GetUserReviewAsync(Guid productId, Guid userId)
+        {
+            return _db.ProductReviews.FirstOrDefaultAsync(x => x.ProductId == productId && x.UserId == userId);
+        }
+
+        public Task<ReviewDto?> GetUserReviewDtoAsync(Guid productId, Guid userId)
+        {
+            return BuildReviewDtoQuery(productId, userId).FirstOrDefaultAsync();
+        }
+
+        public Task<int> CountReviewsAsync(Guid productId)
+        {
+            return _db.ProductReviews
+                .AsNoTracking()
+                .CountAsync(x => x.ProductId == productId);
+        }
+
+        public Task<List<ReviewDto>> GetReviewsPageAsync(Guid productId, string? sort, int skip, int take)
+        {
+            var query = BuildReviewDtoQuery(productId);
+            query = ApplyReviewSort(query, sort);
+
+            return query
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+        }
+
+
+        // Helpers Review
+        private IQueryable<ReviewDto> BuildReviewDtoQuery(Guid productId, Guid? userId = null)
+        {
+            var reviewsQuery = _db.ProductReviews.AsNoTracking().Where(x => x.ProductId == productId);
+
+            if (userId != null)
+                reviewsQuery = reviewsQuery.Where(x => x.UserId == userId.Value);
+
+            return reviewsQuery
+                .Select(review => new ReviewDto
+                {
+                    Id = review.Id,
+                    Rating = _db.ProductRatings
+                        .Where(r => r.ProductId == review.ProductId && r.UserId == review.UserId)
+                        .Select(r => r.Value)
+                        .FirstOrDefault(),
+
+                    Title = review.Title,
+                    Text = review.Text,
+                    AuthorName = review.User.FirstName + " " + review.User.LastName,
+                    CreatedAt = review.CreatedAt,
+                    UpdatedAt = review.UpdatedAt
+                });
+        }
+
+        private static IQueryable<ReviewDto> ApplyReviewSort(IQueryable<ReviewDto> query, string? sort)
+        {
+            if (string.IsNullOrWhiteSpace(sort))
+                sort = "top";
+            else
+                sort = sort.Trim().ToLowerInvariant();
+
+            return sort switch
+            {
+                "recent" => query
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ThenByDescending(x => x.Id),
+
+                "top" => query
+                    .OrderByDescending(x => x.Rating)
+                    .ThenByDescending(x => x.CreatedAt)
+                    .ThenByDescending(x => x.Id),
+
+                _ => query
+                    .OrderByDescending(x => x.Rating)
+                    .ThenByDescending(x => x.CreatedAt)
+                    .ThenByDescending(x => x.Id)
+            };
+        }
+
+
+
 
     }
 }

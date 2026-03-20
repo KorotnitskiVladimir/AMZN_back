@@ -1,6 +1,7 @@
 ﻿using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Products;
+using AMZN.DTOs.Products.Reviews;
 using AMZN.Extensions;
 using AMZN.Services.Products;
 using Microsoft.AspNetCore.Authorization;
@@ -57,6 +58,26 @@ namespace AMZN.Controllers.Api
             var dto = await _productService.SetRatingAsync(productId, userId, request.Rating);
             return Ok(dto);
         }
+
+        [HttpGet("{productId:guid}/reviews")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PagedResult<ReviewDto>>> GetReviews([FromRoute] Guid productId, [FromQuery] ReviewParamsDto q)
+        {
+            var dto = await _productService.GetReviewsAsync(productId, q);
+            return Ok(dto);
+        }
+
+        [HttpPut("{productId:guid}/review")]
+        [Authorize]
+        public async Task<ActionResult<ReviewDto>> CreateOrUpdateReview([FromRoute] Guid productId, [FromBody] ReviewRequestDto request)
+        {
+            var userId = User.GetRequiredUserId();
+
+            var dto = await _productService.CreateOrUpdateReviewAsync(productId, userId, request);
+            return Ok(dto);
+        }
+
+
     }
 
 

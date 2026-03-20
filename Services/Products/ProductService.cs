@@ -2,6 +2,7 @@
 using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Products;
+using AMZN.DTOs.Products.Reviews;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Products.Queries;
 using AMZN.Shared.Exceptions;
@@ -29,7 +30,6 @@ namespace AMZN.Services.Products
 
             return product.ToDetailsDto();
         }
-
 
         public async Task<PagedResult<ProductCardDto>> GetCatalogPageAsync(ProductListQueryDto q)
         {
@@ -63,48 +63,19 @@ namespace AMZN.Services.Products
 
             return brands.Select(b => b.ToBrandDto()).ToList();
         }
-
+        
+        //  Rating
         public async Task<ProductRatingResponseDto> SetRatingAsync(Guid productId, Guid userId, byte rating)
         {
-            var product = await _productRepository.GetByIdAsync(productId);
-
-            if (product == null)
-                throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+            var product = await GetExistingProductAsync(productId);
 
             if (product.SellerId == userId)
                 throw new ApiException(ErrorCodes.CannotRateOwnProduct, "You cannot rate your own product", StatusCodes.Status403Forbidden);
 
-            var existingRating = await _productRepository.GetUserRatingAsync(productId, userId);
-
-            var hasChanges = false;
-
-            if (existingRating == null)
-            {
-                var newRating = new ProductRating
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = productId,
-                    UserId = userId,
-                    Value = rating
-                };
-
-                _productRepository.AddRating(newRating);
-
-                product.RatingSum += rating;
-                product.RatingCount += 1;
-                hasChanges = true;
-            }
-            else if (existingRating.Value != rating)
-            {
-                product.RatingSum = product.RatingSum - existingRating.Value + rating;
-                existingRating.Value = rating;
-                hasChanges = true;
-            }
+            var hasChanges = await SetUserRatingAsync(product, userId, rating);
 
             if (hasChanges)
-            {
                 await _productRepository.SaveChangesAsync();
-            }
 
             return new ProductRatingResponseDto
             {
@@ -113,6 +84,120 @@ namespace AMZN.Services.Products
                 UserRating = rating
             };
         }
+
+        // Review
+        public async Task<PagedResult<ReviewDto>> GetReviewsAsync(Guid productId, ReviewParamsDto q)
+        {
+            var exists = await _productRepository.ExistsAsync(productId);
+            if (!exists)
+                throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+
+            var skip = (q.Page - 1) * q.PageSize;
+
+            var total = await _productRepository.CountReviewsAsync(productId);
+            var items = await _productRepository.GetReviewsPageAsync(productId, q.Sort, skip, q.PageSize);
+
+            return new PagedResult<ReviewDto>
+            {
+                Items = items,
+                Page = q.Page,
+                PageSize = q.PageSize,
+                TotalItems = total
+            };
+        }
+
+        public async Task<ReviewDto> CreateOrUpdateReviewAsync(Guid productId, Guid userId, ReviewRequestDto request)
+        {
+            var product = await GetExistingProductAsync(productId);
+
+            if (product.SellerId == userId)
+                throw new ApiException(ErrorCodes.CannotReviewOwnProduct, "You cannot review your own product", StatusCodes.Status403Forbidden);
+
+            var normalizedTitle = request.Title.Trim();
+            var normalizedText = request.Text.Trim();
+
+            var existingReview = await _productRepository.GetUserReviewAsync(productId, userId);
+
+            var reviewChanged = false;
+
+            if (existingReview == null)
+            {
+                var review = new ProductReview
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = productId,
+                    UserId = userId,
+                    Title = normalizedTitle,
+                    Text = normalizedText,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _productRepository.AddReview(review);
+                reviewChanged = true;
+            }
+            else if (existingReview.Title != normalizedTitle || existingReview.Text != normalizedText)
+            {
+                existingReview.Title = normalizedTitle;
+                existingReview.Text = normalizedText;
+                existingReview.UpdatedAt = DateTime.UtcNow;
+                reviewChanged = true;
+            }
+
+            var ratingChanged = await SetUserRatingAsync(product, userId, request.Rating);
+
+            if (reviewChanged || ratingChanged)
+                await _productRepository.SaveChangesAsync();
+
+            var dto = await _productRepository.GetUserReviewDtoAsync(productId, userId);
+
+            if (dto == null)
+                throw new InvalidOperationException("Review was not saved correctly");
+
+            return dto;
+        }
+
+
+        // Helpers
+        private async Task<Product> GetExistingProductAsync(Guid productId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+
+            if (product == null)
+                throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+
+            return product;
+        }
+
+        private async Task<bool> SetUserRatingAsync(Product product, Guid userId, byte rating)
+        {
+            var existingRating = await _productRepository.GetUserRatingAsync(product.Id, userId);
+
+            if (existingRating == null)
+            {
+                var newRating = new ProductRating
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    UserId = userId,
+                    Value = rating
+                };
+
+                _productRepository.AddRating(newRating);
+
+                product.RatingSum += rating;
+                product.RatingCount += 1;
+                return true;
+            }
+
+            if (existingRating.Value == rating)
+                return false;
+
+            product.RatingSum = product.RatingSum - existingRating.Value + rating;
+            existingRating.Value = rating;
+
+            return true;
+        }
+
 
     }
 }

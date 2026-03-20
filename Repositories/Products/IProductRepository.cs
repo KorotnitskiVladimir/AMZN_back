@@ -1,5 +1,6 @@
 ﻿using AMZN.Data.Entities;
 using AMZN.DTOs.Products;
+using AMZN.DTOs.Products.Reviews;
 using AMZN.Repositories.Products.Queries;
 
 namespace AMZN.Repositories.Products
@@ -18,7 +19,8 @@ namespace AMZN.Repositories.Products
         Task<Product?> GetByIdAsync(Guid id);
         Task<Product?> GetByIdWithImagesAsync(Guid id);
         Task<Product?> GetDetailsByIdAsync(Guid id);
-      
+
+        Task<bool> ExistsAsync(Guid id);
 
         // Catalog Page
         Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams);
@@ -28,6 +30,13 @@ namespace AMZN.Repositories.Products
         // Product Rating
         Task<ProductRating?> GetUserRatingAsync(Guid productId, Guid userId);
         void AddRating(ProductRating rating);
+
+        // Product Reviews
+        Task<int> CountReviewsAsync(Guid productId);
+        Task<List<ReviewDto>> GetReviewsPageAsync(Guid productId, string? sort, int skip, int take);
+        Task<ProductReview?> GetUserReviewAsync(Guid productId, Guid userId);
+        Task<ReviewDto?> GetUserReviewDtoAsync(Guid productId, Guid userId);
+        void AddReview(ProductReview review);
 
     }
 
