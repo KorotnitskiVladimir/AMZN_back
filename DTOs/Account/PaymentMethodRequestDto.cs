@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AMZN.DTOs.Auth;
+namespace AMZN.DTOs.Account;
 
 public class PaymentMethodRequestDto
 {

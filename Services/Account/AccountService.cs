@@ -15,7 +15,7 @@ public class AccountService
     
     public AccountService(
         IUserRepository userRepository,
-        DeletedUserRepository deletedUserRepository)
+        IDeletedUserRepository deletedUserRepository)
     {
         _userRepository = userRepository;
         _deletedUserRepository = deletedUserRepository;
