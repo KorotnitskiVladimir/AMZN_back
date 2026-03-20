@@ -35,6 +35,9 @@
         // User
         public const string UserNotFound = "user.not_found";
 
+        // Product Review
+        public const string CannotReviewOwnProduct = "product.cannot_review_own";
+
     }
 
 }

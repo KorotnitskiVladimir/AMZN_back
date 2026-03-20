@@ -12,6 +12,7 @@ public class DataContext: DbContext
     public DbSet<Product> Products { get; private set; } = null!;
     public DbSet<ProductImage> ProductImages { get; private set; } = null!;
     public DbSet<ProductRating> ProductRatings { get; private set; } = null!;
+    public DbSet<ProductReview> ProductReviews { get; private set; } = null!;
 
     public DbSet<Category> Categories { get; private set; } = null!;
     public DbSet<Action> Actions { get; private set; } = null!;
@@ -156,6 +157,32 @@ public class DataContext: DbContext
             });
         });
 
+
+        modelBuilder.Entity<ProductReview>(r =>
+        {
+            r.HasIndex(x => new { x.ProductId, x.UserId })
+                .IsUnique();
+
+            r.HasIndex(x => new { x.ProductId, x.CreatedAt });
+
+            r.Property(x => x.Title)
+                .HasMaxLength(120)
+                .IsRequired();
+
+            r.Property(x => x.Text)
+                .HasMaxLength(4000)
+                .IsRequired();
+
+            r.HasOne(x => x.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            r.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
 
         modelBuilder.Entity<Category>()
