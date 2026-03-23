@@ -42,6 +42,7 @@ var builder = WebApplication.CreateBuilder(args);
 /*  TODO:
        - upload limits ограничение общего размера multipart/form-data (защита от слишком больших аплоадов)
        - CloudStirageServuce: sync методы сделать Async (блокирует поток)
+       - Почистить program
     
  */
 
