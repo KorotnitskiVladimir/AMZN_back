@@ -28,6 +28,7 @@
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductRating> Ratings { get; set; } = new List<ProductRating>();
         public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+        public ICollection<ProductQuestion> Questions { get; set; } = new List<ProductQuestion>();
         public Guid BrandId { get; set; }
         public Brand Brand { get; set; } = null!;
 
