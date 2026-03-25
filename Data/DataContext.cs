@@ -13,6 +13,8 @@ public class DataContext: DbContext
     public DbSet<ProductImage> ProductImages { get; private set; } = null!;
     public DbSet<ProductRating> ProductRatings { get; private set; } = null!;
     public DbSet<ProductReview> ProductReviews { get; private set; } = null!;
+    public DbSet<ProductQuestion> ProductQuestions { get; private set; } = null!;
+    public DbSet<ProductQuestionAnswer> ProductQuestionAnswers { get; private set; } = null!;
 
     public DbSet<Category> Categories { get; private set; } = null!;
     public DbSet<Action> Actions { get; private set; } = null!;
@@ -183,6 +185,50 @@ public class DataContext: DbContext
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+
+        modelBuilder.Entity<ProductQuestion>(q =>
+        {
+            q.HasIndex(x => new { x.ProductId, x.CreatedAt });
+
+            q.Property(x => x.Text)
+                .HasMaxLength(1024)
+                .IsRequired();
+
+            q.HasOne(x => x.Product)
+                .WithMany(p => p.Questions)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            q.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+        modelBuilder.Entity<ProductQuestionAnswer>(a =>
+        {
+            a.HasIndex(x => new { x.QuestionId, x.CreatedAt });
+
+            a.Property(x => x.Text)
+                .HasMaxLength(2048)
+                .IsRequired();
+
+            a.HasOne(x => x.Question)
+                .WithMany(q => q.Answers)
+                .HasForeignKey(x => x.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            a.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+
+
 
 
         modelBuilder.Entity<Category>()
