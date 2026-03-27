@@ -3,6 +3,7 @@ using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Home;
 using AMZN.DTOs.Products;
+using AMZN.DTOs.Search;
 
 namespace AMZN.Shared.Mapping
 {
@@ -62,6 +63,26 @@ namespace AMZN.Shared.Mapping
                     Id = p.BrandId,
                     Name = p.Brand.Name
                 },
+            };
+        }
+
+        public static SearchProductSuggestionDto ToSearchSuggestionDto(this Product p)
+        {
+            return new SearchProductSuggestionDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Price = new PriceDto
+                {
+                    Current = p.CurrentPrice,
+                    Original = CalcOriginalPrice(p.CurrentPrice, p.OriginalPrice)
+                },
+                Image = new ImageUrlDto
+                {
+                    Url = p.PrimaryImageUrl
+                },
+                BrandName = p.Brand.Name,
+                CategoryName = p.Category.Name
             };
         }
 

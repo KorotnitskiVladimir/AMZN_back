@@ -24,6 +24,9 @@ namespace AMZN.DTOs.Products
         public Guid? CategoryId { get; set; }
         public List<Guid> BrandIds { get; set; } = new();
 
+        [StringLength(100)]
+        public string? Search { get; set; }
+
         [Range(0, PriceMax)]
         public decimal? MaxPrice { get; set; }
 
@@ -52,6 +55,9 @@ namespace AMZN.DTOs.Products
 
             if (!string.IsNullOrWhiteSpace(Sort) && !AllowedSorts.Contains(Sort.Trim(), StringComparer.OrdinalIgnoreCase))
                 yield return new ValidationResult("Invalid sort value", new[] { nameof(Sort) });
+
+            if (!string.IsNullOrWhiteSpace(Search) && Search.Trim().Length < 2)
+                yield return new ValidationResult("Search must contain at least 2 characters", new[] { nameof(Search) });
         }
 
 
