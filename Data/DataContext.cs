@@ -70,6 +70,7 @@ public class DataContext: DbContext
             p.HasIndex(x => new { x.CategoryId, x.CreatedAt });       
             p.HasIndex(x => x.BrandId);
             p.HasIndex(x => x.SellerId);
+            p.HasIndex(x => x.Title);
 
             p.Property(x => x.Title)
                 .HasMaxLength(256)

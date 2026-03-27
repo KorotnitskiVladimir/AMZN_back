@@ -9,6 +9,7 @@ using AMZN.Repositories.Brands;
 using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Products.Questions;
+using AMZN.Repositories.Search;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
 using AMZN.Security.Tokens;
@@ -20,6 +21,7 @@ using AMZN.Services.Categories;
 using AMZN.Services.Home;
 using AMZN.Services.Products;
 using AMZN.Services.Products.Questions;
+using AMZN.Services.Search;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -170,7 +172,10 @@ builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IDeletedUserRepository, DeletedUserRepository>();
-
+// Search
+builder.Services.AddScoped<ISearchRepository, SearchRepository>();
+builder.Services.AddScoped<SearchService>();
+// Storage
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
 

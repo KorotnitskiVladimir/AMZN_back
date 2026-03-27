@@ -2,6 +2,7 @@
 using AMZN.Data.Entities;
 using AMZN.DTOs.Products.Reviews;
 using AMZN.Repositories.Products.Queries;
+using AMZN.Shared.Helpers.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace AMZN.Repositories.Products
@@ -93,7 +94,7 @@ namespace AMZN.Repositories.Products
         public Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take)
         {
             var query = BuildCatalogQuery(queryParams);
-            query = ApplySort(query, queryParams.Sort);
+            query = ApplySort(query, queryParams);
 
             return query
                 .Skip(skip)
@@ -122,22 +123,36 @@ namespace AMZN.Repositories.Products
         private IQueryable<Product> BuildCatalogQuery(ProductListQueryParams q)
         {
             var query = _db.Products.AsNoTracking();
-            
+
             if (q.CategoryId != null)
                 query = query.Where(p => p.CategoryId == q.CategoryId.Value);
 
             if (q.BrandIds.Count > 0)
                 query = query.Where(p => q.BrandIds.Contains(p.BrandId));
 
-            if(q.MinPrice  != null)
+            if (!string.IsNullOrWhiteSpace(q.Search))
+            {
+                var tokens = SearchQueryHelper.SplitTokens(q.Search);
+
+                foreach (var token in tokens)
+                {
+                    query = query.Where(p =>
+                        p.Title.Contains(token) ||
+                        p.Brand.Name.Contains(token) ||
+                        p.Category.Name.Contains(token));
+                }
+            }
+
+            if (q.MinPrice != null)
                 query = query.Where(p => p.CurrentPrice >= q.MinPrice.Value);
 
             if (q.MaxPrice != null)
                 query = query.Where(p => p.CurrentPrice <= q.MaxPrice.Value);
 
-            if (q.MinRating != null && q.MinRating >0)
+            if (q.MinRating != null && q.MinRating > 0)
             {
                 var minRating = q.MinRating.Value;
+
                 query = query.Where(p =>
                     p.RatingCount > 0 &&
                     ((decimal)p.RatingSum / p.RatingCount) >= minRating);
@@ -146,12 +161,19 @@ namespace AMZN.Repositories.Products
             return query;
         }
 
-        private static IQueryable<Product> ApplySort(IQueryable<Product> query, string? sort)
+        private static IQueryable<Product> ApplySort(IQueryable<Product> query, ProductListQueryParams q)
         {
-            if (string.IsNullOrWhiteSpace(sort))
-                sort = "featured";
+            var sort = q.Sort?.Trim().ToLowerInvariant();
 
-            sort = sort.Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(sort))
+            {
+                if (!string.IsNullOrWhiteSpace(q.Search))
+                    return ApplySearchRelevanceSort(query, q.Search);
+
+                return query
+                    .OrderByDescending(p => p.RatingCount)
+                    .ThenByDescending(p => p.CreatedAt);
+            }
 
             return sort switch
             {
@@ -159,19 +181,46 @@ namespace AMZN.Repositories.Products
                     .OrderByDescending(p => p.RatingCount)
                     .ThenByDescending(p => p.CreatedAt),
 
-                "price_asc" => query.OrderBy( p => p.CurrentPrice),
-                "price_desc" => query.OrderByDescending(p => p.CurrentPrice),
+                "price_asc" => query
+                    .OrderBy(p => p.CurrentPrice),
+
+                "price_desc" => query
+                    .OrderByDescending(p => p.CurrentPrice),
 
                 "rating" or "rating_desc" => query
-                        .OrderByDescending(p => p.RatingCount > 0 
-                            ? ((decimal)p.RatingSum / p.RatingCount) 
-                            : 0m)
-                        .ThenByDescending(p => p.RatingCount),
+                    .OrderByDescending(p => p.RatingCount > 0
+                        ? ((decimal)p.RatingSum / p.RatingCount)
+                        : 0m)
+                    .ThenByDescending(p => p.RatingCount),
 
-                "newest" => query.OrderByDescending(p => p.CreatedAt),
+                "newest" => query
+                    .OrderByDescending(p => p.CreatedAt),
 
-                _ => query.OrderByDescending(p => p.RatingCount).ThenByDescending(p => p.CreatedAt)
+                _ => query
+                    .OrderByDescending(p => p.RatingCount)
+                    .ThenByDescending(p => p.CreatedAt)
             };
+        }
+
+        private static IQueryable<Product> ApplySearchRelevanceSort(IQueryable<Product> query, string? search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return query
+                    .OrderByDescending(p => p.RatingCount)
+                    .ThenByDescending(p => p.CreatedAt);
+            }
+
+            return query
+                .OrderByDescending(p => p.Title == search)
+                .ThenByDescending(p => p.Title.StartsWith(search))
+                .ThenByDescending(p => p.Brand.Name == search)
+                .ThenByDescending(p => p.Brand.Name.StartsWith(search))
+                .ThenByDescending(p => p.Category.Name == search)
+                .ThenByDescending(p => p.Category.Name.StartsWith(search))
+                .ThenByDescending(p => p.RatingCount)
+                .ThenByDescending(p => p.CreatedAt)
+                .ThenBy(p => p.Title);
         }
 
         // Prodcut Ratings

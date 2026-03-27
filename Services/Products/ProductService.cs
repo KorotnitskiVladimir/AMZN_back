@@ -7,6 +7,7 @@ using AMZN.Repositories.Products;
 using AMZN.Repositories.Products.Queries;
 using AMZN.Shared.Exceptions;
 using AMZN.Shared.Exceptions.Errors;
+using AMZN.Shared.Helpers.Search;
 using AMZN.Shared.Mapping;
 
 namespace AMZN.Services.Products
@@ -34,11 +35,13 @@ namespace AMZN.Services.Products
         public async Task<PagedResult<ProductCardDto>> GetCatalogPageAsync(ProductListQueryDto q)
         {
             var skip = (q.Page - 1) * q.PageSize;
+            var normalizedSearch = SearchQueryHelper.NormalizeQuery(q.Search);
 
             var queryParams = new ProductListQueryParams
             {
                 CategoryId = q.CategoryId,
                 BrandIds = q.BrandIds.ToList(),
+                Search = string.IsNullOrEmpty(normalizedSearch) ? null : normalizedSearch,
                 MinPrice = q.MinPrice,
                 MaxPrice = q.MaxPrice,
                 MinRating = q.MinRating,
