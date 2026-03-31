@@ -1,4 +1,6 @@
-﻿using AMZN.Data.Entities;
+﻿using System.Xml;
+using AMZN.Data.Entities;
+using AMZN.DTOs.Account;
 using AMZN.DTOs.Auth;
 using AMZN.Repositories.Users;
 using AMZN.Security.Passwords;
@@ -101,5 +103,66 @@ public class AccountService
         };
         await _userRepository.DeleteUserAsync(user);
         await _deletedUserRepository.AddAsync(deletedUser);
+    }
+
+    public async Task<PaymentMethodResponseDto> AddPaymentMethod(PaymentMethodRequestDto dto, Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+
+        if (user.PaymentMethods.Any(pm => pm.CardNumber == dto.CardNumber))
+        {
+            throw new ApiException(ErrorCodes.ValidationError, "Card number already exists", StatusCodes.Status409Conflict);
+        }
+
+        if (dto.ExpirationDate < DateOnly.FromDateTime(DateTime.Now))
+        {
+            throw new ApiException(ErrorCodes.ValidationError, "Expiration date must be in the future", StatusCodes.Status406NotAcceptable);
+        }
+        PaymentMethod paymentMethod = new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            CardNumber = dto.CardNumber,
+            ExpirationDate = dto.ExpirationDate,
+            IsDefault = dto.IsDefault,
+            User = user
+        };
+        if (paymentMethod.IsDefault)
+        {
+            _userRepository.SetDefaultPaymentMethod(paymentMethod, user);
+        }
+        await _userRepository.AddPaymentMethodAsync(paymentMethod, user);
+        return new PaymentMethodResponseDto()
+        {
+            Id = paymentMethod.Id,
+            CardNumber = paymentMethod.CardNumber,
+            HolderFirstName = user.FirstName,
+            HolderLastName = user.LastName,
+            ExpirationDate = paymentMethod.ExpirationDate,
+            IsDefault = paymentMethod.IsDefault,
+        };
+    }
+
+    public async Task<List<PaymentMethodResponseDto>> GetUserPaymentMethods(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        var paymentMethods = await _userRepository.GetUserPaymentMethodsAsync(user);
+        return paymentMethods.Select(pm => new PaymentMethodResponseDto()
+        {
+            Id = pm.Id,
+            CardNumber = pm.CardNumber,
+            HolderFirstName = user.FirstName,
+            HolderLastName = user.LastName,
+            ExpirationDate = pm.ExpirationDate,
+            IsDefault = pm.IsDefault,
+        }).ToList();
     }
 }
