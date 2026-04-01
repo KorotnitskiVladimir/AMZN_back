@@ -27,6 +27,8 @@ public class DataContext: DbContext
     public DbSet<DeletedUser>  DeletedUsers { get; private set; } = null!;
     
     public DbSet<PaymentMethod> PaymentMethods { get; private set; } = null!;
+    
+    public DbSet<DeliveryAddress> DeliveryAddresses { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -287,6 +289,12 @@ public class DataContext: DbContext
             .HasOne(p => p.User)
             .WithMany(u => u.PaymentMethods)
             .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<DeliveryAddress>()
+            .HasOne(d => d.User)
+            .WithMany(u => u.DeliveryAddresses)
+            .HasForeignKey(d => d.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
     }

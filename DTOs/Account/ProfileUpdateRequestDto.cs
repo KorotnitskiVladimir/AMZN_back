@@ -12,6 +12,7 @@ public class ProfileUpdateRequestDto
     private const string PhoneRegex = @"^\+[1-9]\d{1,14}$";
     
     [Display(Name = "First name")]
+    [Required]
     [StringLength(NameMaxLength, MinimumLength = NameMinLength, ErrorMessage = "{0} must be {2}-{1} characters")]
     [RegularExpression(PersonNameRegex, ErrorMessage = "{0} may contain letters, spaces, hyphens and apostrophes")]
     public string FirstName { get; set; } = "";

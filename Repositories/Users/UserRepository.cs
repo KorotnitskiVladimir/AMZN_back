@@ -83,5 +83,36 @@ namespace AMZN.Repositories.Users
         {
             return await _db.PaymentMethods.FirstOrDefaultAsync(x => x.UserId == user.Id && x.IsDefault);
         }
+
+        public async Task AddDeliveryAddressAsync(DeliveryAddress address, User user)
+        {
+            await _db.DeliveryAddresses.AddAsync(address);
+            user.DeliveryAddresses.Add(address);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<List<DeliveryAddress>> GetUserDeliveryAddressesAsync(User user)
+        {
+            return await _db.DeliveryAddresses.Where(x => x.UserId == user.Id).ToListAsync();
+        }
+        
+        public async Task DeleteDeliveryAddressAsync(DeliveryAddress address, User user)
+        {
+            _db.DeliveryAddresses.Remove(address);
+            user.DeliveryAddresses.Remove(address);
+            await _db.SaveChangesAsync();
+        }
+        
+        public void SetDefaultDeliveryAddress(DeliveryAddress address, User user)
+        {
+            address.IsDefault = true;
+            foreach (var ad in user.DeliveryAddresses)
+            {
+                if (ad.IsDefault && ad.Id != address.Id)
+                { 
+                    ad.IsDefault = false;
+                }
+            }
+        }
     }
 }

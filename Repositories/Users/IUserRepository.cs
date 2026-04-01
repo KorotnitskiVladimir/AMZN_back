@@ -23,6 +23,14 @@ namespace AMZN.Repositories.Users
         void SetDefaultPaymentMethod(PaymentMethod paymentMethod, User user);
         
         Task<PaymentMethod?> GetDefaultPaymentMethodAsync(User user);
+        
+        Task AddDeliveryAddressAsync(DeliveryAddress address, User user);
+        
+        Task<List<DeliveryAddress>> GetUserDeliveryAddressesAsync(User user);
+        
+        Task DeleteDeliveryAddressAsync(DeliveryAddress address, User user);
+        
+        void SetDefaultDeliveryAddress(DeliveryAddress address, User user);
 
     }
 }
