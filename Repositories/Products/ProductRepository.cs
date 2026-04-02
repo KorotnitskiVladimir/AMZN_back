@@ -36,15 +36,6 @@ namespace AMZN.Repositories.Products
             return _db.SaveChangesAsync();
         }
 
-        public Task<List<Product>> GetHomeProductsAsync(int take)
-        {
-            return _db.Products
-                .AsNoTracking()
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(take)
-                .ToListAsync();
-        }
-
         public Task<List<Product>> GetByCategoryAsync(Guid categoryId, int skip, int take)
         {
             return _db.Products

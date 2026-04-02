@@ -1,12 +1,11 @@
 using AMZN.Data;
 using AMZN.Extensions;
 using AMZN.Middleware;
-using AMZN.Middleware;
-using AMZN.Models;
 using AMZN.Models;
 using AMZN.Repositories.Actions;
 using AMZN.Repositories.Brands;
 using AMZN.Repositories.Categories;
+using AMZN.Repositories.Home;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Products.Questions;
 using AMZN.Repositories.Search;
@@ -28,7 +27,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 
@@ -160,7 +158,10 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductQuestionRepository, ProductQuestionRepository>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductQuestionService>();
+
+builder.Services.AddScoped<IHomeRepository, HomeRepository>();
 builder.Services.AddScoped<HomeService>();
+
 builder.Services.AddScoped<AdminUserService>();
 builder.Services.AddScoped<AdminCategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
