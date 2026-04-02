@@ -59,6 +59,9 @@ public class DeliveryAddressRequestDto
     [RegularExpression(PhoneRegex, ErrorMessage = "Invalid {0} format")]
     public string PhoneNumber { get; set; } = "";
     
+    [Display(Name = "Set as default delivery address")]
+    public bool IsDefault { get; set; }
+    
     
     
 }

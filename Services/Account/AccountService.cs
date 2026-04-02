@@ -7,6 +7,7 @@ using AMZN.Security.Passwords;
 using AMZN.Services.Auth;
 using AMZN.Shared.Exceptions;
 using AMZN.Shared.Exceptions.Errors;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 
 namespace AMZN.Services.Account;
 
@@ -14,7 +15,7 @@ public class AccountService
 {
     private readonly IUserRepository _userRepository;
     private readonly IDeletedUserRepository _deletedUserRepository;
-    
+
     public AccountService(
         IUserRepository userRepository,
         IDeletedUserRepository deletedUserRepository)
@@ -23,7 +24,7 @@ public class AccountService
         _deletedUserRepository = deletedUserRepository;
     }
 
-    
+
     public async Task<ProfileUpdateResponseDto> UpdateProfileAsync(ProfileUpdateRequestDto dto, Guid userId)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
@@ -31,6 +32,7 @@ public class AccountService
         {
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
         }
+
         string email = dto.Email.Trim().ToLowerInvariant();
         if (email != user.Email)
         {
@@ -39,8 +41,10 @@ public class AccountService
                 throw new ApiException(ErrorCodes.AuthEmailTaken, "Email already taken",
                     StatusCodes.Status409Conflict);
             }
+
             user.Email = email;
         }
+
         if (!string.IsNullOrEmpty(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
         if (!string.IsNullOrEmpty(dto.LastName)) user.LastName = dto.LastName.Trim();
         if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
@@ -51,6 +55,7 @@ public class AccountService
                 throw new ApiException(ErrorCodes.ValidationError, "User must be at least 18 years old",
                     StatusCodes.Status400BadRequest);
             }
+
             user.BirthDate = dto.BirthDate;
         }
 
@@ -66,8 +71,8 @@ public class AccountService
             BirthDate = user.BirthDate,
         };
     }
-    
-    
+
+
     public int CheckUserAge(DateOnly? birthDate)
     {
         if (birthDate != null)
@@ -78,11 +83,13 @@ public class AccountService
             {
                 age--;
             }
+
             return age;
         }
+
         return 0;
     }
-    
+
     public async Task DeleteUserAsync(Guid userId)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
@@ -115,13 +122,16 @@ public class AccountService
 
         if (user.PaymentMethods.Any(pm => pm.CardNumber == dto.CardNumber))
         {
-            throw new ApiException(ErrorCodes.ValidationError, "Card number already exists", StatusCodes.Status409Conflict);
+            throw new ApiException(ErrorCodes.ValidationError, "Card number already exists",
+                StatusCodes.Status409Conflict);
         }
 
         if (dto.ExpirationDate < DateOnly.FromDateTime(DateTime.Now))
         {
-            throw new ApiException(ErrorCodes.ValidationError, "Expiration date must be in the future", StatusCodes.Status406NotAcceptable);
+            throw new ApiException(ErrorCodes.ValidationError, "Expiration date must be in the future",
+                StatusCodes.Status406NotAcceptable);
         }
+
         PaymentMethod paymentMethod = new()
         {
             Id = Guid.NewGuid(),
@@ -135,6 +145,7 @@ public class AccountService
         {
             _userRepository.SetDefaultPaymentMethod(paymentMethod, user);
         }
+
         await _userRepository.AddPaymentMethodAsync(paymentMethod, user);
         return new PaymentMethodResponseDto()
         {
@@ -154,6 +165,7 @@ public class AccountService
         {
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
         }
+
         var paymentMethods = await _userRepository.GetUserPaymentMethodsAsync(user);
         return paymentMethods.Select(pm => new PaymentMethodResponseDto()
         {
@@ -164,5 +176,100 @@ public class AccountService
             ExpirationDate = pm.ExpirationDate,
             IsDefault = pm.IsDefault,
         }).ToList();
+    }
+
+    public async Task<DeliveryAddressResponseDto> AddDeliveryAddress(DeliveryAddressRequestDto dto, Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        if (user.DeliveryAddresses.Any(da => da.Address == dto.StreetAddress))
+        {
+            throw new ApiException(ErrorCodes.ValidationError, "Address already exists",
+                StatusCodes.Status409Conflict);
+        }
+
+        DeliveryAddress deliveryAddress = new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Address = dto.StreetAddress,
+            City = dto.City,
+            PostalCode = dto.PostalCode,
+            Country = dto.Country,
+            State = dto.State,
+            PhoneNumber = dto.PhoneNumber,
+            IsDefault = dto.IsDefault,
+            User = user
+        };
+        
+        if (deliveryAddress.IsDefault)
+        {
+            _userRepository.SetDefaultDeliveryAddress(deliveryAddress, user);
+        }
+        
+        await _userRepository.AddDeliveryAddressAsync(deliveryAddress, user);
+
+        return new DeliveryAddressResponseDto()
+        {
+            Id = deliveryAddress.Id,
+            FirstName = deliveryAddress.FirstName,
+            LastName = deliveryAddress.LastName,
+            Address = deliveryAddress.Address,
+            City = deliveryAddress.City,
+            PostalCode = deliveryAddress.PostalCode,
+            Country = deliveryAddress.Country,
+            State = deliveryAddress.State,
+            PhoneNumber = deliveryAddress.PhoneNumber,
+            IsDefault = deliveryAddress.IsDefault,
+        };
+    }
+
+    public async Task<List<DeliveryAddressResponseDto>> GetUserDeliveryAddresses(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var deliveryAddresses = await _userRepository.GetUserDeliveryAddressesAsync(user);
+        /*return deliveryAddresses.Select(da => new DeliveryAddressResponseDto()
+        {
+            Id = da.Id,
+            FirstName = da.FirstName,
+            LastName = da.LastName,
+            Address = da.Address,
+            City = da.City,
+            PostalCode = da.PostalCode,
+            Country = da.Country,
+            State = da.State,
+            PhoneNumber = da.PhoneNumber,
+            IsDefault = da.IsDefault,
+        }).ToList();*/
+        var response = new List<DeliveryAddressResponseDto>();
+        foreach (var da in deliveryAddresses)
+        {
+            var dto = new DeliveryAddressResponseDto()
+            {
+                Id = da.Id,
+                FirstName = da.FirstName,
+                LastName = da.LastName,
+                Address = da.Address,
+                City = da.City,
+                PostalCode = da.PostalCode,
+                Country = da.Country,
+                State = da.State,
+                PhoneNumber = da.PhoneNumber,
+                IsDefault = da.IsDefault,
+            };
+            response.Add(dto);
+        }
+        return response;
     }
 }

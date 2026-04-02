@@ -69,4 +69,27 @@ public class UserAccountController : ControllerBase
         List<PaymentMethodResponseDto> response = await _accountService.GetUserPaymentMethods(userId);
         return StatusCode(StatusCodes.Status200OK, response);
     }
+    
+    // POST api/user/addDeliveryAddress
+    [HttpPost("addDeliveryAddress")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<DeliveryAddressResponseDto>> AddDeliveryAddress(
+        [FromBody] DeliveryAddressRequestDto request)
+    {
+        var userId = User.GetRequiredUserId();
+        DeliveryAddressResponseDto response = await _accountService.AddDeliveryAddress(request, userId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/user/getDeliveryAddresses
+    [HttpPost("getDeliveryAddresses")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<List<DeliveryAddressResponseDto>>> GetDeliveryAddresses()
+    {
+        var userId = User.GetRequiredUserId();
+        List<DeliveryAddressResponseDto> response = await _accountService.GetUserDeliveryAddresses(userId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
 }
