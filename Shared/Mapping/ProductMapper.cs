@@ -1,7 +1,6 @@
 ﻿using AMZN.Data.Entities;
 using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
-using AMZN.DTOs.Home;
 using AMZN.DTOs.Products;
 using AMZN.DTOs.Search;
 

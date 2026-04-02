@@ -1,4 +1,5 @@
 ﻿using AMZN.DTOs.Home;
+using AMZN.DTOs.Products;
 using AMZN.Services.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,19 +11,28 @@ namespace AMZN.Controllers.Api
     [ApiController]
     public class HomeController : ControllerBase
     {
-        private readonly HomeService _home;
+        private readonly HomeService _homeService;
 
-        public HomeController(HomeService home)
+        public HomeController(HomeService homeService)
         {
-            _home = home;
+            _homeService = homeService;
         }
+
 
         [HttpGet]
         [AllowAnonymous]
-        [OutputCache(Duration = 15, VaryByQueryKeys = new[] { "take" })]
-        public async Task<ActionResult<HomeResponseDto>> Get([FromQuery] int take = 20)
+        [OutputCache(Duration = 15)]
+        public async Task<ActionResult<HomeResponseDto>> GetHome()
         {
-            var dto = await _home.GetHomeAsync(take);
+            HomeResponseDto dto = await _homeService.GetHomeAsync();
+            return Ok(dto);
+        }
+
+        [HttpGet("last-viewed")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<ProductCardDto>>> GetLastViewed([FromQuery] HomeLastViewedQueryDto query)
+        {
+            List<ProductCardDto> dto = await _homeService.GetLastViewedAsync(query.ProductIds);
             return Ok(dto);
         }
     }

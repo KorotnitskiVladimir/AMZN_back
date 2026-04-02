@@ -13,7 +13,6 @@ namespace AMZN.Repositories.Products
         void Remove(Product product);
         Task SaveChangesAsync();
 
-        Task<List<Product>> GetHomeProductsAsync(int take);
         Task<List<Product>> GetByCategoryAsync(Guid categoryId, int skip, int take);
 
         Task<Product?> GetByIdAsync(Guid id);
