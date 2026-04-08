@@ -29,6 +29,10 @@ public class DataContext: DbContext
     public DbSet<PaymentMethod> PaymentMethods { get; private set; } = null!;
     
     public DbSet<DeliveryAddress> DeliveryAddresses { get; private set; } = null!;
+    
+    public DbSet<Cart> Carts { get; private set; } = null!;
+    
+    public DbSet<CartItem> CartItems { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -296,6 +300,21 @@ public class DataContext: DbContext
             .WithMany(u => u.DeliveryAddresses)
             .HasForeignKey(d => d.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Cart)
+            .WithMany(c => c.Items)
+            .HasForeignKey(ci => ci.CartId);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Product)
+            .WithMany();
+        
+        modelBuilder.Entity<Cart>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .HasPrincipalKey(u => u.Id);
 
     }
 }

@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
+using AMZN.Repositories.Cart;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -173,6 +174,7 @@ builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IDeletedUserRepository, DeletedUserRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 // Search
 builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 builder.Services.AddScoped<SearchService>();
