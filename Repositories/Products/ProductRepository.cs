@@ -225,6 +225,38 @@ namespace AMZN.Repositories.Products
             _db.ProductRatings.Add(rating);
         }
 
+        // Блокирует запись в БД (product) для изменений рейтинга и отзывов внутри транзакции
+        public Task<Product?> GetByIdForUpdateAsync(Guid id)
+        {
+            return _db.Products
+                .FromSqlInterpolated($"SELECT * FROM Products WHERE Id = {id} FOR UPDATE")
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<(int ratingSum, int ratingCount)> UpdateProductRatingAsync(Guid productId)
+        {
+            var totals = await _db.ProductRatings
+                .Where(x => x.ProductId == productId)
+                .GroupBy(x => x.ProductId)
+                .Select(g => new
+                {
+                    RatingSum = g.Sum(x => (int)x.Value),
+                    RatingCount = g.Count()
+                })
+                .FirstOrDefaultAsync();
+
+            int ratingSum = totals?.RatingSum ?? 0;
+            int ratingCount = totals?.RatingCount ?? 0;
+
+            await _db.Products
+                .Where(x => x.Id == productId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.RatingSum, ratingSum)
+                    .SetProperty(x => x.RatingCount, ratingCount));
+
+            return (ratingSum, ratingCount);
+        }
+
         // Product Review
         public void AddReview(ProductReview review)
         {

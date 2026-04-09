@@ -29,6 +29,8 @@ namespace AMZN.Repositories.Products
         // Product Rating
         Task<ProductRating?> GetUserRatingAsync(Guid productId, Guid userId);
         void AddRating(ProductRating rating);
+        Task<Product?> GetByIdForUpdateAsync(Guid id);
+        Task<(int ratingSum, int ratingCount)> UpdateProductRatingAsync(Guid productId);
 
         // Product Reviews
         Task<int> CountReviewsAsync(Guid productId);
