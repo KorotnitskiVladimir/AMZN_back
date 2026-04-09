@@ -30,7 +30,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
-using AMZN.Repositories.Cart;
+using AMZN.Repositories.Carts;
 
 var builder = WebApplication.CreateBuilder(args);
 
