@@ -9,22 +9,26 @@ using AMZN.Shared.Exceptions;
 using AMZN.Shared.Exceptions.Errors;
 using AMZN.Shared.Helpers.Search;
 using AMZN.Shared.Mapping;
+using AMZN.Shared.Transactions;
 
 namespace AMZN.Services.Products
 {
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ITransactionManager _transactionManager;
 
-        public ProductService(IProductRepository productRepository)
+
+        public ProductService(IProductRepository productRepository, ITransactionManager transactionManager)
         {
             _productRepository = productRepository;
+            _transactionManager = transactionManager;
         }
 
 
-        public async Task<ProductDetailsDto> GetByIdAsync (Guid id)
+        public async Task<ProductDetailsDto> GetByIdAsync(Guid id)
         {
-            var product = await _productRepository.GetDetailsByIdAsync (id);
+            Product? product = await _productRepository.GetDetailsByIdAsync(id);
 
             if (product == null)
                 throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
@@ -34,8 +38,8 @@ namespace AMZN.Services.Products
 
         public async Task<PagedResult<ProductCardDto>> GetCatalogPageAsync(ProductListQueryDto q)
         {
-            var skip = (q.Page - 1) * q.PageSize;
-            var normalizedSearch = SearchQueryHelper.NormalizeQuery(q.Search);
+            int skip = (q.Page - 1) * q.PageSize;
+            string? normalizedSearch = SearchQueryHelper.NormalizeQuery(q.Search);
 
             var queryParams = new ProductListQueryParams
             {
@@ -48,8 +52,8 @@ namespace AMZN.Services.Products
                 Sort = q.Sort
             };
 
-            var total = await _productRepository.CountCatalogProductsAsync(queryParams);
-            var items = await _productRepository.GetCatalogProductsAsync(queryParams, skip, q.PageSize);
+            int total = await _productRepository.CountCatalogProductsAsync(queryParams);
+            List<Product> items = await _productRepository.GetCatalogProductsAsync(queryParams, skip, q.PageSize);
 
             return new PagedResult<ProductCardDto>
             {
@@ -62,43 +66,52 @@ namespace AMZN.Services.Products
 
         public async Task<List<BrandDto>> GetCatalogBrandsAsync(Guid? categoryId)
         {
-            var brands = await _productRepository.GetCatalogBrandsAsync(categoryId);
+            List<Brand> brands = await _productRepository.GetCatalogBrandsAsync(categoryId);
 
             return brands.Select(b => b.ToBrandDto()).ToList();
         }
         
         //  Rating
-        public async Task<ProductRatingResponseDto> SetRatingAsync(Guid productId, Guid userId, byte rating)
+        public Task<ProductRatingResponseDto> SetRatingAsync(Guid productId, Guid userId, byte rating)
         {
-            var product = await GetExistingProductAsync(productId);
-
-            if (product.SellerId == userId)
-                throw new ApiException(ErrorCodes.CannotRateOwnProduct, "You cannot rate your own product", StatusCodes.Status403Forbidden);
-
-            var hasChanges = await SetUserRatingAsync(product, userId, rating);
-
-            if (hasChanges)
-                await _productRepository.SaveChangesAsync();
-
-            return new ProductRatingResponseDto
+            return _transactionManager.ExecuteAsync(async () =>
             {
-                AverageRating = ProductMapper.CalcRatingHalfStep(product.RatingSum, product.RatingCount),
-                RatingsCount = product.RatingCount,
-                UserRating = rating
-            };
+                Product product = await GetExistingProductForUpdateAsync(productId);
+
+                if (product.SellerId == userId)
+                    throw new ApiException(ErrorCodes.CannotRateOwnProduct, "You cannot rate your own product", StatusCodes.Status403Forbidden);
+
+                bool ratingChanged = await SetUserRatingAsync(productId, userId, rating);
+
+                int ratingSum = product.RatingSum;
+                int ratingCount = product.RatingCount;
+
+                if (ratingChanged)
+                {
+                    await _productRepository.SaveChangesAsync();
+                    (ratingSum, ratingCount) = await _productRepository.UpdateProductRatingAsync(productId);
+                }
+
+                return new ProductRatingResponseDto
+                {
+                    AverageRating = ProductMapper.CalcRatingHalfStep(ratingSum, ratingCount),
+                    RatingsCount = ratingCount,
+                    UserRating = rating
+                };
+            });
         }
 
         // Review
         public async Task<PagedResult<ReviewDto>> GetReviewsAsync(Guid productId, ReviewParamsDto q)
         {
-            var exists = await _productRepository.ExistsAsync(productId);
+            bool exists = await _productRepository.ExistsAsync(productId);
             if (!exists)
                 throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
 
-            var skip = (q.Page - 1) * q.PageSize;
+            int skip = (q.Page - 1) * q.PageSize;
 
-            var total = await _productRepository.CountReviewsAsync(productId);
-            var items = await _productRepository.GetReviewsPageAsync(productId, q.Sort, skip, q.PageSize);
+            int total = await _productRepository.CountReviewsAsync(productId);
+            List<ReviewDto> items = await _productRepository.GetReviewsPageAsync(productId, q.Sort, skip, q.PageSize);
 
             return new PagedResult<ReviewDto>
             {
@@ -109,61 +122,67 @@ namespace AMZN.Services.Products
             };
         }
 
-        public async Task<ReviewDto> CreateOrUpdateReviewAsync(Guid productId, Guid userId, ReviewRequestDto request)
+        public Task<ReviewDto> CreateOrUpdateReviewAsync(Guid productId, Guid userId, ReviewRequestDto request)
         {
-            var product = await GetExistingProductAsync(productId);
-
-            if (product.SellerId == userId)
-                throw new ApiException(ErrorCodes.CannotReviewOwnProduct, "You cannot review your own product", StatusCodes.Status403Forbidden);
-
-            var normalizedTitle = request.Title.Trim();
-            var normalizedText = request.Text.Trim();
-
-            var existingReview = await _productRepository.GetUserReviewAsync(productId, userId);
-
-            var reviewChanged = false;
-
-            if (existingReview == null)
+            return _transactionManager.ExecuteAsync(async () =>
             {
-                var review = new ProductReview
+                Product product = await GetExistingProductForUpdateAsync(productId);
+
+                if (product.SellerId == userId)
+                    throw new ApiException(ErrorCodes.CannotReviewOwnProduct, "You cannot review your own product", StatusCodes.Status403Forbidden);
+
+                string normalizedTitle = request.Title.Trim();
+                string normalizedText = request.Text.Trim();
+
+                ProductReview? existingReview = await _productRepository.GetUserReviewAsync(productId, userId);
+
+                bool reviewChanged = false;
+
+                if (existingReview == null)
                 {
-                    Id = Guid.NewGuid(),
-                    ProductId = productId,
-                    UserId = userId,
-                    Title = normalizedTitle,
-                    Text = normalizedText,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    var review = new ProductReview
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = productId,
+                        UserId = userId,
+                        Title = normalizedTitle,
+                        Text = normalizedText,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                _productRepository.AddReview(review);
-                reviewChanged = true;
-            }
-            else if (existingReview.Title != normalizedTitle || existingReview.Text != normalizedText)
-            {
-                existingReview.Title = normalizedTitle;
-                existingReview.Text = normalizedText;
-                existingReview.UpdatedAt = DateTime.UtcNow;
-                reviewChanged = true;
-            }
+                    _productRepository.AddReview(review);
+                    reviewChanged = true;
+                }
+                else if (existingReview.Title != normalizedTitle || existingReview.Text != normalizedText)
+                {
+                    existingReview.Title = normalizedTitle;
+                    existingReview.Text = normalizedText;
+                    existingReview.UpdatedAt = DateTime.UtcNow;
+                    reviewChanged = true;
+                }
 
-            var ratingChanged = await SetUserRatingAsync(product, userId, request.Rating);
+                bool ratingChanged = await SetUserRatingAsync(productId, userId, request.Rating);
 
-            if (reviewChanged || ratingChanged)
-                await _productRepository.SaveChangesAsync();
+                if (reviewChanged || ratingChanged)
+                    await _productRepository.SaveChangesAsync();
 
-            var dto = await _productRepository.GetUserReviewDtoAsync(productId, userId);
+                if (ratingChanged)
+                    await _productRepository.UpdateProductRatingAsync(productId);
 
-            if (dto == null)
-                throw new InvalidOperationException("Review was not saved correctly");
+                ReviewDto? dto = await _productRepository.GetUserReviewDtoAsync(productId, userId);
 
-            return dto;
+                if (dto == null)
+                    throw new InvalidOperationException("Review was not saved correctly");
+
+                return dto;
+            });
         }
 
 
         // Helpers
-        private async Task<Product> GetExistingProductAsync(Guid productId)
+        private async Task<Product> GetExistingProductForUpdateAsync(Guid productId)
         {
-            var product = await _productRepository.GetByIdAsync(productId);
+            Product? product = await _productRepository.GetByIdForUpdateAsync(productId);
 
             if (product == null)
                 throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
@@ -171,33 +190,28 @@ namespace AMZN.Services.Products
             return product;
         }
 
-        private async Task<bool> SetUserRatingAsync(Product product, Guid userId, byte rating)
+        private async Task<bool> SetUserRatingAsync(Guid productId, Guid userId, byte rating)
         {
-            var existingRating = await _productRepository.GetUserRatingAsync(product.Id, userId);
+            ProductRating? existingRating = await _productRepository.GetUserRatingAsync(productId, userId);
 
             if (existingRating == null)
             {
                 var newRating = new ProductRating
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = productId,
                     UserId = userId,
                     Value = rating
                 };
 
                 _productRepository.AddRating(newRating);
-
-                product.RatingSum += rating;
-                product.RatingCount += 1;
                 return true;
             }
 
             if (existingRating.Value == rating)
                 return false;
 
-            product.RatingSum = product.RatingSum - existingRating.Value + rating;
             existingRating.Value = rating;
-
             return true;
         }
 

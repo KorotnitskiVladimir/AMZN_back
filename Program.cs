@@ -23,6 +23,7 @@ using AMZN.Services.Products.Questions;
 using AMZN.Services.Search;
 using AMZN.Services.Storage.Cloud;
 using AMZN.Services.Storage.Local;
+using AMZN.Shared.Transactions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -181,6 +182,9 @@ builder.Services.AddScoped<SearchService>();
 // Storage
 builder.Services.AddSingleton<ILocalsStorageService, LocalStorageService>();
 builder.Services.AddSingleton<ICloudStorageService, CloudStorageService>();
+
+// EF TransactionManager
+builder.Services.AddScoped<ITransactionManager, EfTransactionManager>();
 
 builder.Services.AddAmznForwardedHeaders();
 builder.Services.AddAmznRateLimiting();
