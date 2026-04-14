@@ -1,67 +1,162 @@
-﻿using AMZN.Models.Product;
+﻿using AMZN.Extensions;
+using AMZN.Models.Product;
 using AMZN.Services.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
-namespace AMZN.Controllers;
-
-
-[Route("Admin/Products")]
-public class AdminProductsController : Controller
+namespace AMZN.Controllers
 {
-    private readonly AdminProductService _adminProductService;
-    private readonly ILogger<AdminProductsController> _logger;
-
-    public AdminProductsController(AdminProductService adminProductService, ILogger<AdminProductsController> logger)
+    [Route("Admin/Products")]
+    public class AdminProductsController : Controller
     {
-        _adminProductService = adminProductService;
-        _logger = logger;
+        private readonly AdminProductService _adminProductService;
+
+        public AdminProductsController(AdminProductService adminProductService)
+        {
+            _adminProductService = adminProductService;
+        }
+
+
+
+        [HttpGet("")]
+        [Authorize]
+        public async Task<IActionResult> Index()
+        {
+            Guid? sellerId = User.GetUserIdOrNull();
+            if (sellerId == null)
+                return Forbid();
+
+            MyProductsListViewModel vm = await _adminProductService.BuildMyProductsListVmAsync(sellerId.Value);
+            return View(vm);
+        }
+
+
+
+        [HttpGet("Create")]
+        [Authorize]
+        public async Task<IActionResult> Create()
+        {
+            ProductCreateViewModel vm = await _adminProductService.BuildCreateVmAsync();
+            return View(vm);
+        }
+
+
+        [HttpPost("Create")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProductCreateFormModel form)
+        {
+            Guid? sellerId = User.GetUserIdOrNull();
+            if (sellerId == null)
+                return Forbid();
+
+            if (!ModelState.IsValid)
+            {
+                ProductCreateViewModel vmInvalid = await _adminProductService.BuildCreateVmAsync(form);
+                return View(vmInvalid);
+            }
+
+            try
+            {
+                Guid productId = await _adminProductService.CreateAsync(form, sellerId.Value);
+
+                TempData["Success"] = "Product created";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                ProductCreateViewModel vmError = await _adminProductService.BuildCreateVmAsync(form, ex.Message);
+                return View(vmError);
+            }
+        }
+
+
+        [HttpGet("Edit/{id:guid}")]
+        [Authorize]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            Guid? sellerId = User.GetUserIdOrNull();
+            if (sellerId == null)
+                return Forbid();
+
+            try
+            {
+                ProductEditViewModel vm = await _adminProductService.BuildProductEditVmAsync(id, sellerId.Value);
+                return View(vm);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+        }
+
+
+        [HttpPost("Edit/{id:guid}")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, ProductEditFormModel form)
+        {
+            Guid? sellerId = User.GetUserIdOrNull();
+            if (sellerId == null)
+                return Forbid();
+
+            if (!ModelState.IsValid)
+            {
+                try
+                {
+                    ProductEditViewModel vmInvalid = await _adminProductService.BuildProductEditVmAsync(id, sellerId.Value, form);
+
+                    return View(vmInvalid);
+                }
+                catch (InvalidOperationException)
+                {
+                    return NotFound();
+                }
+            }
+
+            try
+            {
+                await _adminProductService.UpdateAsync(id, form, sellerId.Value);
+
+                TempData["Success"] = "Product updated";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+            catch (InvalidOperationException ex)
+            {
+                try
+                {
+                    ProductEditViewModel vmError = await _adminProductService.BuildProductEditVmAsync(id, sellerId.Value, form, ex.Message);
+
+                    return View(vmError);
+                }
+                catch (InvalidOperationException)
+                {
+                    return NotFound();
+                }
+            }
+        }
+
+
+        [HttpPost("Delete/{id:guid}")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            Guid? sellerId = User.GetUserIdOrNull();
+            if (sellerId == null)
+                return Forbid();
+
+            try
+            {
+                await _adminProductService.DeleteAsync(id, sellerId.Value);
+                TempData["Success"] = "Product deleted";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
-
-
-    [HttpGet("Create")]
-    [Authorize]
-    public async Task<IActionResult> Create()
-    {
-        var vm = await _adminProductService.BuildCreateVmAsync();
-        return View(vm);
-    }
-
-
-    [HttpPost("Create")]
-    [ValidateAntiForgeryToken]
-    [Authorize]
-    public async Task<IActionResult> Create(ProductCreateFormModel form)
-    {
-        if (!ModelState.IsValid)
-        {
-            var vmInvalid = await _adminProductService.BuildCreateVmAsync(form);
-            return View(vmInvalid);
-        }
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null || !Guid.TryParse(userId, out var sellerId))
-        {
-            _logger.LogError("Auth claims NameIdentifier missing/invalid. TraceId={TraceId}, Path={Path}",
-                HttpContext.TraceIdentifier,
-                HttpContext.Request.Path);
-
-            return Forbid();
-        }
-
-        try
-        {
-            await _adminProductService.CreateAsync(form, sellerId);
-            TempData["Success"] = "Product created";
-            return RedirectToAction(nameof(Create));
-        }
-        catch (InvalidOperationException ex)
-        {
-            var vmError = await _adminProductService.BuildCreateVmAsync(form, ex.Message);
-            return View(vmError);
-        }
-    }
-
-
 }

@@ -21,6 +21,11 @@ namespace AMZN.Repositories.Products
 
         Task<bool> ExistsAsync(Guid id);
 
+        // MyProduct View
+        Task<List<Product>> GetSellerProductsAsync(Guid sellerId);
+        void RemoveProductImages(IEnumerable<ProductImage> productImages);
+        void AddProductImages(IEnumerable<ProductImage> productImages);
+
         // Catalog Page
         Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams);
         Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take);

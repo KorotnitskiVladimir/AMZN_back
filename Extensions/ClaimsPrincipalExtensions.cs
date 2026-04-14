@@ -6,9 +6,10 @@ namespace AMZN.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {
+        // Метод для API
         public static Guid GetRequiredUserId(this ClaimsPrincipal user)
         {
-            var userIdValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? userIdValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!Guid.TryParse(userIdValue, out var userId))
             {
@@ -21,5 +22,19 @@ namespace AMZN.Extensions
 
             return userId;
         }
+
+        // Метод для MVC
+        public static Guid? GetUserIdOrNull(this ClaimsPrincipal user)
+        {
+            string? userIdValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdValue))
+                return null;
+
+            return Guid.TryParse(userIdValue, out Guid userId)
+                ? userId
+                : null;
+        }
+
     }
 }

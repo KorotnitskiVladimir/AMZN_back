@@ -75,6 +75,25 @@ namespace AMZN.Repositories.Products
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        // MyProduct View
+        public Task<List<Product>> GetSellerProductsAsync(Guid sellerId)
+        {
+            return _db.Products
+                .AsNoTracking()
+                .Where(x => x.SellerId == sellerId)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
+
+        public void RemoveProductImages(IEnumerable<ProductImage> productImages)
+        {
+            _db.ProductImages.RemoveRange(productImages);
+        }
+        public void AddProductImages(IEnumerable<ProductImage> productImages)
+        {
+            _db.ProductImages.AddRange(productImages);
+        }
+
         // Catalog Page
         // кол-во Products подходящих под фильтры запроса
         public Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams)

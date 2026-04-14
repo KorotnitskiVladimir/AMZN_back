@@ -1,0 +1,75 @@
+﻿@model AMZN.Models.Product.MyProductsListViewModel
+
+@{
+    ViewData["Title"] = "My products";
+}
+
+<div class="text-center">
+    <h1 class="display-4">My products</h1>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add product</a>
+</p>
+
+@if (Model.Products.Count == 0)
+{
+    <p>No products yet.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Created</th>
+                <th style="width: 180px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td>
+                        <img src="@product.PrimaryImageUrl"
+                             alt="@product.Title"
+                             style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />
+                    </td>
+                    <td>@product.Title</td>
+                    <td>@product.CurrentPrice.ToString("F2")</td>
+                    <td>@product.StockQuantity</td>
+                    <td>@product.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@product.Id"
+                           class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        <form asp-action="Delete"
+                              asp-route-id="@product.Id"
+                              method="post"
+                              style="display:inline"
+                              onsubmit="return confirm('Delete this product permanently?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
