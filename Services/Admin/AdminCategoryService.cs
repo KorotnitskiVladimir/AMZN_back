@@ -24,29 +24,29 @@ public class AdminCategoryService
         _formsValidator = formsValidator;
         _cloudStorageService = cloudStorageService;
     }
-    
-    public (bool, object) AddCategory(CategoryFormModel formModel)
+
+    public async Task<(bool, object)> AddCategoryAsync(CategoryFormModel formModel)
     {
         Dictionary<string, string> errors = _formsValidator.ValidateCategory(formModel);
         if (errors.Count == 0)
         {
             Guid id = Guid.NewGuid();
-            var parent = _categoryRepository.GetById(formModel.ParentCategory);
+            Category? parent = _categoryRepository.GetById(formModel.ParentCategory);
             Guid? parentId = null;
+
             if (parent != null)
-            {
                 parentId = parent.Id;
-            }
 
             Category category = new()
             {
                 Id = id,
                 Name = formModel.Name,
                 Description = formModel.Description,
-                //ImageUrl = _localsStorageService.SaveFile(model.Image),
-                ImageUrl = _cloudStorageService.SaveFile(formModel.Image),
+                //ImageUrl = _localStorageService.SaveFile(model.Image),
+                ImageUrl = await _cloudStorageService.SaveImageAsync(formModel.Image),
                 CreatedAt = DateTime.UtcNow,
             };
+
             if (parent != null)
             {
                 category.ParentId = parentId;
@@ -56,9 +56,10 @@ public class AdminCategoryService
             _categoryRepository.AddCategory(category);
             return (true, "Category added successfully");
         }
+
         return (false, errors.Values);
     }
-    
+
     public List<Category> GetAll()
     {
         return _categoryRepository.GetAll();
