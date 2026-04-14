@@ -31,9 +31,9 @@ namespace AMZN.Repositories.Products
             _db.Products.Remove(product);
         }
 
-        public Task SaveChangesAsync()
+        public Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return _db.SaveChangesAsync();
+            return _db.SaveChangesAsync(cancellationToken);
         }
 
         public Task<List<Product>> GetByCategoryAsync(Guid categoryId, int skip, int take)

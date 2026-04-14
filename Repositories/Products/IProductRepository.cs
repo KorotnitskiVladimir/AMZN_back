@@ -11,7 +11,7 @@ namespace AMZN.Repositories.Products
         void Add(Product product);
         void Update(Product product);
         void Remove(Product product);
-        Task SaveChangesAsync();
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
         Task<List<Product>> GetByCategoryAsync(Guid categoryId, int skip, int take);
 
