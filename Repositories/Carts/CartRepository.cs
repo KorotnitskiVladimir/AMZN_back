@@ -73,4 +73,15 @@ public class CartRepository : ICartRepository
     {
         return await _dataContext.CartItems.Where(ci => ci.CartId == cartId).ToListAsync();
     }
+    
+    public async Task<CartItem?> IsItemInCartAsync(Guid productId, Guid cartId)
+    {
+        return await _dataContext.CartItems.FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
+    }
+    
+    public async Task UpdateCartItemAsync(CartItem cartItem)
+    {
+        _dataContext.CartItems.Update(cartItem);
+        await _dataContext.SaveChangesAsync();
+    }
 }

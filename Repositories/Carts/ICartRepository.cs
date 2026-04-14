@@ -22,4 +22,8 @@ public interface ICartRepository
     
     Task<List<CartItem>> GetCartItemsAsync(Guid cartId);
     
+    Task<CartItem?> IsItemInCartAsync(Guid productId, Guid cartId);
+
+    Task UpdateCartItemAsync(CartItem cartItem);
+
 }
