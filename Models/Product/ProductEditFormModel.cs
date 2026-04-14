@@ -1,20 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
-using AMZN.Shared.Validation.Attributes;
+﻿using AMZN.Shared.Validation.Attributes;
 using AMZN.Shared.Validation.Files;
+using System.ComponentModel.DataAnnotations;
 
 namespace AMZN.Models.Product
 {
-    public class ProductCreateFormModel : IValidatableObject
+    public class ProductEditFormModel : IValidatableObject
     {
         private const int TitleMaxLength = 256;
         private const int DescriptionMaxLength = 4000;
 
         private const string PriceMin = "0";
-        private const string PriceMax = "999999999";    
+        private const string PriceMax = "999999999";
 
-        private const long MaxImageBytes = 5 * 1024 * 1024;     // 5MB
+        private const long MaxImageBytes = 5 * 1024 * 1024; // 5 MB
         public const int MaxGalleryImages = 10;
-
 
 
         [Required(ErrorMessage = "Title is required")]
@@ -43,51 +42,48 @@ namespace AMZN.Models.Product
         public decimal? OriginalPrice { get; set; }
 
 
-        [RequiredFile(ErrorMessage = "Primary image is required")]
         [ImageFile(MaxImageBytes, ErrorMessage = "Primary image is invalid")]
-        public IFormFile? PrimaryImage { get; set; }
+        public IFormFile? NewPrimaryImage { get; set; }
 
+        // Новые gallery images, Добавляются после существующих
+        public List<IFormFile>? NewGalleryImages { get; set; }
 
-        public List<IFormFile>? Images { get; set; }
-
+        // Порядок существующих gallery images после delete / reorder
+        public List<Guid> ExistingGalleryImageIdsInOrder { get; set; } = new();
 
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // OriginalPrice >= CurrentPrice
             if (OriginalPrice is > 0 && OriginalPrice < CurrentPrice)
             {
                 yield return new ValidationResult(
                     "OriginalPrice must be >= CurrentPrice",
-                    new[] { nameof(OriginalPrice), nameof(CurrentPrice) }
-                );
+                    new[] { nameof(OriginalPrice), nameof(CurrentPrice) });
             }
 
-            if (Images == null || Images.Count == 0)
+            if (NewGalleryImages == null || NewGalleryImages.Count == 0)
                 yield break;
 
-            // Галерея до 10 img
-            if (Images.Count > MaxGalleryImages)
+            if (NewGalleryImages.Count > MaxGalleryImages)
             {
-                yield return new ValidationResult("Too many gallery images (max 10)", new[] { nameof(Images) });
+                yield return new ValidationResult(
+                    "Too many gallery images (max 10)",
+                    new[] { nameof(NewGalleryImages) });
+
                 yield break;
             }
 
-            // Проверка файлов галереи
-            foreach (var file in Images)
+            foreach (var file in NewGalleryImages)
             {
                 if (file == null)
                 {
-                    yield return new ValidationResult("Invalid file", new[] { nameof(Images) });
+                    yield return new ValidationResult("Invalid file", new[] { nameof(NewGalleryImages) });
                     continue;
                 }
 
                 if (!ImageFileRules.TryValidate(file, MaxImageBytes, out var error))
-                    yield return new ValidationResult(error, new[] { nameof(Images) });
+                    yield return new ValidationResult(error, new[] { nameof(NewGalleryImages) });
             }
-
-
         }
-
     }
 }

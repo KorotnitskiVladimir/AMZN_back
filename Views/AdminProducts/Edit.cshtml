@@ -1,0 +1,262 @@
+﻿@model AMZN.Models.Product.ProductEditViewModel
+
+@{
+    ViewData["Title"] = "Edit product";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Edit product</h1>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+
+<form id="edit-product-form"
+      asp-action="Edit"
+      asp-route-id="@Model.ProductId"
+      method="post"
+      enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div id="existing-gallery-image-ids-container">
+        @for (int i = 0; i < Model.Form.ExistingGalleryImageIdsInOrder.Count; i++)
+        {
+            <input type="hidden"
+                   name="Form.ExistingGalleryImageIdsInOrder[@i]"
+                   value="@Model.Form.ExistingGalleryImageIdsInOrder[i]" />
+        }
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input asp-for="Form.Title" class="form-control" />
+        <span asp-validation-for="Form.Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="Form.CategoryId" class="form-select">
+            <option value="">-- select --</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Form.CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Brand</label>
+        <select asp-for="Form.BrandId" class="form-select">
+            <option value="">-- select --</option>
+            @foreach (var brand in Model.Brands)
+            {
+                <option value="@brand.Id">@brand.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Form.BrandId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea asp-for="Form.Description" class="form-control"></textarea>
+        <span asp-validation-for="Form.Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Stock quantity</label>
+        <input asp-for="Form.StockQuantity" class="form-control" type="number" min="0" step="1" />
+        <span asp-validation-for="Form.StockQuantity" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Current price</label>
+        <input asp-for="Form.CurrentPrice" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Form.CurrentPrice" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Original price</label>
+        <input asp-for="Form.OriginalPrice" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Form.OriginalPrice" class="text-danger"></span>
+    </div>
+
+    <hr />
+
+    <div class="mb-3">
+        <label class="form-label d-block">Current primary image</label>
+        <div class="mb-2">
+            <img src="@Model.CurrentPrimaryImageUrl"
+                 alt="Primary image"
+                 style="max-width:220px;max-height:220px;object-fit:cover;border-radius:10px;border:1px solid #ddd;" />
+        </div>
+
+        <label class="form-label">Replace primary image</label>
+        <input asp-for="Form.NewPrimaryImage"
+               class="form-control"
+               type="file"
+               accept=".jpg,.jpeg,.png,.webp" />
+        <span asp-validation-for="Form.NewPrimaryImage" class="text-danger"></span>
+    </div>
+
+    <hr />
+
+    <div class="mb-3">
+        <label class="form-label d-block">Existing gallery images</label>
+
+        <div id="existing-gallery-empty"
+             class="text-muted mb-2"
+             @(Model.ExistingGalleryImages.Count > 0 ? "hidden" : null)>
+            No gallery images.
+        </div>
+
+        <div id="existing-gallery-grid" class="d-flex flex-wrap gap-3">
+            @foreach (var image in Model.ExistingGalleryImages)
+            {
+                <div class="existing-gallery-item position-relative"
+                     data-image-id="@image.Id"
+                     style="width:120px;">
+                    <button type="button"
+                            class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                            data-action="remove-existing-image"
+                            title="Delete image">
+                        ×
+                    </button>
+
+                    <img src="@image.Url"
+                         alt=""
+                         style="width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid #ddd;cursor:grab;" />
+                </div>
+            }
+        </div>
+
+        <small class="text-muted d-block mt-2">
+            Drag images to change order. Click × to remove an image.
+        </small>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Add new gallery images</label>
+        <input asp-for="Form.NewGalleryImages"
+               id="new-gallery-images-input"
+               class="form-control"
+               type="file"
+               multiple
+               accept=".jpg,.jpeg,.png,.webp" />
+        <span asp-validation-for="Form.NewGalleryImages" class="text-danger"></span>
+
+        <small class="text-muted d-block mt-1">
+            New images will be added after existing gallery images when you save.
+        </small>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to list</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs/Sortable.min.js"></script>
+
+    <script>
+        (function () {
+            const form = document.getElementById("edit-product-form");
+            const existingGalleryGrid = document.getElementById("existing-gallery-grid");
+            const existingGalleryEmpty = document.getElementById("existing-gallery-empty");
+            const existingGalleryIdsContainer = document.getElementById("existing-gallery-image-ids-container");
+            const newGalleryImagesInput = document.getElementById("new-gallery-images-input");
+            const maxGalleryImages = 10;
+
+            function renderExistingGalleryHiddenInputs() {
+                if (!existingGalleryGrid || !existingGalleryIdsContainer) {
+                    return;
+                }
+
+                const imageIds = Array.from(existingGalleryGrid.querySelectorAll("[data-image-id]"))
+                    .map(item => item.getAttribute("data-image-id"))
+                    .filter(Boolean);
+
+                existingGalleryIdsContainer.innerHTML = "";
+
+                imageIds.forEach((imageId, index) => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = `Form.ExistingGalleryImageIdsInOrder[${index}]`;
+                    input.value = imageId;
+                    existingGalleryIdsContainer.appendChild(input);
+                });
+
+                if (existingGalleryEmpty) {
+                    existingGalleryEmpty.hidden = imageIds.length > 0;
+                }
+            }
+
+            function getExistingGalleryImagesCount() {
+                if (!existingGalleryGrid) {
+                    return 0;
+                }
+
+                return existingGalleryGrid.querySelectorAll("[data-image-id]").length;
+            }
+
+            if (existingGalleryGrid) {
+                new Sortable(existingGalleryGrid, {
+                    animation: 150,
+                    ghostClass: "sortable-ghost",
+                    onSort: renderExistingGalleryHiddenInputs
+                });
+
+                existingGalleryGrid.addEventListener("click", function (event) {
+                    const removeButton = event.target.closest("[data-action='remove-existing-image']");
+                    if (!removeButton) {
+                        return;
+                    }
+
+                    const imageItem = removeButton.closest("[data-image-id]");
+                    if (imageItem) {
+                        imageItem.remove();
+                        renderExistingGalleryHiddenInputs();
+                    }
+                });
+            }
+
+            if (newGalleryImagesInput) {
+                newGalleryImagesInput.addEventListener("change", function () {
+                    const newFilesCount = newGalleryImagesInput.files ? newGalleryImagesInput.files.length : 0;
+                    const totalImagesCount = getExistingGalleryImagesCount() + newFilesCount;
+
+                    if (totalImagesCount > maxGalleryImages) {
+                        alert("Too many gallery images. Max 10 in total.");
+                        newGalleryImagesInput.value = "";
+                    }
+                });
+            }
+
+            if (form) {
+                form.addEventListener("submit", function () {
+                    renderExistingGalleryHiddenInputs();
+                });
+            }
+
+            renderExistingGalleryHiddenInputs();
+        })();
+    </script>
+
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+    </style>
+}

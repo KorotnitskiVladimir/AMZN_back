@@ -308,8 +308,10 @@ public class DataContext: DbContext
 
         modelBuilder.Entity<CartItem>()
             .HasOne(ci => ci.Product)
-            .WithMany();
-        
+            .WithMany()
+            .HasForeignKey(ci => ci.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Cart>()
             .HasOne(c => c.User)
             .WithMany()
