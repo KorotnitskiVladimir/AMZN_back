@@ -30,15 +30,15 @@ public class CloudStorageService : ICloudStorageService
         }
     }
 
-    public string SaveFile(IFormFile file)
+    public async Task<string> SaveImageAsync(IFormFile file, CancellationToken cancellationToken = default)
     {
         if (file == null) throw new ArgumentNullException(nameof(file));
         if (file.Length <= 0) throw new InvalidOperationException("File is empty");
 
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-        var blobName  = $"{Guid.NewGuid():N}{ext}";
+        var blobName = $"{Guid.NewGuid():N}{ext}";
 
-        var blob = _containerClient.GetBlobClient(blobName);
+        BlobClient blob = _containerClient.GetBlobClient(blobName);
 
         var contentType = file.ContentType;
 
@@ -59,39 +59,42 @@ public class CloudStorageService : ICloudStorageService
             HttpHeaders = new BlobHttpHeaders { ContentType = contentType }
         };
 
-        using var stream = file.OpenReadStream();
-        blob.Upload(stream, options);
+        await using Stream stream = file.OpenReadStream();
+        await blob.UploadAsync(stream, options, cancellationToken);
 
         return blob.Uri.AbsoluteUri;
     }
 
-    public Stream? GetFile(string fileName)
+    public async Task<Stream?> GetFileAsync(string fileName, CancellationToken cancellationToken = default)
     {
         BlobClient blob = _containerClient.GetBlobClient(fileName);
-        if (blob.Exists())
-        {
-            BlobDownloadInfo download = blob.Download();
-            return download.Content;
-        }
-        return null;
+
+        if (!await blob.ExistsAsync(cancellationToken))
+            return null;
+
+        BlobDownloadResult download = await blob.DownloadContentAsync(cancellationToken);
+        return download.Content.ToStream();
     }
 
-    public bool DeleteByUrl(string fileUrl)
+
+    public async Task<bool> DeleteFileByUrlAsync(string fileUrl, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(fileUrl))
             return false;
 
-        var blobName = ExtractBlobName(fileUrl);
-        return DeleteByName(blobName);
+        string blobName = ExtractBlobName(fileUrl);
+        return await DeleteFileByNameAsync(blobName, cancellationToken);
     }
 
-    public bool DeleteByName(string blobName)
+    public async Task<bool> DeleteFileByNameAsync(string blobName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(blobName))
             return false;
 
-        var blob = _containerClient.GetBlobClient(blobName);
-        return blob.DeleteIfExists();
+        BlobClient blob = _containerClient.GetBlobClient(blobName);
+        Response<bool> result = await blob.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+
+        return result.Value;
     }
 
     // Из blob url достает имя файла (последний сегмент пути)

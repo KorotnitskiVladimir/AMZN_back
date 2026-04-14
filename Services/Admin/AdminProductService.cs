@@ -4,7 +4,6 @@ using AMZN.Repositories.Brands;
 using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Services.Storage.Cloud;
-using AMZN.Shared.Transactions;
 
 namespace AMZN.Services.Admin
 {
@@ -69,7 +68,7 @@ namespace AMZN.Services.Admin
 
             try
             {
-                primaryUrl = _cloud.SaveFile(primaryFile);
+                primaryUrl = await _cloud.SaveImageAsync(primaryFile);
 
                 // Галерея Продукта (до 10 img)  // sort - их очерёдность
                 if (form.Images != null && form.Images.Count > 0)
@@ -79,7 +78,7 @@ namespace AMZN.Services.Admin
                         if (file == null || file.Length == 0) continue;
                         if (galleryUrls.Count >= ProductCreateFormModel.MaxGalleryImages) break;
 
-                        string url = _cloud.SaveFile(file);
+                        string url = await _cloud.SaveImageAsync(file);
                         galleryUrls.Add(url);
                     }
                 }
@@ -121,8 +120,8 @@ namespace AMZN.Services.Admin
             catch
             {
                 // не оставляем мусорные картинки в blob
-                DeleteBlobFileBestEffort(primaryUrl);
-                DeleteBlobFilesBestEffort(galleryUrls);
+                await DeleteBlobFileBestEffortAsync(primaryUrl);
+                await DeleteBlobFilesBestEffortAsync(galleryUrls);
                 throw;
             }
         }
@@ -278,14 +277,14 @@ namespace AMZN.Services.Admin
             {
                 if (form.NewPrimaryImage != null)
                 {
-                    newPrimaryImageUrl = _cloud.SaveFile(form.NewPrimaryImage);
+                    newPrimaryImageUrl = await _cloud.SaveImageAsync(form.NewPrimaryImage);
                     oldPrimaryImageUrl = product.PrimaryImageUrl;
                     product.PrimaryImageUrl = newPrimaryImageUrl;
                 }
 
                 foreach (IFormFile file in newGalleryImageFiles)
                 {
-                    string newGalleryImageUrl = _cloud.SaveFile(file);
+                    string newGalleryImageUrl = await _cloud.SaveImageAsync(file);
                     newGalleryImageUrls.Add(newGalleryImageUrl);
                 }
 
@@ -330,13 +329,13 @@ namespace AMZN.Services.Admin
             }
             catch
             {
-                DeleteBlobFileBestEffort(newPrimaryImageUrl);
-                DeleteBlobFilesBestEffort(newGalleryImageUrls);
+                await DeleteBlobFileBestEffortAsync(newPrimaryImageUrl);
+                await DeleteBlobFilesBestEffortAsync(newGalleryImageUrls);
                 throw;
             }
 
-            DeleteBlobFileBestEffort(oldPrimaryImageUrl);
-            DeleteBlobFilesBestEffort(deletedExistingImageUrls);
+            await DeleteBlobFileBestEffortAsync(oldPrimaryImageUrl);
+            await DeleteBlobFilesBestEffortAsync(deletedExistingImageUrls);
         }
 
 
@@ -354,7 +353,7 @@ namespace AMZN.Services.Admin
             _products.Remove(product);
             await _products.SaveChangesAsync();
 
-            DeleteBlobFilesBestEffort(blobUrlsToDelete);
+            await DeleteBlobFilesBestEffortAsync(blobUrlsToDelete);
         }
 
 
@@ -388,14 +387,14 @@ namespace AMZN.Services.Admin
         }
 
 
-        private void DeleteBlobFileBestEffort(string? fileUrl)
+        private async Task DeleteBlobFileBestEffortAsync(string? fileUrl)
         {
             if (string.IsNullOrWhiteSpace(fileUrl))
                 return;
 
             try
             {
-                _cloud.DeleteByUrl(fileUrl);
+                await _cloud.DeleteFileByUrlAsync(fileUrl);
             }
             catch (Exception ex)
             {
@@ -404,10 +403,10 @@ namespace AMZN.Services.Admin
         }
 
 
-        private void DeleteBlobFilesBestEffort(IEnumerable<string> fileUrls)
+        private async Task DeleteBlobFilesBestEffortAsync(IEnumerable<string> fileUrls)
         {
             foreach (string fileUrl in fileUrls.Distinct())
-                DeleteBlobFileBestEffort(fileUrl);
+                await DeleteBlobFileBestEffortAsync(fileUrl);
         }
     }
 }

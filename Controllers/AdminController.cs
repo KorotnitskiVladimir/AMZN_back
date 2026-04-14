@@ -95,14 +95,14 @@ public class AdminController : Controller
     }
     
     [HttpPost]
-    public JsonResult AddCategory(CategoryFormModel? model)
+    public async Task<JsonResult> AddCategory(CategoryFormModel? model)
     {
         if (model == null)
         {
             return Json(new { success = false, message = "Form model is null" });
         }
 
-        (bool success, object message) = _adminCategoryService.AddCategory(model);
+        (bool success, object message) = await _adminCategoryService.AddCategoryAsync(model);
         return Json(new { success, message });
     }
 
