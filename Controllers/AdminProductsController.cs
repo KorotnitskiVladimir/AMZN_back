@@ -44,7 +44,7 @@ namespace AMZN.Controllers
         [HttpPost("Create")]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductCreateFormModel form)
+        public async Task<IActionResult> Create(ProductCreateFormModel form, CancellationToken cancellationToken)
         {
             Guid? sellerId = User.GetUserIdOrNull();
             if (sellerId == null)
@@ -58,7 +58,7 @@ namespace AMZN.Controllers
 
             try
             {
-                Guid productId = await _adminProductService.CreateAsync(form, sellerId.Value);
+                Guid productId = await _adminProductService.CreateAsync(form, sellerId.Value, cancellationToken);
 
                 TempData["Success"] = "Product created";
                 return RedirectToAction(nameof(Index));
@@ -94,7 +94,7 @@ namespace AMZN.Controllers
         [HttpPost("Edit/{id:guid}")]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, ProductEditFormModel form)
+        public async Task<IActionResult> Edit(Guid id, ProductEditFormModel form, CancellationToken cancellationToken)
         {
             Guid? sellerId = User.GetUserIdOrNull();
             if (sellerId == null)
@@ -116,7 +116,7 @@ namespace AMZN.Controllers
 
             try
             {
-                await _adminProductService.UpdateAsync(id, form, sellerId.Value);
+                await _adminProductService.UpdateAsync(id, form, sellerId.Value, cancellationToken);
 
                 TempData["Success"] = "Product updated";
                 return RedirectToAction(nameof(Edit), new { id });
@@ -140,7 +140,7 @@ namespace AMZN.Controllers
         [HttpPost("Delete/{id:guid}")]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             Guid? sellerId = User.GetUserIdOrNull();
             if (sellerId == null)
@@ -148,7 +148,7 @@ namespace AMZN.Controllers
 
             try
             {
-                await _adminProductService.DeleteAsync(id, sellerId.Value);
+                await _adminProductService.DeleteAsync(id, sellerId.Value, cancellationToken);
                 TempData["Success"] = "Product deleted";
             }
             catch (InvalidOperationException ex)

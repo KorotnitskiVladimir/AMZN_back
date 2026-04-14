@@ -45,7 +45,7 @@ namespace AMZN.Services.Admin
         }
 
 
-        public async Task<Guid> CreateAsync(ProductCreateFormModel form, Guid sellerId)
+        public async Task<Guid> CreateAsync(ProductCreateFormModel form, Guid sellerId, CancellationToken cancellationToken = default)
         {
             Guid categoryId = form.CategoryId ?? throw new InvalidOperationException("Category is required");
             Guid brandId = form.BrandId ?? throw new InvalidOperationException("Brand is required");
@@ -68,7 +68,7 @@ namespace AMZN.Services.Admin
 
             try
             {
-                primaryUrl = await _cloud.SaveImageAsync(primaryFile);
+                primaryUrl = await _cloud.SaveImageAsync(primaryFile, cancellationToken);
 
                 // Галерея Продукта (до 10 img)  // sort - их очерёдность
                 if (form.Images != null && form.Images.Count > 0)
@@ -78,7 +78,7 @@ namespace AMZN.Services.Admin
                         if (file == null || file.Length == 0) continue;
                         if (galleryUrls.Count >= ProductCreateFormModel.MaxGalleryImages) break;
 
-                        string url = await _cloud.SaveImageAsync(file);
+                        string url = await _cloud.SaveImageAsync(file, cancellationToken);
                         galleryUrls.Add(url);
                     }
                 }
@@ -113,15 +113,15 @@ namespace AMZN.Services.Admin
                 }
 
                 _products.Add(product);
-                await _products.SaveChangesAsync();
+                await _products.SaveChangesAsync(cancellationToken);
 
                 return product.Id;
             }
             catch
             {
                 // не оставляем мусорные картинки в blob
-                await DeleteBlobFileBestEffortAsync(primaryUrl);
-                await DeleteBlobFilesBestEffortAsync(galleryUrls);
+                await DeleteBlobFileBestEffortAsync(primaryUrl, CancellationToken.None);
+                await DeleteBlobFilesBestEffortAsync(galleryUrls, CancellationToken.None);
                 throw;
             }
         }
@@ -194,7 +194,7 @@ namespace AMZN.Services.Admin
         }
 
 
-        public async Task UpdateAsync(Guid productId, ProductEditFormModel form, Guid sellerId)
+        public async Task UpdateAsync(Guid productId, ProductEditFormModel form, Guid sellerId, CancellationToken cancellationToken = default)
         {
             Product product = await _products.GetByIdWithImagesAsync(productId)
                 ?? throw new InvalidOperationException("Product not found");
@@ -277,14 +277,14 @@ namespace AMZN.Services.Admin
             {
                 if (form.NewPrimaryImage != null)
                 {
-                    newPrimaryImageUrl = await _cloud.SaveImageAsync(form.NewPrimaryImage);
+                    newPrimaryImageUrl = await _cloud.SaveImageAsync(form.NewPrimaryImage, cancellationToken);
                     oldPrimaryImageUrl = product.PrimaryImageUrl;
                     product.PrimaryImageUrl = newPrimaryImageUrl;
                 }
 
                 foreach (IFormFile file in newGalleryImageFiles)
                 {
-                    string newGalleryImageUrl = await _cloud.SaveImageAsync(file);
+                    string newGalleryImageUrl = await _cloud.SaveImageAsync(file, cancellationToken);
                     newGalleryImageUrls.Add(newGalleryImageUrl);
                 }
 
@@ -325,21 +325,21 @@ namespace AMZN.Services.Admin
                 if (newProductImages.Count > 0)
                     _products.AddProductImages(newProductImages);
 
-                await _products.SaveChangesAsync();
+                await _products.SaveChangesAsync(cancellationToken);
             }
             catch
             {
-                await DeleteBlobFileBestEffortAsync(newPrimaryImageUrl);
-                await DeleteBlobFilesBestEffortAsync(newGalleryImageUrls);
+                await DeleteBlobFileBestEffortAsync(newPrimaryImageUrl, CancellationToken.None);
+                await DeleteBlobFilesBestEffortAsync(newGalleryImageUrls, CancellationToken.None);
                 throw;
             }
 
-            await DeleteBlobFileBestEffortAsync(oldPrimaryImageUrl);
-            await DeleteBlobFilesBestEffortAsync(deletedExistingImageUrls);
+            await DeleteBlobFileBestEffortAsync(oldPrimaryImageUrl, CancellationToken.None);
+            await DeleteBlobFilesBestEffortAsync(deletedExistingImageUrls, CancellationToken.None);
         }
 
 
-        public async Task DeleteAsync(Guid productId, Guid sellerId)
+        public async Task DeleteAsync(Guid productId, Guid sellerId, CancellationToken cancellationToken = default)
         {
             Product product = await _products.GetByIdWithImagesAsync(productId)
                 ?? throw new InvalidOperationException("Product not found");
@@ -351,9 +351,9 @@ namespace AMZN.Services.Admin
             blobUrlsToDelete.AddRange(product.Images.Select(x => x.Url));
 
             _products.Remove(product);
-            await _products.SaveChangesAsync();
+            await _products.SaveChangesAsync(cancellationToken);
 
-            await DeleteBlobFilesBestEffortAsync(blobUrlsToDelete);
+            await DeleteBlobFilesBestEffortAsync(blobUrlsToDelete, CancellationToken.None);
         }
 
 
@@ -387,14 +387,18 @@ namespace AMZN.Services.Admin
         }
 
 
-        private async Task DeleteBlobFileBestEffortAsync(string? fileUrl)
+        private async Task DeleteBlobFileBestEffortAsync(string? fileUrl, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(fileUrl))
                 return;
 
             try
             {
-                await _cloud.DeleteFileByUrlAsync(fileUrl);
+                await _cloud.DeleteFileByUrlAsync(fileUrl, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -403,10 +407,10 @@ namespace AMZN.Services.Admin
         }
 
 
-        private async Task DeleteBlobFilesBestEffortAsync(IEnumerable<string> fileUrls)
+        private async Task DeleteBlobFilesBestEffortAsync(IEnumerable<string> fileUrls, CancellationToken cancellationToken)
         {
             foreach (string fileUrl in fileUrls.Distinct())
-                await DeleteBlobFileBestEffortAsync(fileUrl);
+                await DeleteBlobFileBestEffortAsync(fileUrl, cancellationToken);
         }
     }
 }
