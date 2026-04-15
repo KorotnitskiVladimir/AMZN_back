@@ -399,9 +399,10 @@ function initProductGalleryEditor(root) {
 
     if (allowExistingReorder && typeof Sortable !== "undefined" && existingGrid) {
         new Sortable(existingGrid, {
-            animation: 150,
+            animation: 180,
             draggable: ".js-pge-existing-item",
             ghostClass: "sortable-ghost",
+            chosenClass: "product-gallery-editor__card--chosen",
             onSort: renderExistingHiddenInputs
         });
     }
