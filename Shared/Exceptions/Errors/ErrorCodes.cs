@@ -37,6 +37,9 @@
 
         // Prudct Questions
         public const string ProductQuestionNotFound = "product.question.not_found";
+        
+        // Cart
+        public const string CartNotFound = "cart.not_found";
 
     }
 

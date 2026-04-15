@@ -37,4 +37,37 @@ public class CartController : ControllerBase
         CartResponseDto response = await _cartService.AddToCartAsync(userId, parsedId);
         return StatusCode(StatusCodes.Status200OK, response);
     }
+    
+    // POST api/cart/remove
+    [HttpPost("remove")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<CartResponseDto>> RemoveFromCart([FromRoute] string productId)
+    {
+        var userId = User.GetRequiredUserId();
+        if (string.IsNullOrEmpty(productId))
+        {
+            return BadRequest("Product id is required");
+        }
+
+
+        if (!Guid.TryParse(productId, out Guid parsedId))
+        {
+            return BadRequest("Product id is invalid");
+        }
+
+        CartResponseDto response = await _cartService.RemoveFromCartAsync(userId, parsedId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/cart/clear
+    [HttpPost("clear")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult> ClearCart()
+    {
+        var userId = User.GetRequiredUserId();
+        await _cartService.ClearCartAsync(userId);
+        return StatusCode(StatusCodes.Status200OK);
+    }
 }

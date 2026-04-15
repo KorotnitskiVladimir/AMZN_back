@@ -56,10 +56,10 @@ public class CartRepository : ICartRepository
     
     public Task RemoveCartItemAsync(CartItem cartItem)
     {
-        _dataContext.CartItems.Remove(cartItem);
         var cart = cartItem.Cart;
         cart.Items.Remove(cartItem);
         _dataContext.Carts.Update(cart);
+        _dataContext.CartItems.Remove(cartItem);
         return _dataContext.SaveChangesAsync();
     }
     
@@ -84,4 +84,10 @@ public class CartRepository : ICartRepository
         _dataContext.CartItems.Update(cartItem);
         await _dataContext.SaveChangesAsync();
     }
+    
+    public async Task<CartItem?> GetCartItemAsync(Guid productId, Guid cartId)
+    {
+        return await _dataContext.CartItems.FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
+    }
+    
 }

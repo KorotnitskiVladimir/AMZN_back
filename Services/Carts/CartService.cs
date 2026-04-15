@@ -46,7 +46,6 @@ public class CartService
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 User = user,
-                IsActive = true,
                 Items = new List<CartItem>()
             };
             await _cartRepository.AddCartAsync(cart);
@@ -61,7 +60,7 @@ public class CartService
             };
             await _cartRepository.AddCartItemAsync(cartItem);
         }
-        if (cart.IsActive)
+        else
         {
             if (await _cartRepository.IsCartEmptyAsync(cart.Id))
             {
@@ -98,6 +97,83 @@ public class CartService
         {
             products.Add(ci.Product);
         }
+        return new CartResponseDto()
+        {
+            Cart = cart,
+            Products = products
+        };
+    }
+
+    public async Task<CartResponseDto> RemoveFromCartAsync(Guid userId, Guid productId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        if (cart == null)
+        {
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
+        }
+        
+        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        if (item == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+
+        await _cartRepository.RemoveCartItemAsync(item);
+        
+        List<Product> products = new List<Product>();
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        {
+            foreach (var ci in cart.Items)
+            {
+                products.Add(ci.Product);
+            }
+        }
+
+        return new CartResponseDto()
+        {
+            Cart = cart,
+            Products = products
+        };
+    }
+
+    public async Task<CartResponseDto> ClearCartAsync(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        if (cart == null)
+        {
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
+        }
+
+        if (await _cartRepository.IsCartEmptyAsync(cart.Id))
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Cart is empty", StatusCodes.Status404NotFound);
+        }
+
+        foreach (var ci in cart.Items)
+        {
+            await _cartRepository.RemoveCartItemAsync(ci);
+        }
+        
+        List<Product> products = new List<Product>();
+        
         return new CartResponseDto()
         {
             Cart = cart,
