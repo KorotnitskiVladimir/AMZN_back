@@ -26,7 +26,10 @@ public class HomeController : Controller
         if (code == 403)
             return View("Forbidden");
 
-        return View("Error");
+        return View("Error", new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        });
     }
 
 

@@ -2,74 +2,107 @@
 
 @{
     ViewData["Title"] = "My products";
+
+    string? successMessage = TempData["Success"] as string;
+    string? errorMessage = TempData["Error"] as string;
 }
 
-<div class="text-center">
-    <h1 class="display-4">My products</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-products.css" asp-append-version="true" />
+}
+
+<div class="admin-products-page">
+    <div class="admin-products-header">
+        <div>
+            <h1 class="admin-products-title">My products</h1>
+            <p class="admin-products-subtitle">
+                Manage your products, update media and keep stock information up to date.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="admin-btn admin-btn-primary">Add product</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="admin-alert admin-alert-success" role="alert">@successMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="admin-alert admin-alert-danger" role="alert">@errorMessage</div>
+    }
+
+    @if (Model.Products.Count == 0)
+    {
+        <div class="admin-empty-card">
+            <h2 class="admin-empty-title">No products yet</h2>
+            <p class="admin-empty-text">
+                Start by creating your first product.
+            </p>
+
+            <div class="admin-page-actions justify-content-center">
+                <a asp-action="Create" class="admin-btn admin-btn-primary">Create product</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="admin-list-card">
+            <div class="admin-products-table-wrap">
+                <table class="admin-products-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Created</th>
+                            <th style="width: 190px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.Products)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@product.PrimaryImageUrl"
+                                         alt="@product.Title"
+                                         class="admin-product-thumb" />
+                                </td>
+                                <td class="admin-product-title-cell">@product.Title</td>
+                                <td>@product.CurrentPrice.ToString("F2")</td>
+                                <td>@product.StockQuantity</td>
+                                <td>@product.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <div class="admin-inline-actions">
+                                        <a asp-action="Edit"
+                                           asp-route-id="@product.Id"
+                                           class="admin-btn admin-btn-warning admin-btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <button type="button"
+                                                class="admin-btn admin-btn-danger admin-btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#adminDeleteConfirmModal"
+                                                data-delete-url="@Url.Action("Delete", "AdminProducts", new { id = product.Id })"
+                                                data-product-title="@product.Title">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success" role="alert">@TempData["Success"]</div>
-}
+<partial name="_DeleteConfirmModal" />
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
-}
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">Add product</a>
-</p>
-
-@if (Model.Products.Count == 0)
-{
-    <p>No products yet.</p>
-}
-else
-{
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Title</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Created</th>
-                <th style="width: 180px;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in Model.Products)
-            {
-                <tr>
-                    <td>
-                        <img src="@product.PrimaryImageUrl"
-                             alt="@product.Title"
-                             style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />
-                    </td>
-                    <td>@product.Title</td>
-                    <td>@product.CurrentPrice.ToString("F2")</td>
-                    <td>@product.StockQuantity</td>
-                    <td>@product.CreatedAt.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        <a asp-action="Edit"
-                           asp-route-id="@product.Id"
-                           class="btn btn-sm btn-warning">
-                            Edit
-                        </a>
-
-                        <form asp-action="Delete"
-                              asp-route-id="@product.Id"
-                              method="post"
-                              style="display:inline"
-                              onsubmit="return confirm('Delete this product permanently?');">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+@section Scripts {
+    <script src="~/js/admin-products.js" asp-append-version="true"></script>
 }

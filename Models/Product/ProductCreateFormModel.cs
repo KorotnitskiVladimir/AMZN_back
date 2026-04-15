@@ -9,7 +9,7 @@ namespace AMZN.Models.Product
         private const int TitleMaxLength = 256;
         private const int DescriptionMaxLength = 4000;
 
-        private const string PriceMin = "0";
+        private const string PriceMin = "1";
         private const string PriceMax = "999999999";    
 
         private const long MaxImageBytes = 5 * 1024 * 1024;     // 5MB
@@ -35,11 +35,11 @@ namespace AMZN.Models.Product
         public Guid? CategoryId { get; set; }
 
 
-        [Range(typeof(decimal), PriceMin, PriceMax, ErrorMessage = "CurrentPrice must be between 0 and 999999999")]
+        [Range(typeof(decimal), PriceMin, PriceMax, ErrorMessage = "CurrentPrice must be between {1} and {2}")]
         public decimal CurrentPrice { get; set; }
 
 
-        [Range(typeof(decimal), PriceMin, PriceMax, ErrorMessage = "OriginalPrice must be between 0 and 999999999")]
+        [Range(typeof(decimal), PriceMin, PriceMax, ErrorMessage = "OriginalPrice must be between {1} and {2}")]
         public decimal? OriginalPrice { get; set; }
 
 

@@ -52,6 +52,8 @@ namespace AMZN.Controllers
 
             if (!ModelState.IsValid)
             {
+                TempData.Remove("Success");
+
                 ProductCreateViewModel vmInvalid = await _adminProductService.BuildCreateVmAsync(form);
                 return View(vmInvalid);
             }
@@ -65,6 +67,8 @@ namespace AMZN.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                TempData.Remove("Success");
+
                 ProductCreateViewModel vmError = await _adminProductService.BuildCreateVmAsync(form, ex.Message);
                 return View(vmError);
             }
@@ -102,6 +106,8 @@ namespace AMZN.Controllers
 
             if (!ModelState.IsValid)
             {
+                TempData.Remove("Success");
+
                 try
                 {
                     ProductEditViewModel vmInvalid = await _adminProductService.BuildProductEditVmAsync(id, sellerId.Value, form);
@@ -123,6 +129,8 @@ namespace AMZN.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                TempData.Remove("Success");
+
                 try
                 {
                     ProductEditViewModel vmError = await _adminProductService.BuildProductEditVmAsync(id, sellerId.Value, form, ex.Message);

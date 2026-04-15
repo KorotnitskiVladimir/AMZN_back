@@ -7,7 +7,10 @@
      data-existing-ids-field-prefix="@Model.ExistingIdsFieldPrefix"
      data-is-edit-mode="@Model.IsEditMode.ToString().ToLowerInvariant()">
 
-    <label class="form-label d-block">@Model.Title</label>
+    <div class="product-gallery-editor__topbar">
+        <label class="form-label mb-0">@Model.Title</label>
+        <div class="product-gallery-editor__count text-muted small js-pge-count" hidden></div>
+    </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3 js-pge-toast-container"
          style="z-index: 1080;">
@@ -63,24 +66,29 @@
         {
             <div class="product-gallery-editor__section js-pge-existing-section">
                 <div class="product-gallery-editor__section-header">
-                    <div class="product-gallery-editor__section-title">Existing images</div>
-                    <div class="product-gallery-editor__section-hint">Drag to reorder</div>
+                    <div>
+                        <div class="product-gallery-editor__section-title">Existing images</div>
+                        <div class="product-gallery-editor__section-hint">Drag to reorder</div>
+                    </div>
                 </div>
 
                 <div class="product-gallery-editor__grid js-pge-existing-grid">
                     @foreach (var image in Model.ExistingImages)
                     {
                         <div class="product-gallery-editor__card product-gallery-editor__card--image js-pge-existing-item position-relative"
-                             data-image-id="@image.Id">
+                             data-image-id="@image.Id"
+                             title="Drag to reorder">
+
                             <button type="button"
-                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 product-gallery-editor__remove-btn js-pge-remove-existing"
-                                    title="Remove image">
-                                &times;
+                                    class="product-gallery-editor__remove-btn js-pge-remove-existing"
+                                    title="Remove image"
+                                    aria-label="Remove image">
+                                ×
                             </button>
 
                             <img src="@image.Url"
                                  alt=""
-                                 class="product-gallery-editor__thumb product-gallery-editor__thumb--sortable" />
+                                 class="product-gallery-editor__thumb" />
                         </div>
                     }
                 </div>
@@ -89,26 +97,30 @@
 
         <div class="product-gallery-editor__section js-pge-new-section">
             <div class="product-gallery-editor__section-header">
-                <div class="product-gallery-editor__section-title">
-                    @(Model.IsEditMode ? "New images" : "Selected images")
-                </div>
-                <div class="product-gallery-editor__section-hint">
-                    @if (Model.IsEditMode)
-                    {
-                        <text>Not sortable. They will be added after existing images when you save.</text>
-                    }
-                    else
-                    {
-                        <text>These images will be uploaded when you save.</text>
-                    }
+                <div>
+                    <div class="product-gallery-editor__section-title">
+                        @(Model.IsEditMode ? "New images" : "Selected images")
+                    </div>
+                    <div class="product-gallery-editor__section-hint">
+                        @if (Model.IsEditMode)
+                        {
+                            <text>Not sortable. They will be added after existing images when you save.</text>
+                        }
+                        else
+                        {
+                            <text>These images will be uploaded when you save.</text>
+                        }
+                    </div>
                 </div>
             </div>
 
             <div class="product-gallery-editor__grid js-pge-new-grid">
                 <button type="button"
                         class="product-gallery-editor__card product-gallery-editor__add-card js-pge-add-card">
-                    <span class="product-gallery-editor__add-icon">+</span>
-                    <span>Add images</span>
+                    <span class="product-gallery-editor__add-icon-wrap">
+                        <span class="product-gallery-editor__add-icon">+</span>
+                    </span>
+                    <span class="product-gallery-editor__add-text">Add images</span>
                 </button>
             </div>
         </div>
@@ -120,6 +132,4 @@
               data-valmsg-for="@Model.ValidationMessageFieldName"
               data-valmsg-replace="true"></span>
     }
-
-    <div class="text-muted small mt-2 js-pge-count" hidden></div>
 </div>
