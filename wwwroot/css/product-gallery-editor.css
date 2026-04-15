@@ -1,0 +1,128 @@
+﻿.sortable-ghost {
+    opacity: 0.4;
+}
+
+.product-gallery-editor__drop-zone {
+    border: 2px dashed #9ec5fe;
+    border-radius: 14px;
+    padding: 24px;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.product-gallery-editor__drop-zone--over {
+    border-color: #0d6efd;
+    background-color: #eef5ff;
+}
+
+.product-gallery-editor__prompt {
+    text-align: center;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #dee2e6;
+    cursor: pointer;
+    user-select: none;
+}
+
+.product-gallery-editor__icon {
+    line-height: 1;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.product-gallery-editor__title {
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+.product-gallery-editor__browse {
+    margin-top: 4px;
+}
+
+.product-gallery-editor__hint {
+    margin-top: 6px;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.product-gallery-editor__section + .product-gallery-editor__section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed #dee2e6;
+}
+
+.product-gallery-editor__section-header {
+    margin-bottom: 12px;
+}
+
+.product-gallery-editor__section-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.product-gallery-editor__section-hint {
+    margin-top: 2px;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.product-gallery-editor__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.product-gallery-editor__card {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.product-gallery-editor__thumb {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    display: block;
+}
+
+.product-gallery-editor__thumb--sortable {
+    cursor: grab;
+}
+
+.product-gallery-editor__add-card {
+    height: 120px;
+    border: 1px dashed #ced4da;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+    .product-gallery-editor__add-card:hover {
+        border-color: #86b7fe;
+        background-color: #eef5ff;
+        color: #0d6efd;
+    }
+
+.product-gallery-editor__add-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.product-gallery-editor__remove-btn {
+    z-index: 2;
+    line-height: 1;
+    padding: 0.15rem 0.45rem;
+}
+
+.product-gallery-editor__file-name {
+    max-width: 120px;
+}
