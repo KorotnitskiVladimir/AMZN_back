@@ -18,7 +18,6 @@
     <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
 }
 
-
 <form asp-action="Create" asp-controller="AdminProducts" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
@@ -56,7 +55,7 @@
 
     <div class="mb-3">
         <label class="form-label">Description</label>
-        <textarea asp-for="Form.Description" class="form-control"></textarea>
+        <textarea asp-for="Form.Description" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Form.Description" class="text-danger"></span>
     </div>
 
@@ -84,31 +83,22 @@
         <span asp-validation-for="Form.PrimaryImage" class="text-danger"></span>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Gallery images (max 10)</label>
-        <input asp-for="Form.Images" class="form-control" type="file" multiple accept=".jpg,.jpeg,.png,.webp" />
-        <span asp-validation-for="Form.Images" class="text-danger"></span>
-    </div>
+    @await Html.PartialAsync("_ProductGalleryEditor", new AMZN.Models.Product.ProductGalleryEditorViewModel
+    {
+        Title = "Gallery images",
+        NewFilesInputName = "Form.Images",
+        ValidationMessageFieldName = "Form.Images",
+        ExistingImages = new List<AMZN.Models.Product.ExistingProductImageViewModel>(),
+        MaxGalleryImages = AMZN.Models.Product.ProductCreateFormModel.MaxGalleryImages,
+        AllowExistingReorder = false,
+        IsEditMode = false
+        })
 
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Index" class="btn btn-secondary ms-2">Back to my products</a>
-
 </form>
-
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Ограничение на 10 img's для удобства,сервер все равно проверит
-        const input = document.querySelector('input[name="Form.Images"]');
-        if (input) {
-            input.addEventListener('change', () => {
-                if (input.files && input.files.length > 10) {
-                    alert("Too many files. Max 10.");
-                    input.value = "";
-                }
-            });
-        }
-    </script>
+    <script src="~/js/product-gallery-editor.js" asp-append-version="true"></script>
 }
