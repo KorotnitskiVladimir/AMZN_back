@@ -180,4 +180,127 @@ public class CartService
             Products = products
         };
     }
+    
+    public async Task<CartResponseDto> GetCartAsync(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        if (cart == null)
+        {
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
+        }
+        
+        List<Product> products = new List<Product>();
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        {
+            foreach (var ci in cart.Items)
+            {
+                products.Add(ci.Product);
+            }
+        }
+        
+        return new CartResponseDto()
+        {
+            Cart = cart,
+            Products = products
+        };       
+    }
+
+    public async Task<CartResponseDto> IncreaseQuantityAsync(Guid userId, Guid productId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        if (cart == null)
+        {
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
+        }
+        
+        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        if (item == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+        
+        item.Quantity++;
+        await _cartRepository.UpdateCartItemAsync(item);
+        
+        List<Product> products = new List<Product>();
+        foreach (var ci in cart.Items)
+            products.Add(ci.Product);
+        
+        return new CartResponseDto()
+        {
+            Cart = cart,
+            Products = products
+        };       
+    }
+
+    public async Task<CartResponseDto> DecreaseQuantityAsync(Guid userId, Guid productId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        if (cart == null)
+        {
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
+        }
+        
+        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        if (item == null)
+        {
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+        }
+        
+        item.Quantity--;
+        if (item.Quantity <= 0)
+        {
+            await _cartRepository.RemoveCartItemAsync(item);
+        }
+        else
+        {
+            await _cartRepository.UpdateCartItemAsync(item);
+        }
+        
+        List<Product> products = new List<Product>();
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        {
+            foreach (var ci in cart.Items)
+            {
+                products.Add(ci.Product);
+            }
+        }
+
+        return new CartResponseDto()
+        {
+            Cart = cart,
+            Products = products
+        };
+    }
+    
 }

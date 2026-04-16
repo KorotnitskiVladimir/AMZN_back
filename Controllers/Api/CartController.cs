@@ -64,10 +64,63 @@ public class CartController : ControllerBase
     [HttpPost("clear")]
     [Authorize]
     [EnableRateLimiting("Auth")]
-    public async Task<ActionResult> ClearCart()
+    public async Task<ActionResult<CartResponseDto>> ClearCart()
     {
         var userId = User.GetRequiredUserId();
-        await _cartService.ClearCartAsync(userId);
-        return StatusCode(StatusCodes.Status200OK);
+        CartResponseDto response = await _cartService.ClearCartAsync(userId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/cart/get
+    [HttpPost("get")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<CartResponseDto>> GetCart()
+    {
+        var userId = User.GetRequiredUserId();
+        CartResponseDto response = await _cartService.GetCartAsync(userId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/cart/increaseQuantity
+    [HttpPost("increaseQuantity")]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<CartResponseDto>> IncreaseQuantity([FromRoute] string productId)
+    {
+        var userId = User.GetRequiredUserId();
+        if (string.IsNullOrEmpty(productId))
+        {
+            return BadRequest("Product id is required");
+        }
+        
+        if (!Guid.TryParse(productId, out Guid parsedId))
+        {
+            return BadRequest("Product id is invalid");
+        }
+        
+        CartResponseDto response = await _cartService.IncreaseQuantityAsync(userId, parsedId);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST / api/cart/decreaseQuantity
+    [HttpPost]
+    [Authorize]
+    [EnableRateLimiting("Auth")]
+    public async Task<ActionResult<CartResponseDto>> DecreaseQuantity([FromRoute] string productId)
+    {
+        var userId = User.GetRequiredUserId();
+        if (string.IsNullOrEmpty(productId))
+        {
+            return BadRequest("Product id is required");
+        }
+
+        if (!Guid.TryParse(productId, out Guid parsedId))
+        {
+            return BadRequest("Product id is invalid");
+        }
+        
+        CartResponseDto response = await _cartService.DecreaseQuantityAsync(userId, parsedId);
+        return StatusCode(StatusCodes.Status200OK, response);
     }
 }
