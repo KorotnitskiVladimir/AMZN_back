@@ -50,7 +50,7 @@ namespace AMZN.Controllers
             }
         }
 
-        [HttpPost("Delete")]
+        [HttpPost("Delete/{id:guid}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {

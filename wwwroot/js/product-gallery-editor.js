@@ -15,6 +15,7 @@ function initProductGalleryEditor(root) {
     const newFilesInput = root.querySelector(".js-pge-new-files-input");
     const existingIdsContainer = root.querySelector(".js-pge-existing-ids-container");
 
+    // settings для data-attributes
     const maxGalleryImages = Number(root.dataset.maxGalleryImages || "10");
     const maxFileBytes = Number(root.dataset.maxFileBytes || (5 * 1024 * 1024));
     const allowExistingReorder = root.dataset.allowExistingReorder === "true";
@@ -24,6 +25,7 @@ function initProductGalleryEditor(root) {
     const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
+    // runtime state
     let pendingNewFiles = [];
     let fileDragDepth = 0;
 
@@ -110,6 +112,7 @@ function initProductGalleryEditor(root) {
         toastContainer.innerHTML = "";
     }
 
+
     function hasAllowedExtension(fileName) {
         const normalizedFileName = (fileName || "").toLowerCase();
         return allowedExtensions.some(extension => normalizedFileName.endsWith(extension));
@@ -174,6 +177,7 @@ function initProductGalleryEditor(root) {
 
         newGrid.appendChild(addCard);
     }
+
 
     function updateState() {
         const existingCount = getExistingCount();
@@ -303,6 +307,7 @@ function initProductGalleryEditor(root) {
         updateState();
     }
 
+    // Open native file picker
     function openFilePicker() {
         if (!newFilesInput) {
             return;
@@ -317,6 +322,7 @@ function initProductGalleryEditor(root) {
         newFilesInput.click();
     }
 
+    // Add files from file picker or drag and drop
     function addFiles(fileList) {
         clearToasts();
 
@@ -389,6 +395,8 @@ function initProductGalleryEditor(root) {
         updateState();
     }
 
+
+    // Check that current drag event really contains files
     function isFileDragEvent(event) {
         if (!event.dataTransfer) {
             return false;
@@ -520,6 +528,7 @@ function initProductGalleryEditor(root) {
             }
         });
     }
+
 
     const form = root.closest("form");
     if (form) {

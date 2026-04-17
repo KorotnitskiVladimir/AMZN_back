@@ -1,4 +1,5 @@
-﻿@model AMZN.Models.Product.ProductEditViewModel
+@using AMZN.Models.Product
+@model ProductEditViewModel
 
 @{
     ViewData["Title"] = "Edit product";
@@ -10,38 +11,35 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/admin-products.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/product-management.css" asp-append-version="true" />
 }
 
-<div class="admin-products-page">
-    <div class="admin-products-header">
+<div class="management-page">
+    <div class="management-page__header">
         <div>
-            <h1 class="admin-products-title">Edit product</h1>
-            <p class="admin-products-subtitle">
+            <h1 class="management-page__title">Edit product</h1>
+            <p class="management-page__subtitle">
                 Update product details, stock, pricing and images.
             </p>
         </div>
 
-        <a asp-action="Index" class="admin-btn admin-btn-back">
-            <span class="admin-btn-back__icon" aria-hidden="true">←</span>
-            <span>Back to list</span>
+        <a asp-action="Index" class="back-link">
+            <span class="back-link__icon" aria-hidden="true">←</span>
+            <span>Back to products</span>
         </a>
-
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(successMessage))
-    {
-        <div class="admin-alert admin-alert-success" role="alert">@successMessage</div>
-    }
+    <partial name="_SuccessToast" model="successMessage" />
 
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        <div class="admin-alert admin-alert-danger" role="alert">@Model.ErrorMessage</div>
+        <div class="alert-box alert-box--danger" role="alert">@Model.ErrorMessage</div>
     }
 
     @if (hasModelErrors)
     {
-        <div asp-validation-summary="All" class="admin-validation-summary"></div>
+        <div asp-validation-summary="All" class="validation-summary"></div>
     }
 
     <form id="edit-product-form"
@@ -51,22 +49,22 @@
           enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
-        <div class="admin-products-layout">
-            <section class="admin-card">
-                <h2 class="admin-card-title">Basic info</h2>
-                <p class="admin-card-description">
+        <div class="products-layout">
+            <section class="panel">
+                <h2 class="panel__title">Basic info</h2>
+                <p class="panel__description">
                     Product name, category, brand and description.
                 </p>
 
-                <div class="admin-form-grid">
-                    <div class="admin-field">
+                <div class="form-grid">
+                    <div class="field-group">
                         <label asp-for="Form.Title" class="form-label">Title</label>
                         <input asp-for="Form.Title" class="form-control" />
                         <span asp-validation-for="Form.Title" class="text-danger"></span>
                     </div>
 
-                    <div class="admin-form-grid admin-form-grid-2">
-                        <div class="admin-field">
+                    <div class="form-grid form-grid--2">
+                        <div class="field-group">
                             <label asp-for="Form.CategoryId" class="form-label">Category</label>
                             <select asp-for="Form.CategoryId" class="form-select">
                                 <option value="">-- select --</option>
@@ -78,7 +76,7 @@
                             <span asp-validation-for="Form.CategoryId" class="text-danger"></span>
                         </div>
 
-                        <div class="admin-field">
+                        <div class="field-group">
                             <label asp-for="Form.BrandId" class="form-label">Brand</label>
                             <select asp-for="Form.BrandId" class="form-select">
                                 <option value="">-- select --</option>
@@ -91,7 +89,7 @@
                         </div>
                     </div>
 
-                    <div class="admin-field">
+                    <div class="field-group">
                         <label asp-for="Form.Description" class="form-label">Description</label>
                         <textarea asp-for="Form.Description" class="form-control" rows="5"></textarea>
                         <span asp-validation-for="Form.Description" class="text-danger"></span>
@@ -99,26 +97,26 @@
                 </div>
             </section>
 
-            <section class="admin-card">
-                <h2 class="admin-card-title">Pricing and stock</h2>
-                <p class="admin-card-description">
+            <section class="panel">
+                <h2 class="panel__title">Pricing and stock</h2>
+                <p class="panel__description">
                     Update quantity and price values visible to customers.
                 </p>
 
-                <div class="admin-form-grid admin-form-grid-3">
-                    <div class="admin-field">
+                <div class="form-grid form-grid--3">
+                    <div class="field-group">
                         <label asp-for="Form.StockQuantity" class="form-label">Stock quantity</label>
                         <input asp-for="Form.StockQuantity" class="form-control" type="number" step="1" />
                         <span asp-validation-for="Form.StockQuantity" class="text-danger"></span>
                     </div>
 
-                    <div class="admin-field">
+                    <div class="field-group">
                         <label asp-for="Form.CurrentPrice" class="form-label">Current price</label>
                         <input asp-for="Form.CurrentPrice" class="form-control" type="number" step="0.01" />
                         <span asp-validation-for="Form.CurrentPrice" class="text-danger"></span>
                     </div>
 
-                    <div class="admin-field">
+                    <div class="field-group">
                         <label asp-for="Form.OriginalPrice" class="form-label">Original price</label>
                         <input asp-for="Form.OriginalPrice" class="form-control" type="number" step="0.01" />
                         <span asp-validation-for="Form.OriginalPrice" class="text-danger"></span>
@@ -126,23 +124,23 @@
                 </div>
             </section>
 
-            <section class="admin-card admin-card-full">
-                <h2 class="admin-card-title">Primary image</h2>
-                <p class="admin-card-description">
+            <section class="panel panel--full">
+                <h2 class="panel__title">Primary image</h2>
+                <p class="panel__description">
                     Replace the main product image only when you want to update it.
                 </p>
 
-                <div class="admin-primary-image">
+                <div class="primary-image-layout">
                     <img src="@Model.CurrentPrimaryImageUrl"
                          alt="Primary image"
-                         class="admin-primary-image-preview" />
+                         class="primary-image-preview" />
 
                     <div>
-                        <p class="admin-primary-image-note">
+                        <p class="primary-image-note">
                             Current primary image is shown on the left. Upload a new file to replace it.
                         </p>
 
-                        <div class="admin-field">
+                        <div class="field-group">
                             <label asp-for="Form.NewPrimaryImage" class="form-label">Replace primary image</label>
                             <input asp-for="Form.NewPrimaryImage"
                                    class="form-control"
@@ -154,27 +152,28 @@
                 </div>
             </section>
 
-            <section class="admin-card admin-card-full">
-                @await Html.PartialAsync("_ProductGalleryEditor", new AMZN.Models.Product.ProductGalleryEditorViewModel
+            <section class="panel panel--full">
+                @await Html.PartialAsync("_ProductGalleryEditor", new ProductGalleryEditorViewModel
                 {
                     Title = "Gallery images",
-                                NewFilesInputName = "Form.NewGalleryImages",
-                                ValidationMessageFieldName = "Form.NewGalleryImages",
-                                ExistingIdsFieldPrefix = "Form.ExistingGalleryImageIdsInOrder",
-                                ExistingImages = Model.ExistingGalleryImages,
-                                MaxGalleryImages = AMZN.Models.Product.ProductEditFormModel.MaxGalleryImages,
-                                AllowExistingReorder = true,
-                                IsEditMode = true
-                                })
+                    NewFilesInputName = "Form.NewGalleryImages",
+                    ValidationMessageFieldName = "Form.NewGalleryImages",
+                    ExistingIdsFieldPrefix = "Form.ExistingGalleryImageIdsInOrder",
+                    ExistingImages = Model.ExistingGalleryImages,
+                    MaxGalleryImages = ProductEditFormModel.MaxGalleryImages,
+                    AllowExistingReorder = true,
+                    IsEditMode = true
+                })
             </section>
         </div>
 
-        <div class="admin-page-actions">
-            <a asp-action="Index" class="admin-btn admin-btn-secondary">Cancel</a>
-            <button type="submit" class="admin-btn admin-btn-primary">Save changes</button>
+        <div class="action-bar">
+            <a asp-action="Index" class="action-button action-button--secondary">Cancel</a>
+            <button type="submit" class="action-button action-button--primary">Save changes</button>
         </div>
     </form>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

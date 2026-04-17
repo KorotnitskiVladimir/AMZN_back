@@ -4,7 +4,7 @@ namespace AMZN.Models.Brands
 {
     public class BrandCreateViewModel
     {
-        private const int NameMaxLength = 128;
+        private const int NameMaxLength = 64;
 
 
         [Required(ErrorMessage = "Name is required")]

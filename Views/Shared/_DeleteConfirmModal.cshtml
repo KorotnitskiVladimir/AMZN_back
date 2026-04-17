@@ -1,36 +1,42 @@
-﻿<div class="modal fade admin-delete-modal"
-     id="adminDeleteConfirmModal"
+﻿
+<div class="modal fade product-delete-modal"
+     id="deleteConfirmModal"
      tabindex="-1"
-     aria-labelledby="adminDeleteConfirmModalLabel"
+     aria-labelledby="deleteConfirmModalLabel"
      aria-hidden="true">
+
     <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title" id="adminDeleteConfirmModalLabel">Delete product</h5>
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Delete item</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
-                <p class="admin-delete-modal__text">
-                    Delete <strong class="js-admin-delete-product-title">this product</strong> permanently?
+                <p class="product-delete-modal__text">
+                    Delete <strong class="js-delete-entity-name">this item</strong> permanently?
                     This action cannot be undone.
                 </p>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                <button type="button"
+                        class="action-button action-button--secondary"
+                        data-bs-dismiss="modal">
                     Cancel
                 </button>
 
-                <form id="adminDeleteConfirmForm" method="post">
+                <form id="deleteConfirmForm" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="admin-btn admin-btn-danger">
+                    <button type="submit" class="action-button action-button--danger">
                         Delete
                     </button>
                 </form>
             </div>
 
         </div>
+
     </div>
 </div>

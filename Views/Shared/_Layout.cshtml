@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims
+@using System.Security.Claims
 @{
     bool isAuthorized = Context.Items.ContainsKey("auth");
     string? userName = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
@@ -8,101 +8,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AMZN</title>
+
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem("theme-mode");
+                var theme = (stored === "dark" || stored === "light")
+                    ? stored
+                    : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+                document.documentElement.setAttribute("data-bs-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-bs-theme", "light");
+            }
+        })();
+    </script>
+
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/AMZN.styles.css" asp-append-version="true"/>
-
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AMZN.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-gallery-editor.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+
     @await RenderSectionAsync("Styles", required: false)
-
 </head>
-<body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AMZN</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
+<body class="theme-scope">
+    <header>
+        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3 bg-body">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AMZN</a>
 
-                    <environment include="Development">
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+                            <a class="nav-link text-body" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                    </environment>
 
-                </ul>
-                @if (isAuthorized)
-                {
-                    <span class="auth-letter" data-auth-ua-id="@userId" title="@userName" style="margin: 0.5em">@firstLetter</span>
-                    <a class="nav-link text-dark" href="?logout" style="margin: 0.5em">Logout</a>
-                }
-                else
-                {
-                    <span class="nav-link text-dark" style="cursor: pointer" data-bs-toggle="modal"
-                          data-bs-target="#authModal">Sing In</span>
-                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="SignUp">Register</a>
-                }
+                        <environment include="Development">
+                            <li class="nav-item">
+                                <a class="nav-link text-body" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+                            </li>
+                        </environment>
+                    </ul>
+
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <button type="button"
+                                id="theme-toggle"
+                                class="btn btn-sm btn-outline-secondary"
+                                title="Dark theme"
+                                aria-label="Dark theme"
+                                aria-pressed="false">
+                            <i class="bi bi-sun-fill theme-icon-light"></i>
+                            <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
+                            <span class="theme-label ms-1">Dark theme</span>
+                        </button>
+
+                        @if (isAuthorized)
+                        {
+                            <span class="auth-letter" data-auth-ua-id="@userId" title="@userName" style="margin: 0.5em">@firstLetter</span>
+                            <a class="nav-link text-body" href="?logout" style="margin: 0.5em">Logout</a>
+                        }
+                        else
+                        {
+                            <span class="nav-link text-body"
+                                  style="cursor: pointer"
+                                  role="button"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#authModal">
+                                Sing In
+                            </span>
+
+                            <a class="nav-link text-body" asp-area="" asp-controller="Admin" asp-action="SignUp">Register</a>
+                        }
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
+        </nav>
+    </header>
 
-<footer class="border-top footer text-muted">
     <div class="container">
-        &copy; 2026 - AMZN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
-</footer>
-<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="authModalLabel">Sing In</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="auth-modal-form">
-                    <div class="mb-3">
-                        <span class="input-group-text" id="AuthLogin-addon"><i class="bi bi-box-arrow-in-right"></i></span>
-                        <input type="email" class="form-control" name="AuthEmail" placeholder="Email" 
-                               aria-label="AuthEmail" 
-                               aria-describedby="AuthEmail-addon">
-                    </div>
-                    <div class="mb-3">
-                        <span class="input-group-text" id="AuthPassword-addon"><i class="bi bi-box-arrow-in-right"></i></span>
-                        <input type="password" class="form-control" name="AuthPassword" placeholder="Password" 
-                               aria-label="AuthPassword" 
-                               aria-describedby="AuthPassword-addon">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <span id="message"></span>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dismiss</button>
-                <button type="submit" form="auth-modal-form" class="btn btn-primary">Enter</button>
+
+    <footer class="border-top footer text-body-secondary">
+        <div class="container">
+            &copy; 2026 - AMZN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="authModalLabel">Sing In</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="auth-modal-form">
+                        <div class="mb-3">
+                            <span class="input-group-text" id="AuthLogin-addon">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                            </span>
+                            <input type="email"
+                                   class="form-control"
+                                   name="AuthEmail"
+                                   placeholder="Email"
+                                   aria-label="AuthEmail"
+                                   aria-describedby="AuthEmail-addon">
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="input-group-text" id="AuthPassword-addon">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                            </span>
+                            <input type="password"
+                                   class="form-control"
+                                   name="AuthPassword"
+                                   placeholder="Password"
+                                   aria-label="AuthPassword"
+                                   aria-describedby="AuthPassword-addon">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <span id="message"></span>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dismiss</button>
+                    <button type="submit" form="auth-modal-form" class="btn btn-primary">Enter</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/theme-toggle.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
