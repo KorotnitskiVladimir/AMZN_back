@@ -1,0 +1,72 @@
+:root {
+    --panel-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    --modal-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+    --gallery-dropzone-border: #9ec5fe;
+    --gallery-dropzone-hover-bg: rgba(13, 110, 253, 0.06);
+    --gallery-thumb-border: #d7dee8;
+    --gallery-thumb-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    --gallery-thumb-shadow-hover: 0 12px 24px rgba(15, 23, 42, 0.10);
+
+    --back-link-bg: rgba(var(--bs-primary-rgb), 0.10);
+    --back-link-bg-hover: rgba(var(--bs-primary-rgb), 0.16);
+    --back-link-border: rgba(var(--bs-primary-rgb), 0.22);
+    --back-link-text: var(--bs-primary-text-emphasis);
+    --back-link-shadow: 0 6px 16px rgba(var(--bs-primary-rgb), 0.08);
+}
+
+html[data-bs-theme="dark"] {
+    --panel-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+    --modal-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+    --gallery-dropzone-border: #3b82f6;
+    --gallery-dropzone-hover-bg: rgba(59, 130, 246, 0.14);
+    --gallery-thumb-border: #334155;
+    --gallery-thumb-shadow: 0 10px 22px rgba(0, 0, 0, 0.30);
+    --gallery-thumb-shadow-hover: 0 14px 28px rgba(0, 0, 0, 0.38);
+
+    --back-link-bg: rgba(var(--bs-primary-rgb), 0.14);
+    --back-link-bg-hover: rgba(var(--bs-primary-rgb), 0.22);
+    --back-link-border: rgba(var(--bs-primary-rgb), 0.28);
+    --back-link-text: #bfdbfe;
+    --back-link-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+body.theme-scope {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+
+.theme-scope,
+.theme-scope .panel,
+.theme-scope .table-card,
+.theme-scope .empty-state,
+.theme-scope .product-gallery-editor__drop-zone,
+.theme-scope .modal-content {
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+#theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+    #theme-toggle .theme-icon-dark {
+        display: none;
+    }
+
+html[data-bs-theme="dark"] #theme-toggle .theme-icon-light {
+    display: none;
+}
+
+html[data-bs-theme="dark"] #theme-toggle .theme-icon-dark {
+    display: inline-block;
+}
+
+@media (max-width: 575.98px) {
+    #theme-toggle .theme-label {
+        display: none;
+    }
+}
+
+
+

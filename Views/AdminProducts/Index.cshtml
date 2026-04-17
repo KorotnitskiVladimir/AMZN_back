@@ -1,4 +1,5 @@
-﻿@model AMZN.Models.Product.MyProductsListViewModel
+@using AMZN.Models.Product
+@model MyProductsListViewModel
 
 @{
     ViewData["Title"] = "My products";
@@ -8,49 +9,48 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/admin-products.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/product-management.css" asp-append-version="true" />
 }
 
-<div class="admin-products-page">
-    <div class="admin-products-header">
+
+<div class="management-page">
+    <div class="management-page__header">
         <div>
-            <h1 class="admin-products-title">My products</h1>
-            <p class="admin-products-subtitle">
+            <h1 class="management-page__title">My products</h1>
+            <p class="management-page__subtitle">
                 Manage your products, update media and keep stock information up to date.
             </p>
         </div>
 
-        <a asp-action="Create" class="admin-btn admin-btn-primary">Add product</a>
+        <a asp-action="Create" class="action-button action-button--primary">Add product</a>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(successMessage))
-    {
-        <div class="admin-alert admin-alert-success" role="alert">@successMessage</div>
-    }
+    <partial name="_SuccessToast" model="successMessage" />
 
     @if (!string.IsNullOrWhiteSpace(errorMessage))
     {
-        <div class="admin-alert admin-alert-danger" role="alert">@errorMessage</div>
+        <div class="alert-box alert-box--danger" role="alert">@errorMessage</div>
     }
 
     @if (Model.Products.Count == 0)
     {
-        <div class="admin-empty-card">
-            <h2 class="admin-empty-title">No products yet</h2>
-            <p class="admin-empty-text">
+        <div class="empty-state">
+            <h2 class="empty-state__title">No products yet</h2>
+            <p class="empty-state__text">
                 Start by creating your first product.
             </p>
 
-            <div class="admin-page-actions justify-content-center">
-                <a asp-action="Create" class="admin-btn admin-btn-primary">Create product</a>
+            <div class="action-bar action-bar--center">
+                <a asp-action="Create" class="action-button action-button--primary">Create product</a>
             </div>
         </div>
     }
     else
     {
-        <div class="admin-list-card">
-            <div class="admin-products-table-wrap">
-                <table class="admin-products-table">
+        <div class="table-card">
+            <div class="table-wrap">
+                <table class="management-table">
                     <thead>
                         <tr>
                             <th>Image</th>
@@ -68,28 +68,30 @@
                                 <td>
                                     <img src="@product.PrimaryImageUrl"
                                          alt="@product.Title"
-                                         class="admin-product-thumb" />
+                                         class="products-thumbnail" />
                                 </td>
-                                <td class="admin-product-title-cell">@product.Title</td>
+                                <td class="products-title-cell">@product.Title</td>
                                 <td>@product.CurrentPrice.ToString("F2")</td>
                                 <td>@product.StockQuantity</td>
                                 <td>@product.CreatedAt.ToString("yyyy-MM-dd")</td>
                                 <td>
-                                    <div class="admin-inline-actions">
+                                    <div class="inline-actions">
                                         <a asp-action="Edit"
                                            asp-route-id="@product.Id"
-                                           class="admin-btn admin-btn-warning admin-btn-sm">
+                                           class="action-button action-button--warning action-button--small">
                                             Edit
                                         </a>
 
                                         <button type="button"
-                                                class="admin-btn admin-btn-danger admin-btn-sm"
+                                                class="action-button action-button--danger action-button--small"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#adminDeleteConfirmModal"
+                                                data-bs-target="#deleteConfirmModal"
                                                 data-delete-url="@Url.Action("Delete", "AdminProducts", new { id = product.Id })"
-                                                data-product-title="@product.Title">
+                                                data-entity-name="@product.Title"
+                                                data-entity-label="product">
                                             Delete
                                         </button>
+
                                     </div>
                                 </td>
                             </tr>
@@ -103,6 +105,7 @@
 
 <partial name="_DeleteConfirmModal" />
 
+
 @section Scripts {
-    <script src="~/js/admin-products.js" asp-append-version="true"></script>
+    <script src="~/js/product-management.js" asp-append-version="true"></script>
 }

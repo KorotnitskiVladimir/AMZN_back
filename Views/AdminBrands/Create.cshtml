@@ -1,25 +1,59 @@
-﻿@model AMZN.Models.Brands.BrandCreateViewModel
+@using AMZN.Models.Brands
+@model BrandCreateViewModel
+
 
 @{
     ViewData["Title"] = "Create brand";
 }
 
-<h1>Create brand</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+}
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
 
-    <div asp-validation-summary="All" class="text-danger"></div>
+<div class="management-page">
+    <div class="management-page__header">
 
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <div>
+            <h1 class="management-page__title">Create brand</h1>
+            <p class="management-page__subtitle">
+                Add a new brand that can be used in product management.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="back-link">
+            <span class="back-link__icon" aria-hidden="true">←</span>
+            <span>Back to brands</span>
+        </a>
     </div>
 
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</form>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="validation-summary"></div>
+
+        <section class="panel panel--full">
+            <h2 class="panel__title">Brand details</h2>
+            <p class="panel__description">
+                Enter the brand name that will be available for products.
+            </p>
+
+            <div class="form-grid">
+                <div class="field-group">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+        </section>
+
+        <div class="action-bar">
+            <a asp-action="Index" class="action-button action-button--secondary">Cancel</a>
+            <button type="submit" class="action-button action-button--primary">Create brand</button>
+        </div>
+    </form>
+
+</div>
 
 
 @section Scripts {
