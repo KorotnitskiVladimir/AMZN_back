@@ -104,7 +104,7 @@ public class CartController : ControllerBase
     }
     
     // POST / api/cart/decreaseQuantity
-    [HttpPost]
+    [HttpPost("decreaseQuantity")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CartResponseDto>> DecreaseQuantity([FromRoute] string productId)
