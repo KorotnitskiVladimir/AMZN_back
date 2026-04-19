@@ -302,5 +302,24 @@ public class CartService
             Products = products
         };
     }
+
+    public void CreateCartsIfNotExist()
+    {
+        var users = _cartRepository.GetUsersWithoutCartAsync().Result;
+        if (users == null)
+        {
+            return;
+        }
+        foreach (var user in users)
+        {
+            _cartRepository.AddCartAsync(new Cart()
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                User = user,
+                Items = new List<CartItem>()
+            });
+        }
+    }
     
 }

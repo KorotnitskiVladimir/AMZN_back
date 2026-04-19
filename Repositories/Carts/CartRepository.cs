@@ -89,5 +89,11 @@ public class CartRepository : ICartRepository
     {
         return await _dataContext.CartItems.FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
     }
-    
+
+    public async Task<List<User>?> GetUsersWithoutCartAsync()
+    {
+        List<User> users = new List<User>();
+        List<Guid> userId = await _dataContext.Carts.Select(c => c.UserId).ToListAsync();
+        return await _dataContext.Users.Where(u => !userId.Contains(u.Id)).ToListAsync();
+    }
 }

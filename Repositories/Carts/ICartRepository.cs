@@ -27,5 +27,7 @@ public interface ICartRepository
     Task UpdateCartItemAsync(CartItem cartItem);
     
     Task<CartItem?> GetCartItemAsync(Guid productId, Guid cartId);
+    
+    Task<List<User>?> GetUsersWithoutCartAsync();
 
 }

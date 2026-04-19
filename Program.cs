@@ -286,12 +286,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Action validity check
+// Action validity check + cart creation
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var checker = services.GetRequiredService<AdminActionService>();
+    var cartChecker = services.GetRequiredService<CartService>();
     checker.CheckActionsValidity();
+    cartChecker.CreateCartsIfNotExist();
 }
 
 app.UseHttpsRedirection();
