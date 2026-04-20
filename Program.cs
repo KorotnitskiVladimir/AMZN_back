@@ -31,7 +31,9 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 using AMZN.Repositories.Carts;
+using AMZN.Repositories.Orders;
 using AMZN.Services.Carts;
+using AMZN.Services.Orders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -178,6 +180,8 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IDeletedUserRepository, DeletedUserRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<OrderService>();
 // Search
 builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 builder.Services.AddScoped<SearchService>();

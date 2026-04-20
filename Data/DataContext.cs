@@ -33,6 +33,8 @@ public class DataContext: DbContext
     public DbSet<Cart> Carts { get; private set; } = null!;
     
     public DbSet<CartItem> CartItems { get; private set; } = null!;
+    
+    public DbSet<Order> Orders { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -246,13 +248,6 @@ public class DataContext: DbContext
             .HasOne(c => c.ParentCategory)
             .WithMany()
             .HasForeignKey(c => c.ParentId);
-        /*
-        modelBuilder.Entity<Action>()
-            .HasOne(a => a.Product)
-            .WithMany()
-            .HasForeignKey(a => a.ProductId)
-            .HasPrincipalKey(p => p.Id);
-        */
         
         modelBuilder.Entity<ProductAction>()
             .HasOne(pa => pa.Product)
@@ -317,6 +312,20 @@ public class DataContext: DbContext
             .WithMany()
             .HasForeignKey(c => c.UserId)
             .HasPrincipalKey(u => u.Id);
+
+        modelBuilder.Entity<Order>(o =>
+        {
+            o.HasOne(x => x.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(x => x.UserId)
+                .HasPrincipalKey(u => u.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            o.Property(x => x.Status)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .IsRequired();
+        });
 
     }
 }

@@ -17,7 +17,8 @@
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
         public ICollection<DeliveryAddress> DeliveryAddresses { get; set; } = new List<DeliveryAddress>();
-
+        
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
 
     }
 
