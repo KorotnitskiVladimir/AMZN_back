@@ -96,14 +96,19 @@ namespace AMZN.Repositories.Products
 
         // Catalog Page
         // кол-во Products подходящих под фильтры запроса
-        public Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams)
+        public Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams, List<Guid>? categoryIds)
         {
-            return BuildCatalogQuery(queryParams).CountAsync();
+            return BuildCatalogQuery(queryParams, categoryIds).CountAsync();
         }
 
-        public Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take)
+        public Task<List<Product>> GetCatalogProductsAsync(
+            ProductListQueryParams queryParams,
+            int skip,
+            int take,
+            List<Guid>? categoryIds
+            )
         {
-            var query = BuildCatalogQuery(queryParams);
+            IQueryable<Product> query = BuildCatalogQuery(queryParams, categoryIds);
             query = ApplySort(query, queryParams);
 
             return query
@@ -112,14 +117,14 @@ namespace AMZN.Repositories.Products
                 .ToListAsync();
         }
 
-        public Task<List<Brand>> GetCatalogBrandsAsync(Guid? categoryId)
+        public Task<List<Brand>> GetCatalogBrandsAsync(List<Guid>? categoryIds)
         {
-            var productQuery = _db.Products.AsNoTracking();
+            IQueryable<Product> productQuery = _db.Products.AsNoTracking();
 
-            if (categoryId != null)
-                productQuery = productQuery.Where(p => p.CategoryId == categoryId.Value);
+            if (categoryIds != null && categoryIds.Count > 0)
+                productQuery = productQuery.Where(p => categoryIds.Contains(p.CategoryId));
 
-            var brandIdsQuery = productQuery
+            IQueryable<Guid> brandIdsQuery = productQuery
                 .Select(p => p.BrandId)
                 .Distinct();
 
@@ -130,12 +135,12 @@ namespace AMZN.Repositories.Products
                 .ToListAsync();
         }
 
-        private IQueryable<Product> BuildCatalogQuery(ProductListQueryParams q)
+        private IQueryable<Product> BuildCatalogQuery(ProductListQueryParams q, List<Guid>? categoryIds)
         {
             var query = _db.Products.AsNoTracking();
 
-            if (q.CategoryId != null)
-                query = query.Where(p => p.CategoryId == q.CategoryId.Value);
+            if (categoryIds != null && categoryIds.Count > 0)
+                query = query.Where(p => categoryIds.Contains(p.CategoryId));
 
             if (q.BrandIds.Count > 0)
                 query = query.Where(p => q.BrandIds.Contains(p.BrandId));

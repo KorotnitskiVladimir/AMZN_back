@@ -3,6 +3,7 @@ using AMZN.DTOs.Brands;
 using AMZN.DTOs.Common;
 using AMZN.DTOs.Products;
 using AMZN.DTOs.Products.Reviews;
+using AMZN.Repositories.Categories;
 using AMZN.Repositories.Products;
 using AMZN.Repositories.Products.Queries;
 using AMZN.Shared.Exceptions;
@@ -16,12 +17,14 @@ namespace AMZN.Services.Products
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly ITransactionManager _transactionManager;
 
 
-        public ProductService(IProductRepository productRepository, ITransactionManager transactionManager)
+        public ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository, ITransactionManager transactionManager)
         {
             _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
             _transactionManager = transactionManager;
         }
 
@@ -41,7 +44,7 @@ namespace AMZN.Services.Products
             int skip = (q.Page - 1) * q.PageSize;
             string? normalizedSearch = SearchQueryHelper.NormalizeQuery(q.Search);
 
-            var queryParams = new ProductListQueryParams
+            ProductListQueryParams queryParams = new ProductListQueryParams
             {
                 CategoryId = q.CategoryId,
                 BrandIds = q.BrandIds.ToList(),
@@ -52,8 +55,13 @@ namespace AMZN.Services.Products
                 Sort = q.Sort
             };
 
-            int total = await _productRepository.CountCatalogProductsAsync(queryParams);
-            List<Product> items = await _productRepository.GetCatalogProductsAsync(queryParams, skip, q.PageSize);
+            List<Guid>? categoryIds = null;
+
+            if (q.CategoryId != null)
+                categoryIds = await _categoryRepository.GetCategoryTreeIdsAsync(q.CategoryId.Value);
+
+            int total = await _productRepository.CountCatalogProductsAsync(queryParams, categoryIds);
+            List<Product> items = await _productRepository.GetCatalogProductsAsync(queryParams, skip, q.PageSize, categoryIds);
 
             return new PagedResult<ProductCardDto>
             {
@@ -66,11 +74,16 @@ namespace AMZN.Services.Products
 
         public async Task<List<BrandDto>> GetCatalogBrandsAsync(Guid? categoryId)
         {
-            List<Brand> brands = await _productRepository.GetCatalogBrandsAsync(categoryId);
+            List<Guid>? categoryIds = null;
+
+            if (categoryId != null)
+                categoryIds = await _categoryRepository.GetCategoryTreeIdsAsync(categoryId.Value);
+
+            List<Brand> brands = await _productRepository.GetCatalogBrandsAsync(categoryIds);
 
             return brands.Select(b => b.ToBrandDto()).ToList();
         }
-        
+
         //  Rating
         public Task<ProductRatingResponseDto> SetRatingAsync(Guid productId, Guid userId, byte rating)
         {

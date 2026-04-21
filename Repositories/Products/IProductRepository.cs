@@ -27,9 +27,9 @@ namespace AMZN.Repositories.Products
         void AddProductImages(IEnumerable<ProductImage> productImages);
 
         // Catalog Page
-        Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams);
-        Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams, int skip, int take);
-        Task<List<Brand>> GetCatalogBrandsAsync(Guid? categoryId);
+        Task<int> CountCatalogProductsAsync(ProductListQueryParams queryParams, List<Guid>? categoryIds);
+        Task<List<Product>> GetCatalogProductsAsync(ProductListQueryParams queryParams,int skip, int take, List<Guid>? categoryIds);
+        Task<List<Brand>> GetCatalogBrandsAsync(List<Guid>? categoryIds);
 
         // Product Rating
         Task<ProductRating?> GetUserRatingAsync(Guid productId, Guid userId);
