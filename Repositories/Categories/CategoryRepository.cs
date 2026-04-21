@@ -87,6 +87,48 @@ public class CategoryRepository : ICategoryRepository
             .ToListAsync();
     }
 
+    public async Task<List<Guid>> GetCategoryTreeIdsAsync(Guid categoryId)
+    {
+        List<Category> categories = await _dataContext.Categories
+            .AsNoTracking()
+            .Select(x => new Category
+            {
+                Id = x.Id,
+                ParentId = x.ParentId
+            })
+            .ToListAsync();
+
+        Dictionary<Guid, List<Category>> subcategoriesByParentId = categories
+            .Where(x => x.ParentId != null)
+            .GroupBy(x => x.ParentId!.Value)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        List<Guid> result = new List<Guid>();
+
+        CollectCategoryTreeIds(categoryId, subcategoriesByParentId, result);
+
+        return result;
+    }
+
+    private static void CollectCategoryTreeIds(
+            Guid categoryId,
+            Dictionary<Guid, List<Category>> subcategoriesByParentId,
+            List<Guid> result
+            )
+    {
+        result.Add(categoryId);
+
+        if (!subcategoriesByParentId.TryGetValue(categoryId, out List<Category>? subcategories))
+            return;
+
+        foreach (Category subcategory in subcategories)
+        {
+            CollectCategoryTreeIds(subcategory.Id, subcategoriesByParentId, result);
+        }
+    }
+
+
+
     public Task SaveChangesAsync()
     {
         return _dataContext.SaveChangesAsync();

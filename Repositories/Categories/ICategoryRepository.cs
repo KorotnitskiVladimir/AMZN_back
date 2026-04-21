@@ -19,4 +19,5 @@ public interface ICategoryRepository
     Task<List<CategoryListItemDto>> GetByParentAsync(Guid parentId);
     Task SaveChangesAsync();
 
+    Task<List<Guid>> GetCategoryTreeIdsAsync(Guid categoryId);
 }
