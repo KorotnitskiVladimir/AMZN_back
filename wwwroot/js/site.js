@@ -2,59 +2,170 @@
 // for details on configuring this project to bundle and minify static web assdo
 document.addEventListener("submit", e => {
     const form = e.target;
-    if(form.id === "user-registration-form") {
+    if (form.id === "user-registration-form") {
         e.preventDefault();
+
+        const feedback = document.getElementById("signup-feedback");
+        const submitBtn = form.querySelector('[type="submit"]');
+
+        if (submitBtn) submitBtn.disabled = true;
+
         fetch("/Admin/Register", {
-            method: 'POST',
+            method: "POST",
             body: new FormData(form)
-        }).then(r => r.json())
+        })
+            .then(r => r.json())
             .then(j => {
-                if(j.success) {
-                    alert("User registered successfully!");
+                if (j.success) {
+                    const toastEl = document.getElementById("signup-toast");
+                    const toastBody = document.getElementById("signup-toast-body");
+
+                    if (toastEl && toastBody && typeof bootstrap !== "undefined") {
+                        toastBody.textContent = "Account created successfully!";
+                        toastEl.classList.add("text-bg-success");
+                        toastEl.classList.remove("text-bg-danger");
+
+                        bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 5000 }).show();
+                    }
+
+                    if (feedback) feedback.innerHTML = "";
                     form.reset();
-                    window.location.reload();
+                } else {
+                    if (feedback) {
+                        feedback.innerHTML =
+                            '<div class="alert-box alert-box--danger">' +
+                            (j.message || "Something went wrong.") +
+                            '</div>';
+                    }
                 }
-                else {
-                    alert(j.message);
+            })
+            .catch(() => {
+                if (feedback) {
+                    feedback.innerHTML =
+                        '<div class="alert-box alert-box--danger">Request failed. Please try again.</div>';
                 }
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
             });
     }
-    if(form.id === "auth-modal-form") {
+    if (form.id === "auth-modal-form") {
         e.preventDefault();
+
         const email = form.querySelector("[name='AuthEmail']").value;
         const password = form.querySelector("[name='AuthPassword']").value;
         const credentials = btoa(email + ':' + password);
+
+        const messageEl = document.getElementById("message");
+        const submitBtn = document.querySelector('[form="auth-modal-form"][type="submit"]');
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (messageEl) { messageEl.textContent = ""; messageEl.className = ""; }
+
         fetch("/Admin/Login", {
             method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + credentials
-            }
-        }).then(r => r.json())
+            headers: { 'Authorization': 'Bearer ' + credentials }
+        })
+            .then(r => r.json())
             .then(j => {
-                if(j.status === 200) {
-                    alert("Logged in successfully!");
+                if (j.status === 200) {
                     window.location.reload();
+                } else {
+                    if (messageEl) {
+                        messageEl.textContent = j.message || "Login failed.";
+                        messageEl.className = "text-danger small";
+                    }
                 }
-                else {
-                    alert(j.message);
+            })
+            .catch(() => {
+                if (messageEl) {
+                    messageEl.textContent = "Request failed. Please try again.";
+                    messageEl.className = "text-danger small";
                 }
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
             });
     }
-    if(form.id === "add-category-form") {
+    //Category
+    if (form.id === "add-category-form") {
         e.preventDefault();
+
+        const feedback = document.getElementById("category-feedback");
+        const submitBtn = form.querySelector('[type="submit"]');
+
+        if (submitBtn) submitBtn.disabled = true;
+
         fetch("/Admin/AddCategory", {
-            method: 'POST',
+            method: "POST",
             body: new FormData(form)
-        }).then(r => r.json())
+        })
+            .then(r => r.json())
             .then(j => {
-                if(j.success) {
-                    alert("Category added successfully!");
+                if (j.success) {
+                    if (feedback) {
+                        feedback.innerHTML =
+                            '<div class="alert-box alert-box--success">Category added successfully!</div>';
+                    }
                     form.reset();
-                    window.location.reload();
+                } else {
+                    if (feedback) {
+                        feedback.innerHTML =
+                            '<div class="alert-box alert-box--danger">' +
+                            (j.message || "Something went wrong.") +
+                            '</div>';
+                    }
                 }
-                else {
-                    alert(j.message);
+            })
+            .catch(() => {
+                if (feedback) {
+                    feedback.innerHTML =
+                        '<div class="alert-box alert-box--danger">Request failed. Please try again.</div>';
                 }
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
             });
     }
+    // Action
+    if (form.id === "add-action-form") {
+        e.preventDefault();
+
+        const feedback = document.getElementById("action-feedback");
+        const submitBtn = form.querySelector('[type="submit"]');
+
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch("/Admin/AddAction", {
+            method: "POST",
+            body: new FormData(form)
+        })
+            .then(r => r.json())
+            .then(j => {
+                if (j.success) {
+                    if (feedback) {
+                        feedback.innerHTML =
+                            '<div class="alert-box alert-box--success">Action added successfully!</div>';
+                    }
+                    form.reset();
+                } else {
+                    if (feedback) {
+                        feedback.innerHTML =
+                            '<div class="alert-box alert-box--danger">' +
+                            (j.message || "Something went wrong.") +
+                            '</div>';
+                    }
+                }
+            })
+            .catch(() => {
+                if (feedback) {
+                    feedback.innerHTML =
+                        '<div class="alert-box alert-box--danger">Request failed. Please try again.</div>';
+                }
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
+            });
+    }
+
 })

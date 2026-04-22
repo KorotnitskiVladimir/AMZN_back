@@ -1,0 +1,103 @@
+﻿.admin-hub {
+    padding-bottom: 48px;
+}
+
+.admin-hub__header {
+    padding: 40px 0 48px;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.admin-hub__title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--bs-emphasis-color);
+    margin: 0 0 8px;
+}
+
+.admin-hub__subtitle {
+    font-size: 1rem;
+    color: var(--bs-secondary-color);
+    margin: 0;
+}
+
+.admin-hub-nav__item {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 26px 14px;
+    margin: 0 -14px;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--bs-body-color);
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+    .admin-hub-nav__item:last-child {
+        border-bottom: none;
+    }
+
+    .admin-hub-nav__item:hover {
+        text-decoration: none;
+        background-color: var(--bs-secondary-bg);
+        box-shadow: inset 3px 0 0 var(--bs-primary);
+    }
+
+.admin-hub-nav__icon {
+    font-size: 1.1rem;
+    color: var(--bs-secondary-color);
+    line-height: 1;
+    transition: color 0.18s ease;
+}
+
+.admin-hub-nav__item:hover .admin-hub-nav__icon {
+    color: var(--bs-primary);
+}
+
+.admin-hub-nav__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.admin-hub-nav__title {
+    font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--bs-emphasis-color);
+    transition: color 0.18s ease;
+}
+
+.admin-hub-nav__item:hover .admin-hub-nav__title {
+    color: var(--bs-primary);
+}
+
+.admin-hub-nav__desc {
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color);
+}
+
+.admin-hub-nav__arrow {
+    font-size: 1.3rem;
+    color: var(--bs-secondary-color);
+    flex-shrink: 0;
+    transition: transform 0.22s ease, color 0.18s ease;
+}
+
+.admin-hub-nav__item:hover .admin-hub-nav__arrow {
+    transform: translateX(5px);
+    color: var(--bs-primary);
+}
+
+@media (max-width: 575.98px) {
+    .admin-hub-nav__item {
+        grid-template-columns: 20px 1fr auto;
+        gap: 16px;
+        padding: 20px 10px;
+        margin: 0 -10px;
+    }
+}

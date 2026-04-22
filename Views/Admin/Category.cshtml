@@ -1,45 +1,97 @@
 ﻿@model AMZN.Models.Category.CategoryViewModel
 @using System.Security.Claims
 @{
-    ViewData["Title"] = "Category page";
-}
-@{
+    ViewData["Title"] = "Add category";
+
     bool isAuthorized = Context.Items.ContainsKey("auth");
     string? role = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 }
-<div class="text-center">
-    <h1 class="display-4">Add category</h1>
-</div>
-@if (!isAuthorized)
-{
-<div class="alert alert-danger" role="alert">
-    You are not authorized to view this page.
-</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
 }
-else
-{
-    @if (role != "Admin")
-    {
-    <div class="alert alert-danger" role="alert">
-        Should login as admin to add categories.
+
+<div class="management-page">
+
+    <div class="management-page__header">
+        <div>
+            <h1 class="management-page__title">Add category</h1>
+            <p class="management-page__subtitle">
+                Create a new root category or subcategory for the product catalog.
+            </p>
+        </div>
     </div>
+
+    @if (!isAuthorized)
+    {
+        <div class="alert-box alert-box--danger" role="alert">
+            You are not authorized to view this page.
+        </div>
+    }
+    else if (role != "Admin")
+    {
+        <div class="alert-box alert-box--danger" role="alert">
+            Admin role is required to manage categories.
+        </div>
     }
     else
     {
-        <div class="col">
-            <form id="add-category-form" enctype="multipart/form-data">
-                Name: <input name="category-name"/><br/>
-                Parent: <select name="parent-category">
-                    <option value="">None</option>
-                    @foreach (var category in Model.Categories)
-                    {
-                        <option value="@category.Id">@category.Name</option>
-                    }
-                </select><br/>
-                Description: <textarea name="category-description"></textarea><br/>
-                Picture: <input name="category-image" type="file"/><br/>
-                <button type="submit">Add category</button>
-            </form>
-        </div>
+        <div id="category-feedback"></div>
+
+        <form id="add-category-form" enctype="multipart/form-data">
+
+            <section class="panel panel--full">
+
+                <div class="form-grid form-grid--2">
+
+                    <div class="field-group">
+                        <label class="form-label" for="category-name">Name</label>
+                        <input id="category-name"
+                               name="category-name"
+                               class="form-control" />
+                    </div>
+
+                    <div class="field-group">
+                        <label class="form-label" for="parent-category">Parent category</label>
+                        <select id="parent-category" name="parent-category" class="form-select">
+                            <option value="">— None (root category) —</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-grid" style="margin-top: 16px;">
+
+                    <div class="field-group">
+                        <label class="form-label" for="category-description">Description</label>
+                        <textarea id="category-description"
+                              name="category-description"
+                              class="form-control"></textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="form-label" for="category-image">Cover image</label>
+                        <input id="category-image"
+                               name="category-image"
+                               type="file"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp" />
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="action-bar">
+                <button type="submit" class="action-button action-button--primary">
+                    Add category
+                </button>
+            </div>
+
+        </form>
     }
-}
+
+</div>
