@@ -1,14 +1,71 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Admin panel";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Admin panel</h1>
-    <h1>Content</h1>
-    <h3><a asp-controller="Admin" asp-action="SignUp">Add user</a></h3>
-    <h3><a asp-controller="Admin" asp-action="Category">Add category</a></h3>
-    <h3><a asp-controller="AdminProducts" asp-action="Create">Add product</a></h3>
-    <h3><a asp-controller="AdminProducts" asp-action="Index">My products</a></h3>
-    <h3><a asp-controller="Admin" asp-action="Action">Add action</a></h3>
-    <h3><a asp-controller="AdminBrands" asp-action="Index">Brands</a></h3>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-home.css" asp-append-version="true" />
+}
+
+<div class="admin-hub">
+
+    <header class="admin-hub__header">
+        <h1 class="admin-hub__title">Admin panel</h1>
+    </header>
+
+    <nav>
+        <a asp-controller="Admin" asp-action="SignUp" class="admin-hub-nav__item">
+            <i class="bi bi-person-plus admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">Add user</span>
+                <span class="admin-hub-nav__desc">Register a new user, admin or moderator account</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Category" class="admin-hub-nav__item">
+            <i class="bi bi-folder-plus admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">Add category</span>
+                <span class="admin-hub-nav__desc">Create root categories or nested subcategories</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+
+        <a asp-controller="AdminBrands" asp-action="Index" class="admin-hub-nav__item">
+            <i class="bi bi-award admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">Brands</span>
+                <span class="admin-hub-nav__desc">View and manage brands available in product forms</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+
+        <a asp-controller="AdminProducts" asp-action="Create" class="admin-hub-nav__item">
+            <i class="bi bi-box-seam admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">Add product</span>
+                <span class="admin-hub-nav__desc">List a new product with images, price and stock</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+
+        <a asp-controller="AdminProducts" asp-action="Index" class="admin-hub-nav__item">
+            <i class="bi bi-grid-3x3-gap admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">My products</span>
+                <span class="admin-hub-nav__desc">Edit, restock or remove your existing listings</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Action" class="admin-hub-nav__item">
+            <i class="bi bi-tag admin-hub-nav__icon"></i>
+            <span class="admin-hub-nav__body">
+                <span class="admin-hub-nav__title">Add action</span>
+                <span class="admin-hub-nav__desc">Create a promotional discount for a product or category</span>
+            </span>
+            <i class="bi bi-arrow-right admin-hub-nav__arrow"></i>
+        </a>
+    </nav>
+
 </div>

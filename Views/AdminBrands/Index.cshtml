@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Brands";
 
-    string? successMessage = TempData["Success"] as string;
     string? errorMessage = TempData["Error"] as string;
 }
 
@@ -24,7 +23,6 @@
         <a asp-action="Create" class="action-button action-button--primary">Create brand</a>
     </div>
 
-    <partial name="_SuccessToast" model="successMessage" />
 
     @if (!string.IsNullOrWhiteSpace(errorMessage))
     {

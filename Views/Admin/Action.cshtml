@@ -1,45 +1,104 @@
 ﻿@model AMZN.Models.Action.ActionViewModel
 @using System.Security.Claims
 @{
-    ViewData["Title"] = "Category page";
-}
-@{
+    ViewData["Title"] = "Add action";
+
     bool isAuthorized = Context.Items.ContainsKey("auth");
     string? role = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 }
-<div class="text-center">
-    <h1 class="display-4">Add action</h1>
-</div>
-@if (!isAuthorized)
-{
-    <div class="alert alert-danger" role="alert">
-        You are not authorized to view this page.
-    </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
 }
-else
-{
-    @if (role != "Admin")
+
+<div class="management-page">
+
+    <div class="management-page__header">
+        <div>
+            <h1 class="management-page__title">Add action</h1>
+            <p class="management-page__subtitle">
+                Create a promotional action for a product or category.
+            </p>
+        </div>
+    </div>
+
+    @if (!isAuthorized)
     {
-        <div class="alert alert-danger" role="alert">
-            Should login as admin to add categories.
+        <div class="alert-box alert-box--danger" role="alert">
+            You are not authorized to view this page.
+        </div>
+    }
+    else if (role != "Admin")
+    {
+        <div class="alert-box alert-box--danger" role="alert">
+            Admin role is required to manage actions.
         </div>
     }
     else
     {
-        <div class="col">
-            <form id="add-action-form" enctype="multipart/form-data">
-                Name: <input name="action-name"/><br/>
-                Description: <textarea name="action-description"></textarea><br/>
-                Apply to: <select name="apply-to">
-                    <option value="product">Single product</option>
-                    <option value="category">Whole category</option>
-                </select>
-                Applicant name: <input name="product-title"/><br/>
-                Amount: <input name="action-amount" type="number" min="1" max="99"/><br/>
-                Start Date: <input name="action-start-date" type="date"/><br/>
-                End Date: <input name="action-end-date" type="date"/><br/>
-                <button type="submit">Add action</button>
-            </form>
-        </div>
+        <div id="action-feedback"></div>
+
+        <form id="add-action-form">
+
+            <section class="panel panel--full">
+
+                <div class="form-grid form-grid--2">
+                    <div class="field-group">
+                        <label class="form-label" for="action-name">Name</label>
+                        <input id="action-name" name="action-name" class="form-control" />
+                    </div>
+                    <div class="field-group">
+                        <label class="form-label" for="apply-to">Apply to</label>
+                        <select id="apply-to" name="apply-to" class="form-select">
+                            <option value="product">Single product</option>
+                            <option value="category">Whole category</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2 mt-3">
+                    <div class="field-group">
+                        <label class="form-label" for="product-title">Product / Category name</label>
+                        <input id="product-title" name="product-title" class="form-control" />
+                    </div>
+                    <div class="field-group">
+                        <label class="form-label" for="action-amount">Discount (%)</label>
+                        <input id="action-amount" name="action-amount"
+                               type="number" min="1" max="99"
+                               class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2 mt-3">
+                    <div class="field-group">
+                        <label class="form-label" for="action-start-date">Start date</label>
+                        <input id="action-start-date" name="action-start-date"
+                               type="date" class="form-control" />
+                    </div>
+                    <div class="field-group">
+                        <label class="form-label" for="action-end-date">End date</label>
+                        <input id="action-end-date" name="action-end-date"
+                               type="date" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-grid mt-3">
+                    <div class="field-group">
+                        <label class="form-label" for="action-description">Description</label>
+                        <textarea id="action-description" name="action-description"
+                              class="form-control"></textarea>
+                    </div>
+                </div>
+
+            </section>
+
+            <div class="action-bar">
+                <button type="submit" class="action-button action-button--primary">
+                    Add action
+                </button>
+            </div>
+
+        </form>
     }
-}
+
+</div>

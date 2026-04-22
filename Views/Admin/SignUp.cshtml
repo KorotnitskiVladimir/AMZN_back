@@ -1,24 +1,96 @@
 ﻿@model AMZN.Models.User.UserSignUpViewModel
 @{
-    ViewData["Title"] = "Registration page";
+    ViewData["Title"] = "Sign up";
 }
-<div class="text-center">
-    <h1 class="display-4">Registration page</h1>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+}
+
+<div class="management-page">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+
+            <div class="management-page__header">
+                <div>
+                    <h1 class="management-page__title">Register</h1>
+                    <p class="management-page__subtitle">Create a new user account.</p>
+                </div>
+            </div>
+
+            <div id="signup-feedback"></div>
+
+            <form id="user-registration-form">
+
+                <section class="panel">
+
+                    <div class="form-grid form-grid--2">
+                        <div class="field-group">
+                            <label class="form-label" for="firstName">First name</label>
+                            <input id="firstName" name="firstName" type="text" class="form-control" />
+                        </div>
+                        <div class="field-group">
+                            <label class="form-label" for="lastName">Last name</label>
+                            <input id="lastName" name="lastName" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid--2 mt-3">
+                        <div class="field-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input id="email" name="email" type="email" class="form-control" />
+                        </div>
+                        <div class="field-group">
+                            <label class="form-label" for="role">Role</label>
+                            <select id="role" name="role" class="form-select">
+                                <option value="User">User</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Moderator">Moderator</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid--2 mt-3">
+                        <div class="field-group">
+                            <label class="form-label" for="password">Password</label>
+                            <input id="password" name="password" type="password" class="form-control" />
+                        </div>
+                        <div class="field-group">
+                            <label class="form-label" for="confirmPassword">Confirm password</label>
+                            <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" />
+                        </div>
+                    </div>
+
+                </section>
+
+                <div class="action-bar">
+                    <button type="submit" class="action-button action-button--primary">
+                        Create account
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
 </div>
-<div class="row">
-    <div class="col">
-        <form id="user-registration-form" enctype="multipart/form-data">
-            First Name: <input type="text" name="firstName" /><br />
-            Last Name: <input type="text" name="lastName" /><br />
-            Email: <input type="email" name="email" /><br />
-            Password: <input type="password" name="password" /><br />
-            Confirm Password: <input type="password" name="confirmPassword" /><br />
-            Role: <select name="role">
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-                <option value="Moderator">Moderator</option>
-            </select><br />
-            <input type="submit" value="Register" />
-        </form>
+
+<!-- Toast (всегда в DOM, показываем через JS) -->
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3 success-toast-container"
+     id="signup-toast-container">
+    <div class="toast align-items-center border-0"
+         id="signup-toast"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="signup-toast-body"></div>
+            <button type="button"
+                    class="btn-close me-2 m-auto"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
     </div>
 </div>

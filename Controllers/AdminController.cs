@@ -82,6 +82,7 @@ public class AdminController : Controller
         }
         
         HttpContext.Session.SetString("userId", token.UserId.ToString());
+        TempData["Success"] = "Signed in successfully!";
         return Json(new { status = 200, message = "OK" });
     }
 
