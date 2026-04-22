@@ -5,9 +5,6 @@
     ViewData["Title"] = "Edit product";
 
     bool hasModelErrors = !ViewData.ModelState.IsValid;
-    string? successMessage = Context.Request.Method == "GET"
-        ? TempData["Success"] as string
-        : null;
 }
 
 @section Styles {
@@ -30,7 +27,6 @@
         </a>
     </div>
 
-    <partial name="_SuccessToast" model="successMessage" />
 
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
