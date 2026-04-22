@@ -43,6 +43,7 @@ namespace AMZN.Repositories.Products
         Task<ProductReview?> GetUserReviewAsync(Guid productId, Guid userId);
         Task<ReviewDto?> GetUserReviewDtoAsync(Guid productId, Guid userId);
         void AddReview(ProductReview review);
+        void PurchaseProduct(Guid productId, int quantity);
 
     }
 

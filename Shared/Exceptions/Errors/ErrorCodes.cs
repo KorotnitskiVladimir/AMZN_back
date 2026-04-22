@@ -22,6 +22,7 @@
 
         // Product
         public const string ProductNotFound = "product.not_found";
+        public const string ProductOutOfStock = "product.out_of_stock";
 
         // Category
         public const string CategoryNotFound = "category.not_found";
@@ -35,11 +36,14 @@
         // Product Review
         public const string CannotReviewOwnProduct = "product.cannot_review_own";
 
-        // Prudct Questions
+        // Product Questions
         public const string ProductQuestionNotFound = "product.question.not_found";
         
         // Cart
         public const string CartNotFound = "cart.not_found";
+        
+        // Order
+        public const string OrderNotFound = "order.not_found";
 
     }
 

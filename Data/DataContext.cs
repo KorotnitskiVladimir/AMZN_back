@@ -35,6 +35,8 @@ public class DataContext: DbContext
     public DbSet<CartItem> CartItems { get; private set; } = null!;
     
     public DbSet<Order> Orders { get; private set; } = null!;
+    
+    public DbSet<OrderItem> OrderItems { get; private set; } = null!;
 
     public DataContext(DbContextOptions options) : base(options) {}
 
@@ -326,6 +328,17 @@ public class DataContext: DbContext
                 .HasMaxLength(16)
                 .IsRequired();
         });
-
+        
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.Order)
+            .WithMany()
+            .HasForeignKey(oi => oi.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.Product)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

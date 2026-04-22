@@ -366,7 +366,13 @@ namespace AMZN.Repositories.Products
             };
         }
 
-
-
+        public void PurchaseProduct(Guid productId, int quantity)
+        {
+            var product = _db.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
+                throw new ArgumentException("Product not found", nameof(productId));
+            product.StockQuantity -= quantity;
+            _db.SaveChanges();
+        }
     }
 }

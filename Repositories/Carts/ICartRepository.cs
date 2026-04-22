@@ -29,5 +29,7 @@ public interface ICartRepository
     Task<CartItem?> GetCartItemAsync(Guid productId, Guid cartId);
     
     Task<List<User>?> GetUsersWithoutCartAsync();
+    
+    Task ClearCartAsync(Guid cartId);
 
 }

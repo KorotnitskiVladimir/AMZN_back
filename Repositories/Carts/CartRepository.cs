@@ -96,4 +96,17 @@ public class CartRepository : ICartRepository
         List<Guid> userId = await _dataContext.Carts.Select(c => c.UserId).ToListAsync();
         return await _dataContext.Users.Where(u => !userId.Contains(u.Id)).ToListAsync();
     }
+
+    public async Task ClearCartAsync(Guid cartId)
+    {
+        var cart = await _dataContext.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
+        if (cart == null) return;
+        var items = await _dataContext.CartItems.Where(ci => ci.CartId == cartId).ToListAsync();
+        foreach (var item in items)
+        {
+            cart.Items.Remove(item);
+            _dataContext.CartItems.Remove(item);
+        }
+        await _dataContext.SaveChangesAsync();
+    }
 }

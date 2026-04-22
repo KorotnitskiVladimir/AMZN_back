@@ -31,6 +31,9 @@ namespace AMZN.Repositories.Users
         Task DeleteDeliveryAddressAsync(DeliveryAddress address, User user);
         
         void SetDefaultDeliveryAddress(DeliveryAddress address, User user);
-
+        
+        Task<DeliveryAddress?> GetDeliveryAddressByIdAsync(Guid id);
+        
+        Task<PaymentMethod?> GetPaymentMethodByIdAsync(Guid id);
     }
 }

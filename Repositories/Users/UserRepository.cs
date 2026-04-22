@@ -114,5 +114,15 @@ namespace AMZN.Repositories.Users
                 }
             }
         }
+
+        public async Task<DeliveryAddress?> GetDeliveryAddressByIdAsync(Guid id)
+        {
+            return await _db.DeliveryAddresses.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<PaymentMethod?> GetPaymentMethodByIdAsync(Guid id)
+        {
+            return await _db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == id);
+        }
     }
 }
