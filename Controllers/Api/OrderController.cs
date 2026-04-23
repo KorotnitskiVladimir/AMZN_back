@@ -22,7 +22,6 @@ public class OrderController : ControllerBase
     // POST api/order/create
     [HttpPost("create")]
     [Authorize]
-    [EnableRateLimiting("Auth")]
     public async Task<ActionResult<OrderDto>> Checkout()
     {
         var user = User.GetRequiredUserId();
@@ -33,7 +32,6 @@ public class OrderController : ControllerBase
     // POST api/order/update
     [HttpPost("update")]
     [Authorize]
-    [EnableRateLimiting("Auth")]
     public async Task<ActionResult<OrderDto>> UpdateOrder()
     {
         var user = User.GetRequiredUserId();
@@ -44,7 +42,6 @@ public class OrderController : ControllerBase
     // POST api/order/confirm
     [HttpPost("confirm")]
     [Authorize]
-    [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CompletedOrderDto>> ConfirmOrder(string deliveryAddressId,
         string paymentMethodId)
     {
@@ -58,6 +55,26 @@ public class OrderController : ControllerBase
         }
         var user = User.GetRequiredUserId();
         CompletedOrderDto response = await _orderService.CompleteOrderAsync(user, methodParsed, addressParsed);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/order/cancel
+    [HttpPost("cancel")]
+    [Authorize]
+    public async Task<ActionResult<CompletedOrderDto>> CancelOrder()
+    {
+        var user = User.GetRequiredUserId();
+        CompletedOrderDto response = await _orderService.CancelOrderAsync(user);
+        return StatusCode(StatusCodes.Status200OK, response);
+    }
+    
+    // POST api/order/getOrders
+    [HttpPost("getOrders")]
+    [Authorize]
+    public async Task<ActionResult<List<CompletedOrderDto>>> GetOrders()
+    {
+        var user = User.GetRequiredUserId();
+        List<CompletedOrderDto> response = await _orderService.GetOrdersAsync(user);
         return StatusCode(StatusCodes.Status200OK, response);
     }
 }

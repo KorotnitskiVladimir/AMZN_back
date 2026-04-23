@@ -48,6 +48,12 @@ public class OrderService
         }
         
         var cart = await ValidateCartAsync(userId);
+
+        var order = await _orderRepository.GetPendingOrderByUserIdAsync(user.Id);
+        if (order != null)
+        {
+            throw new ApiException(ErrorCodes.PendingOrderExists, "Pending order exists", StatusCodes.Status409Conflict);
+        }
         
         int quantity = 0;
         decimal totalPrice = 0;
@@ -68,7 +74,7 @@ public class OrderService
             throw new ApiException(ErrorCodes.CartNotFound, "Cart is empty", StatusCodes.Status404NotFound);
         }
 
-        Order order = new()
+        order = new()
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
@@ -242,6 +248,8 @@ public class OrderService
         
         order.Status = OrderStatus.Confirmed;
         order.ConfirmedAt = DateTime.Now;
+        order.DeliveryAddress = address;
+        order.PaymentMethod = paymentMethod;
         await _orderRepository.UpdateOrderAsync(order);
         return new CompletedOrderDto()
         {
@@ -252,6 +260,68 @@ public class OrderService
             DeliveryAddress = address,
             PaymentMethod = paymentMethod
         };
+    }
+
+    public async Task<CompletedOrderDto> CancelOrderAsync(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var cart = await ValidateCartAsync(userId);
+        var order = await _orderRepository.GetPendingOrderByUserIdAsync(user.Id);
+        if (order == null)
+        {
+            throw new ApiException(ErrorCodes.OrderNotFound, "Order not found", StatusCodes.Status404NotFound);
+        }
+
+        await _cartRepository.ClearCartAsync(cart.Id);
+        order.Status = OrderStatus.Cancelled;
+        order.CanceledAt = DateTime.Now;
+        await _orderRepository.UpdateOrderAsync(order);
+
+        return new CompletedOrderDto()
+        {
+            Order = order,
+            TotalQuantity = order.OrderItems.Sum(oi => oi.Quantity),
+            TotalAmount = order.TotalAmount,
+            Status = order.Status
+        };
+    }
+
+    public async Task<List<CompletedOrderDto>> GetOrdersAsync(Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
+        }
+        
+        var orders = await _orderRepository.GetOrdersAsync(user.Id);
+        if (orders == null)
+        {
+            throw new ApiException(ErrorCodes.OrderNotFound, "Orders not found", StatusCodes.Status404NotFound);
+        }
+        
+        List<CompletedOrderDto> completedOrders = new List<CompletedOrderDto>();
+        foreach (var order in orders)
+        {
+            completedOrders.Add(new CompletedOrderDto()
+            {
+                Order = order,
+                TotalQuantity = order.OrderItems.Sum(oi => oi.Quantity),
+                TotalAmount = order.TotalAmount,
+                Status = order.Status,
+                CreatedAt = order.CreatedAt,
+                CompletedAt = order.ConfirmedAt,
+                CanceledAt = order.CanceledAt,
+                DeliveryAddress = order.DeliveryAddress,
+                PaymentMethod = order.PaymentMethod
+            });
+        }
+        return completedOrders;   
     }
     
     private async Task<Cart> ValidateCartAsync(Guid userId)

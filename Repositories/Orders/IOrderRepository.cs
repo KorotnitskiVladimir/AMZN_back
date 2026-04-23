@@ -9,4 +9,5 @@ public interface IOrderRepository
     Task<Order?> GetPendingOrderByUserIdAsync(Guid userId);
     Task UpdateOrderAsync(Order order);
     Task RemoveOrderItemsAsync(Order order);
+    Task<List<Order>?> GetOrdersAsync(Guid userId);
 }

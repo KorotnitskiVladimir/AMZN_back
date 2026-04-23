@@ -49,5 +49,9 @@ public class OrderRepository : IOrderRepository
         await _dataContext.SaveChangesAsync();
     }
     
-
+    public async Task<List<Order>?> GetOrdersAsync(Guid userId)
+    {
+        return await _dataContext.Orders.Where(o => o.UserId == userId && o.Status != OrderStatus.Pending)
+            .ToListAsync();
+    }
 }

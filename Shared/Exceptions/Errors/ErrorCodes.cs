@@ -44,6 +44,7 @@
         
         // Order
         public const string OrderNotFound = "order.not_found";
+        public const string PendingOrderExists = "order.pending_order_exists";
 
     }
 
