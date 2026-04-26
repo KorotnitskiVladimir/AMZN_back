@@ -312,13 +312,14 @@ public class CartService
         }
         foreach (var user in users)
         {
-            _cartRepository.AddCartAsync(new Cart()
+           Cart cart = new()
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 User = user,
                 Items = new List<CartItem>()
-            });
+            };
+            _cartRepository.AddCartAsync(cart);
         }
     }
     

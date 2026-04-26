@@ -295,8 +295,13 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var checker = services.GetRequiredService<AdminActionService>();
-    var cartChecker = services.GetRequiredService<CartService>();
     checker.CheckActionsValidity();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var cartChecker = services.GetRequiredService<CartService>();
     cartChecker.CreateCartsIfNotExist();
 }
 

@@ -40,7 +40,7 @@ public class OrderController : ControllerBase
     }
     
     // POST api/order/confirm
-    [HttpPost("confirm")]
+    [HttpPost("confirm/{deliveryAddressId}/{paymentMethodId}")]
     [Authorize]
     public async Task<ActionResult<CompletedOrderDto>> ConfirmOrder(string deliveryAddressId,
         string paymentMethodId)

@@ -19,7 +19,7 @@ public class CartController : ControllerBase
     }
     
     // POST api/cart/add
-    [HttpPost("add")]
+    [HttpPost("add/{productId}")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CartResponseDto>> AddToCart([FromRoute] string productId)
@@ -39,7 +39,7 @@ public class CartController : ControllerBase
     }
     
     // POST api/cart/remove
-    [HttpPost("remove")]
+    [HttpPost("remove/{productId}")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CartResponseDto>> RemoveFromCart([FromRoute] string productId)
@@ -83,7 +83,7 @@ public class CartController : ControllerBase
     }
     
     // POST api/cart/increaseQuantity
-    [HttpPost("increaseQuantity")]
+    [HttpPost("increaseQuantity/{productId}")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CartResponseDto>> IncreaseQuantity([FromRoute] string productId)
@@ -104,7 +104,7 @@ public class CartController : ControllerBase
     }
     
     // POST / api/cart/decreaseQuantity
-    [HttpPost("decreaseQuantity")]
+    [HttpPost("decreaseQuantity/{productId}")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<CartResponseDto>> DecreaseQuantity([FromRoute] string productId)
