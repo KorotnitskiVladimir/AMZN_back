@@ -322,7 +322,19 @@ public class DataContext: DbContext
                 .HasForeignKey(x => x.UserId)
                 .HasPrincipalKey(u => u.Id)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
+            o.HasOne(x => x.DeliveryAddress)
+                .WithMany()
+                .HasForeignKey(x => x.DeliveryAddressId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            o.HasOne(x => x.PaymentMethod)
+                .WithMany()
+                .HasForeignKey(x => x.PaymentMethodId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            o.Property(x => x.TotalAmount).HasColumnType("decimal(18,2)");
+
             o.Property(x => x.Status)
                 .HasConversion<string>()
                 .HasMaxLength(16)
@@ -331,7 +343,7 @@ public class DataContext: DbContext
         
         modelBuilder.Entity<OrderItem>()
             .HasOne(oi => oi.Order)
-            .WithMany()
+            .WithMany(o => o.OrderItems)
             .HasForeignKey(oi => oi.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -340,5 +352,9 @@ public class DataContext: DbContext
             .WithMany()
             .HasForeignKey(oi => oi.ProductId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<OrderItem>()
+            .Property(x => x.UnitPrice)
+            .HasColumnType("decimal(18,2)");
     }
 }

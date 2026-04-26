@@ -10,6 +10,8 @@ public class Order
     public DateTime? UpdatedAt { get; set; }
     public DateTime? ConfirmedAt { get; set; }
     public DateTime? CanceledAt { get; set; }
+    public Guid? DeliveryAddressId { get; set; }
+    public Guid? PaymentMethodId { get; set; }
     public DeliveryAddress? DeliveryAddress { get; set; }
     public PaymentMethod? PaymentMethod { get; set; }
     public User User { get; set; } = null!;
