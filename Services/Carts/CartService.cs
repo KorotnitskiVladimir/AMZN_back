@@ -303,7 +303,7 @@ public class CartService
         };
     }
 
-    public void CreateCartsIfNotExist()
+    public async Task CreateCartsIfNotExist()
     {
         var users = _cartRepository.GetUsersWithoutCartAsync().Result;
         if (users == null)
@@ -319,7 +319,7 @@ public class CartService
                 User = user,
                 Items = new List<CartItem>()
             };
-            _cartRepository.AddCartAsync(cart);
+            await _cartRepository.AddCartAsync(cart);
         }
     }
     
