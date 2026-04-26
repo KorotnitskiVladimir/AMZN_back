@@ -94,7 +94,14 @@ public class CartRepository : ICartRepository
     {
         List<User> users = new List<User>();
         List<Guid> userId = await _dataContext.Carts.Select(c => c.UserId).ToListAsync();
-        return await _dataContext.Users.Where(u => !userId.Contains(u.Id)).ToListAsync();
+        foreach (var user in _dataContext.Users)
+        {
+            if (!userId.Contains(user.Id))
+            {
+                users.Add(user);
+            }
+        }
+        return users;
     }
 
     public async Task ClearCartAsync(Guid cartId)
