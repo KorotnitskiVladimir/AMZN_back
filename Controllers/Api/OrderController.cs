@@ -20,7 +20,7 @@ public class OrderController : ControllerBase
     }
     
     // POST api/order/create
-    [HttpPost("create")]
+    [HttpGet("create")]
     [Authorize]
     public async Task<ActionResult<OrderDto>> Checkout()
     {
@@ -30,7 +30,7 @@ public class OrderController : ControllerBase
     }
     
     // POST api/order/update
-    [HttpPost("update")]
+    [HttpGet("update")]
     [Authorize]
     public async Task<ActionResult<OrderDto>> UpdateOrder()
     {
@@ -42,8 +42,8 @@ public class OrderController : ControllerBase
     // POST api/order/confirm
     [HttpPost("confirm/{deliveryAddressId}/{paymentMethodId}")]
     [Authorize]
-    public async Task<ActionResult<CompletedOrderDto>> ConfirmOrder(string deliveryAddressId,
-        string paymentMethodId)
+    public async Task<ActionResult<CompletedOrderDto>> ConfirmOrder([FromRoute]string deliveryAddressId,
+        [FromRoute]string paymentMethodId)
     {
         if (string.IsNullOrEmpty(deliveryAddressId) || string.IsNullOrEmpty(paymentMethodId))
         {
@@ -59,7 +59,7 @@ public class OrderController : ControllerBase
     }
     
     // POST api/order/cancel
-    [HttpPost("cancel")]
+    [HttpGet("cancel")]
     [Authorize]
     public async Task<ActionResult<CompletedOrderDto>> CancelOrder()
     {
@@ -69,7 +69,7 @@ public class OrderController : ControllerBase
     }
     
     // POST api/order/getOrders
-    [HttpPost("getOrders")]
+    [HttpGet("getOrders")]
     [Authorize]
     public async Task<ActionResult<List<CompletedOrderDto>>> GetOrders()
     {

@@ -26,13 +26,13 @@ public class CartService
 
     public async Task<CartResponseDto> AddToCartAsync(Guid userId, Guid productId)
     {
-        var user = await _userRepository.GetUserByIdAsync(userId);
+        User? user = await _userRepository.GetUserByIdAsync(userId);
         if (user == null)
         {
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
         }
         
-        var product = await _productRepository.GetByIdAsync(productId);
+        Product? product = await _productRepository.GetByIdAsync(productId);
         if (product == null)
         {
             throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);

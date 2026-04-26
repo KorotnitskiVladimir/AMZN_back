@@ -37,7 +37,7 @@ public class UserAccountController : ControllerBase
     
     // POST api/user/delete
     
-    [HttpPost("delete")]
+    [HttpGet("delete")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult> DeleteUser()
@@ -60,7 +60,7 @@ public class UserAccountController : ControllerBase
     }
     
     // POST api/user/getPaymentMethods
-    [HttpPost("getPaymentMethods")]
+    [HttpGet("getPaymentMethods")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<List<PaymentMethodResponseDto>>> GetPaymentMethods()
@@ -83,7 +83,7 @@ public class UserAccountController : ControllerBase
     }
     
     // POST api/user/getDeliveryAddresses
-    [HttpPost("getDeliveryAddresses")]
+    [HttpGet("getDeliveryAddresses")]
     [Authorize]
     [EnableRateLimiting("Auth")]
     public async Task<ActionResult<List<DeliveryAddressResponseDto>>> GetDeliveryAddresses()

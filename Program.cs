@@ -302,7 +302,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var cartChecker = services.GetRequiredService<CartService>();
-    //cartChecker.CreateCartsIfNotExist();
+    cartChecker.CreateCartsIfNotExist();
 }
 
 app.UseHttpsRedirection();
