@@ -206,17 +206,22 @@ public class CartService
         }
         
         List<CartItemDto> items = new List<CartItemDto>();
-        foreach (var ci in cart.Items)
+        List<CartItem>? cartItems  = await _cartRepository.GetCartItemsAsync(cart.Id);
+        if (cartItems != null)
         {
-            items.Add(new CartItemDto()
+            foreach (var ci in cartItems)
             {
-                ProductId = ci.ProductId,
-                ImageUrl = ci.Product.PrimaryImageUrl,
-                Title = ci.Product.Title,
-                Quantity = ci.Quantity,
-                Price = ci.Product.CurrentPrice
-            });
+                items.Add(new CartItemDto()
+                {
+                    ProductId = ci.ProductId,
+                    ImageUrl = ci.Product.PrimaryImageUrl,
+                    Title = ci.Product.Title,
+                    Quantity = ci.Quantity,
+                    Price = ci.Product.CurrentPrice
+                });
+            }
         }
+
         return new CartResponseDto()
         {
             CartId = cart.Id,

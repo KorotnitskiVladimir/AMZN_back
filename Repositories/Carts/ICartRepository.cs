@@ -20,7 +20,7 @@ public interface ICartRepository
     
     Task DeleteCartAsync(Cart cart);
     
-    Task<List<CartItem>> GetCartItemsAsync(Guid cartId);
+    Task<List<CartItem>?> GetCartItemsAsync(Guid cartId);
     
     Task<CartItem?> IsItemInCartAsync(Guid productId, Guid cartId);
 
