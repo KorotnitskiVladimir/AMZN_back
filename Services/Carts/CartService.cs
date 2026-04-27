@@ -119,7 +119,7 @@ public class CartService
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
         }
         
-        var product = await _productRepository.GetByIdAsync(productId);
+        Product? product = await _productRepository.GetByIdAsync(productId);
         if (product == null)
         {
             throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
@@ -134,23 +134,27 @@ public class CartService
         var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
         if (item == null)
         {
-            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);
         }
 
         await _cartRepository.RemoveCartItemAsync(item);
         
         List<CartItemDto> items = new List<CartItemDto>();
-        foreach (var ci in cart.Items)
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
         {
-            items.Add(new CartItemDto()
+            foreach (var ci in cart.Items)
             {
-                ProductId = ci.ProductId,
-                ImageUrl = ci.Product.PrimaryImageUrl,
-                Title = ci.Product.Title,
-                Quantity = ci.Quantity,
-                Price = ci.Product.CurrentPrice
-            });
+                items.Add(new CartItemDto()
+                {
+                    ProductId = ci.ProductId,
+                    ImageUrl = ci.Product.PrimaryImageUrl,
+                    Title = ci.Product.Title,
+                    Quantity = ci.Quantity,
+                    Price = ci.Product.CurrentPrice
+                });
+            }
         }
+
         return new CartResponseDto()
         {
             CartId = cart.Id,
@@ -193,32 +197,40 @@ public class CartService
     
     public async Task<CartResponseDto> GetCartAsync(Guid userId)
     {
-        var user = await _userRepository.GetUserByIdAsync(userId);
+        User? user = await _userRepository.GetUserByIdAsync(userId);
         if (user == null)
         {
             throw new ApiException(ErrorCodes.UserNotFound, "User not found", StatusCodes.Status404NotFound);
         }
         
-        var cart = await _cartRepository.GetCartByUserIdAsync(user.Id);
+        Cart? cart = await _cartRepository.GetCartByUserIdAsync(userId);
         if (cart == null)
         {
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
         
-        List<CartItemDto> items = new List<CartItemDto>();
-        List<CartItem>? cartItems  = await _cartRepository.GetCartItemsAsync(cart.Id);
-        if (cartItems != null)
+        //List<CartItem>? cartItems  = await _cartRepository.GetCartItemsAsync(cart.Id);
+        /*
+        if (cartItems == null || cartItems.Count == 0)
         {
-            foreach (var ci in cartItems)
+            throw new ApiException(ErrorCodes.CartNotFound, "Cart is empty", StatusCodes.Status404NotFound);       
+        }
+        */
+        
+        List<CartItemDto> items = new List<CartItemDto>();
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        {
+            foreach (CartItem ci in cart.Items)
             {
-                items.Add(new CartItemDto()
+                CartItemDto item = new()
                 {
                     ProductId = ci.ProductId,
                     ImageUrl = ci.Product.PrimaryImageUrl,
                     Title = ci.Product.Title,
                     Quantity = ci.Quantity,
                     Price = ci.Product.CurrentPrice
-                });
+                };
+                items.Add(item);
             }
         }
 
@@ -252,7 +264,7 @@ public class CartService
         var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
         if (item == null)
         {
-            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);
         }
         
         item.Quantity++;
@@ -300,7 +312,7 @@ public class CartService
         var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
         if (item == null)
         {
-            throw new ApiException(ErrorCodes.ProductNotFound, "Product not found", StatusCodes.Status404NotFound);
+            throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);
         }
         
         item.Quantity--;
@@ -314,17 +326,21 @@ public class CartService
         }
         
         List<CartItemDto> items = new List<CartItemDto>();
-        foreach (var ci in cart.Items)
+        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
         {
-            items.Add(new CartItemDto()
+            foreach (var ci in cart.Items)
             {
-                ProductId = ci.ProductId,
-                ImageUrl = ci.Product.PrimaryImageUrl,
-                Title = ci.Product.Title,
-                Quantity = ci.Quantity,
-                Price = ci.Product.CurrentPrice
-            });
+                items.Add(new CartItemDto()
+                {
+                    ProductId = ci.ProductId,
+                    ImageUrl = ci.Product.PrimaryImageUrl,
+                    Title = ci.Product.Title,
+                    Quantity = ci.Quantity,
+                    Price = ci.Product.CurrentPrice
+                });
+            }
         }
+
         return new CartResponseDto()
         {
             CartId = cart.Id,

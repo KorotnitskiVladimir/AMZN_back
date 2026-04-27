@@ -47,8 +47,9 @@ public class CartRepository : ICartRepository
 
     public async Task AddCartItemAsync(CartItem cartItem)
     {
-        _dataContext.CartItems.Add(cartItem);
-        var cart = cartItem.Cart;
+        await _dataContext.CartItems.AddAsync(cartItem);
+        Cart? cart = await _dataContext.Carts.FirstOrDefaultAsync(c => c.Id == cartItem.CartId);
+        if (cart == null) return;
         cart.Items.Add(cartItem);
         _dataContext.Carts.Update(cart);
         await _dataContext.SaveChangesAsync();
