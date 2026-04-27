@@ -45,22 +45,22 @@ public class CartRepository : ICartRepository
         await _dataContext.SaveChangesAsync();
     }
 
-    public Task AddCartItemAsync(CartItem cartItem)
+    public async Task AddCartItemAsync(CartItem cartItem)
     {
         _dataContext.CartItems.Add(cartItem);
         var cart = cartItem.Cart;
         cart.Items.Add(cartItem);
         _dataContext.Carts.Update(cart);
-        return _dataContext.SaveChangesAsync();
+        await _dataContext.SaveChangesAsync();
     }
     
-    public Task RemoveCartItemAsync(CartItem cartItem)
+    public async Task RemoveCartItemAsync(CartItem cartItem)
     {
         var cart = cartItem.Cart;
         cart.Items.Remove(cartItem);
         _dataContext.Carts.Update(cart);
         _dataContext.CartItems.Remove(cartItem);
-        return _dataContext.SaveChangesAsync();
+        await _dataContext.SaveChangesAsync();
     }
     
     public async Task DeleteCartAsync(Cart cart)

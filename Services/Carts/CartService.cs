@@ -92,15 +92,22 @@ public class CartService
             item.Quantity++;
             await _cartRepository.UpdateCartItemAsync(item);
         }
-        List<Product> products = new List<Product>();
+        List<CartItemDto> items = new List<CartItemDto>();
         foreach (var ci in cart.Items)
         {
-            products.Add(ci.Product);
+            items.Add(new CartItemDto()
+            {
+                ProductId = ci.ProductId,
+                ImageUrl = ci.Product.PrimaryImageUrl,
+                Title = ci.Product.Title,
+                Quantity = ci.Quantity,
+                Price = ci.Product.CurrentPrice
+            });
         }
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
+            CartId = cart.Id,
+            Items = items
         };
     }
 
@@ -132,19 +139,22 @@ public class CartService
 
         await _cartRepository.RemoveCartItemAsync(item);
         
-        List<Product> products = new List<Product>();
-        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        List<CartItemDto> items = new List<CartItemDto>();
+        foreach (var ci in cart.Items)
         {
-            foreach (var ci in cart.Items)
+            items.Add(new CartItemDto()
             {
-                products.Add(ci.Product);
-            }
+                ProductId = ci.ProductId,
+                ImageUrl = ci.Product.PrimaryImageUrl,
+                Title = ci.Product.Title,
+                Quantity = ci.Quantity,
+                Price = ci.Product.CurrentPrice
+            });
         }
-
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
+            CartId = cart.Id,
+            Items = items
         };
     }
 
@@ -172,12 +182,12 @@ public class CartService
             await _cartRepository.RemoveCartItemAsync(ci);
         }
         
-        List<Product> products = new List<Product>();
+        List<CartItemDto> items = new List<CartItemDto>();
         
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
+            CartId = cart.Id,
+            Items = items,
         };
     }
     
@@ -195,20 +205,23 @@ public class CartService
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
         
-        List<Product> products = new List<Product>();
-        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        List<CartItemDto> items = new List<CartItemDto>();
+        foreach (var ci in cart.Items)
         {
-            foreach (var ci in cart.Items)
+            items.Add(new CartItemDto()
             {
-                products.Add(ci.Product);
-            }
+                ProductId = ci.ProductId,
+                ImageUrl = ci.Product.PrimaryImageUrl,
+                Title = ci.Product.Title,
+                Quantity = ci.Quantity,
+                Price = ci.Product.CurrentPrice
+            });
         }
-        
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
-        };       
+            CartId = cart.Id,
+            Items = items
+        };     
     }
 
     public async Task<CartResponseDto> IncreaseQuantityAsync(Guid userId, Guid productId)
@@ -240,15 +253,23 @@ public class CartService
         item.Quantity++;
         await _cartRepository.UpdateCartItemAsync(item);
         
-        List<Product> products = new List<Product>();
+        List<CartItemDto> items = new List<CartItemDto>();
         foreach (var ci in cart.Items)
-            products.Add(ci.Product);
-        
+        {
+            items.Add(new CartItemDto()
+            {
+                ProductId = ci.ProductId,
+                ImageUrl = ci.Product.PrimaryImageUrl,
+                Title = ci.Product.Title,
+                Quantity = ci.Quantity,
+                Price = ci.Product.CurrentPrice
+            });
+        }
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
-        };       
+            CartId = cart.Id,
+            Items = items
+        };  
     }
 
     public async Task<CartResponseDto> DecreaseQuantityAsync(Guid userId, Guid productId)
@@ -287,19 +308,22 @@ public class CartService
             await _cartRepository.UpdateCartItemAsync(item);
         }
         
-        List<Product> products = new List<Product>();
-        if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
+        List<CartItemDto> items = new List<CartItemDto>();
+        foreach (var ci in cart.Items)
         {
-            foreach (var ci in cart.Items)
+            items.Add(new CartItemDto()
             {
-                products.Add(ci.Product);
-            }
+                ProductId = ci.ProductId,
+                ImageUrl = ci.Product.PrimaryImageUrl,
+                Title = ci.Product.Title,
+                Quantity = ci.Quantity,
+                Price = ci.Product.CurrentPrice
+            });
         }
-
         return new CartResponseDto()
         {
-            Cart = cart,
-            Products = products
+            CartId = cart.Id,
+            Items = items
         };
     }
 
