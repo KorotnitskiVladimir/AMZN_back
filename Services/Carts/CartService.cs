@@ -59,6 +59,7 @@ public class CartService
                 Quantity = 1
             };
             await _cartRepository.AddCartItemAsync(cartItem);
+            await _cartRepository.UpdateCartAsync(cart);
         }
         else
         {
@@ -74,23 +75,28 @@ public class CartService
                     Quantity = 1
                 };
                 await _cartRepository.AddCartItemAsync(cartItem);
+                await _cartRepository.UpdateCartAsync(cart);
             }
-            var item = await _cartRepository.IsItemInCartAsync(productId, cart.Id);
-            if (item == null)
+            else
             {
-                item = new()
+                var item = await _cartRepository.GetCartItemAsync(productId, cart.Id);
+                if (item == null)
                 {
-                    Id = Guid.NewGuid(),
-                    CartId = cart.Id,
-                    ProductId = productId,
-                    Product = product,
-                    Cart = cart,
-                    Quantity = 1
-                };
-                await _cartRepository.AddCartItemAsync(item);
+                    item = new()
+                    {
+                        Id = Guid.NewGuid(),
+                        CartId = cart.Id,
+                        ProductId = productId,
+                        Product = product,
+                        Cart = cart,
+                        Quantity = 1
+                    };
+                    await _cartRepository.AddCartItemAsync(item);
+                }
+                else
+                    item.Quantity++;
+                await _cartRepository.UpdateCartItemAsync(item);
             }
-            item.Quantity++;
-            await _cartRepository.UpdateCartItemAsync(item);
         }
         List<CartItemDto> items = new List<CartItemDto>();
         foreach (var ci in cart.Items)
@@ -131,7 +137,7 @@ public class CartService
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
         
-        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        var item = await _cartRepository.GetCartItemAsync(productId, cart.Id);
         if (item == null)
         {
             throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);
@@ -181,10 +187,7 @@ public class CartService
             throw new ApiException(ErrorCodes.ProductNotFound, "Cart is empty", StatusCodes.Status404NotFound);
         }
 
-        foreach (var ci in cart.Items)
-        {
-            await _cartRepository.RemoveCartItemAsync(ci);
-        }
+        await _cartRepository.ClearCartAsync(cart.Id);
         
         List<CartItemDto> items = new List<CartItemDto>();
         
@@ -208,14 +211,6 @@ public class CartService
         {
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
-        
-        //List<CartItem>? cartItems  = await _cartRepository.GetCartItemsAsync(cart.Id);
-        /*
-        if (cartItems == null || cartItems.Count == 0)
-        {
-            throw new ApiException(ErrorCodes.CartNotFound, "Cart is empty", StatusCodes.Status404NotFound);       
-        }
-        */
         
         List<CartItemDto> items = new List<CartItemDto>();
         if (!await _cartRepository.IsCartEmptyAsync(cart.Id))
@@ -261,7 +256,7 @@ public class CartService
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
         
-        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        var item = await _cartRepository.GetCartItemAsync(productId, cart.Id);
         if (item == null)
         {
             throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);
@@ -309,7 +304,7 @@ public class CartService
             throw new ApiException(ErrorCodes.CartNotFound, "Cart not found", StatusCodes.Status404NotFound);
         }
         
-        var item = await _cartRepository.GetCartItemAsync(cart.Id, productId);
+        var item = await _cartRepository.GetCartItemAsync(productId, cart.Id);
         if (item == null)
         {
             throw new ApiException(ErrorCodes.ProductNotFound, "Product not in cart", StatusCodes.Status404NotFound);

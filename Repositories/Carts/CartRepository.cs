@@ -31,7 +31,10 @@ public class CartRepository : ICartRepository
     
     public async Task<Cart?> GetCartByUserIdAsync(Guid userId)
     {
-        return await _dataContext.Carts.FirstOrDefaultAsync(c => c.UserId == userId);
+        return await _dataContext.Carts
+            .Include(c => c.Items)
+            .ThenInclude(p => p.Product)
+            .FirstOrDefaultAsync(c => c.UserId == userId);
     }
     
     public async Task<bool> IsCartEmptyAsync(Guid cartId)
@@ -48,7 +51,10 @@ public class CartRepository : ICartRepository
     public async Task AddCartItemAsync(CartItem cartItem)
     {
         await _dataContext.CartItems.AddAsync(cartItem);
-        Cart? cart = await _dataContext.Carts.FirstOrDefaultAsync(c => c.Id == cartItem.CartId);
+        Cart? cart = await _dataContext.Carts
+            .Include(c => c.Items)
+            .ThenInclude(p => p.Product)
+            .FirstOrDefaultAsync(c => c.Id == cartItem.CartId);
         if (cart == null) return;
         cart.Items.Add(cartItem);
         _dataContext.Carts.Update(cart);
@@ -57,7 +63,11 @@ public class CartRepository : ICartRepository
     
     public async Task RemoveCartItemAsync(CartItem cartItem)
     {
-        var cart = cartItem.Cart;
+        var cart = await _dataContext.Carts
+            .Include(c => c.Items)
+            .ThenInclude(p => p.Product)
+            .FirstOrDefaultAsync(c => c.Id == cartItem.CartId);
+        if (cart == null) return;
         cart.Items.Remove(cartItem);
         _dataContext.Carts.Update(cart);
         _dataContext.CartItems.Remove(cartItem);
@@ -72,12 +82,16 @@ public class CartRepository : ICartRepository
     
     public async Task<List<CartItem>?> GetCartItemsAsync(Guid cartId)
     {
-        return await _dataContext.CartItems.Where(ci => ci.CartId == cartId).ToListAsync();
+        return await _dataContext.CartItems
+            .Include(p => p.Product)
+            .Where(ci => ci.CartId == cartId).ToListAsync();
     }
     
     public async Task<CartItem?> IsItemInCartAsync(Guid productId, Guid cartId)
     {
-        return await _dataContext.CartItems.FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
+        return await _dataContext.CartItems
+            .Include(p => p.Product)
+            .FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
     }
     
     public async Task UpdateCartItemAsync(CartItem cartItem)
@@ -88,7 +102,11 @@ public class CartRepository : ICartRepository
     
     public async Task<CartItem?> GetCartItemAsync(Guid productId, Guid cartId)
     {
-        return await _dataContext.CartItems.FirstOrDefaultAsync(ci => ci.ProductId == productId && ci.CartId == cartId);
+        return await _dataContext.CartItems
+            .Include(p => p.Product)
+            .Where(ci => ci.ProductId == productId)
+            .Where(ci => ci.CartId == cartId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<List<User>?> GetUsersWithoutCartAsync()
@@ -107,7 +125,10 @@ public class CartRepository : ICartRepository
 
     public async Task ClearCartAsync(Guid cartId)
     {
-        var cart = await _dataContext.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
+        var cart = await _dataContext.Carts
+            .Include(c => c.Items)
+            .ThenInclude(p => p.Product)
+            .FirstOrDefaultAsync(c => c.Id == cartId);
         if (cart == null) return;
         var items = await _dataContext.CartItems.Where(ci => ci.CartId == cartId).ToListAsync();
         foreach (var item in items)
