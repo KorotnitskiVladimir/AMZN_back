@@ -37,23 +37,6 @@ using AMZN.Services.Orders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/*  Note:
-    
--  Старые refresh токены (revoked/expired) копятся в БД, можно добавить периодическую очистку (удалять ExpiresAt < UtcNow или IsRevoked=true).
--  Rate limiting на Auth использует RemoteIpAddress. При деплое за прокси (Azure/AWS/K8s) реальный IP может приходить в X-Forwarded-For. Тогда нужен ForwardedHeaders (см. Extensions/ForwardedHeadersExtensions).
-
- 
- */
-
-
-/*  TODO:
-       - upload limits ограничение общего размера multipart/form-data (защита от слишком больших аплоадов)
-       - CloudStirageServuce: sync методы сделать Async (блокирует поток)
-       - Почистить program
-    
- */
-
-
 
 // Config (DB connection string, secrets)
 builder.Configuration.AddJsonFile("appsettings-Secrets.json", optional: true, reloadOnChange: true);
@@ -245,7 +228,7 @@ var app = builder.Build();
 app.UseAmznForwardedHeaders();
 app.UseMiddleware<ApiExceptionMiddleware>();
 
-
+// request logger
 if (app.Environment.IsDevelopment())
 {
     app.Use(async (context, next) =>
