@@ -347,7 +347,9 @@ namespace AMZN.Services.Admin
             if (product.SellerId != sellerId)
                 throw new InvalidOperationException("Product not found");
 
-            List<string> blobUrlsToDelete = new() { product.PrimaryImageUrl };
+            //List<string> blobUrlsToDelete = new() { product.PrimaryImageUrl };    // не удаляем primaryImage? -> url копируется в Order items 
+            List<string> blobUrlsToDelete = new();
+
             blobUrlsToDelete.AddRange(product.Images.Select(x => x.Url));
 
             _products.Remove(product);
