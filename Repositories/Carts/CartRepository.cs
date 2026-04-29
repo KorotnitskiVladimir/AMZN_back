@@ -34,6 +34,7 @@ public class CartRepository : ICartRepository
         return await _dataContext.Carts
             .Include(c => c.Items)
             .ThenInclude(p => p.Product)
+            .ThenInclude(p => p.Brand)
             .FirstOrDefaultAsync(c => c.UserId == userId);
     }
     

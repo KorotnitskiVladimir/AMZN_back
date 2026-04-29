@@ -92,9 +92,11 @@ public class OrderService
                 Id = Guid.NewGuid(),
                 OrderId = order.Id,
                 ProductId = ci.ProductId,
+                Brand = ci.Product.Brand.Name,
+                ProductTitle = ci.Product.Title,
+                ProductImage = ci.Product.PrimaryImageUrl,
                 Quantity = ci.Quantity,
                 UnitPrice = ci.Product.CurrentPrice,
-                Product = ci.Product,
                 Order = order
             };
             await _orderRepository.AddOrderItemAsync(item);
@@ -169,9 +171,11 @@ public class OrderService
                 Id = Guid.NewGuid(),
                 OrderId = order.Id,
                 ProductId = ci.ProductId,
+                Brand = ci.Product.Brand.Name,
+                ProductTitle = ci.Product.Title,
+                ProductImage = ci.Product.PrimaryImageUrl,
                 Quantity = ci.Quantity,
                 UnitPrice = ci.Product.CurrentPrice,
-                Product = ci.Product,
                 Order = order
             };
             await _orderRepository.AddOrderItemAsync(item);
