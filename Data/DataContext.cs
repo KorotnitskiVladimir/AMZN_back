@@ -307,7 +307,7 @@ public class DataContext: DbContext
             .HasOne(ci => ci.Product)
             .WithMany()
             .HasForeignKey(ci => ci.ProductId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Cart>()
             .HasOne(c => c.User)
@@ -347,11 +347,13 @@ public class DataContext: DbContext
             .HasForeignKey(oi => oi.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        /*
         modelBuilder.Entity<OrderItem>()
             .HasOne(oi => oi.Product)
             .WithMany()
             .HasForeignKey(oi => oi.ProductId)
             .OnDelete(DeleteBehavior.NoAction);
+        */
 
         modelBuilder.Entity<OrderItem>()
             .Property(x => x.UnitPrice)

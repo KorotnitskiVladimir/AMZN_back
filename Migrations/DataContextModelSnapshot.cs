@@ -100,6 +100,9 @@ namespace AMZN.Migrations
                     b.Property<Guid>("CartId")
                         .HasColumnType("char(36)");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<Guid>("ProductId")
                         .HasColumnType("char(36)");
 
@@ -253,79 +256,6 @@ namespace AMZN.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("DeliveryAddresses");
-                });
-
-            modelBuilder.Entity("AMZN.Data.Entities.Order", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime?>("CanceledAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("ConfirmedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid?>("DeliveryAddressId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("PaymentMethodId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("varchar(16)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeliveryAddressId");
-
-                    b.HasIndex("PaymentMethodId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("AMZN.Data.Entities.OrderItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.PaymentMethod", b =>
@@ -702,7 +632,7 @@ namespace AMZN.Migrations
                     b.HasOne("AMZN.Data.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cart");
@@ -747,50 +677,6 @@ namespace AMZN.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AMZN.Data.Entities.Order", b =>
-                {
-                    b.HasOne("AMZN.Data.Entities.DeliveryAddress", "DeliveryAddress")
-                        .WithMany()
-                        .HasForeignKey("DeliveryAddressId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AMZN.Data.Entities.PaymentMethod", "PaymentMethod")
-                        .WithMany()
-                        .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AMZN.Data.Entities.User", "User")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryAddress");
-
-                    b.Navigation("PaymentMethod");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AMZN.Data.Entities.OrderItem", b =>
-                {
-                    b.HasOne("AMZN.Data.Entities.Order", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AMZN.Data.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("AMZN.Data.Entities.PaymentMethod", b =>
@@ -963,11 +849,6 @@ namespace AMZN.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("AMZN.Data.Entities.Order", b =>
-                {
-                    b.Navigation("OrderItems");
-                });
-
             modelBuilder.Entity("AMZN.Data.Entities.Product", b =>
                 {
                     b.Navigation("Images");
@@ -987,8 +868,6 @@ namespace AMZN.Migrations
             modelBuilder.Entity("AMZN.Data.Entities.User", b =>
                 {
                     b.Navigation("DeliveryAddresses");
-
-                    b.Navigation("Orders");
 
                     b.Navigation("PaymentMethods");
 

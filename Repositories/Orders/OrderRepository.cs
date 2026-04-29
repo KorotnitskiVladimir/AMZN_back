@@ -30,7 +30,9 @@ public class OrderRepository : IOrderRepository
 
     public async Task<Order?> GetPendingOrderByUserIdAsync(Guid userId)
     {
-        return await _dataContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Status == OrderStatus.Pending);
+        return await _dataContext.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == OrderStatus.Pending);
     }
     
     public async Task UpdateOrderAsync(Order order)
@@ -51,7 +53,9 @@ public class OrderRepository : IOrderRepository
     
     public async Task<List<Order>?> GetOrdersAsync(Guid userId)
     {
-        return await _dataContext.Orders.Where(o => o.UserId == userId && o.Status != OrderStatus.Pending)
+        return await _dataContext.Orders
+            .Include(o => o.OrderItems)
+            .Where(o => o.UserId == userId && o.Status != OrderStatus.Pending)
             .ToListAsync();
     }
 }
