@@ -104,7 +104,7 @@ public class OrderService
 
         return new OrderDto()
         {
-            Order = order,
+            OrderId = order.Id,
             TotalQuantity = quantity,
             TotalAmount = totalPrice,
             Status = order.Status,
@@ -185,7 +185,7 @@ public class OrderService
         
         return new OrderDto()
         {
-            Order = order,
+            OrderId = order.Id,
             TotalQuantity = quantity,
             TotalAmount = totalPrice,
             Status = order.Status,
@@ -257,7 +257,7 @@ public class OrderService
         await _orderRepository.UpdateOrderAsync(order);
         return new CompletedOrderDto()
         {
-            Order = order,
+            OrderId = order.Id,
             TotalQuantity = order.OrderItems.Sum(oi => oi.Quantity),
             TotalAmount = order.TotalAmount,
             Status = order.Status,
@@ -288,7 +288,7 @@ public class OrderService
 
         return new CompletedOrderDto()
         {
-            Order = order,
+            OrderId = order.Id,
             TotalQuantity = order.OrderItems.Sum(oi => oi.Quantity),
             TotalAmount = order.TotalAmount,
             Status = order.Status
@@ -314,7 +314,7 @@ public class OrderService
         {
             completedOrders.Add(new CompletedOrderDto()
             {
-                Order = order,
+                OrderId = order.Id,
                 TotalQuantity = order.OrderItems.Sum(oi => oi.Quantity),
                 TotalAmount = order.TotalAmount,
                 Status = order.Status,

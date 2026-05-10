@@ -4,7 +4,7 @@ namespace AMZN.DTOs.Orders;
 
 public class OrderDto
 {
-    public Order? Order { get; set; }
+    public Guid OrderId { get; set; }
     public int TotalQuantity { get; set; }
     public decimal TotalAmount { get; set; }
     public OrderStatus Status { get; set; }
