@@ -62,7 +62,7 @@ public class ActionRepository : IActionRepository
                 {
                     product.CurrentPrice = (decimal)product.OriginalPrice * (decimal)((100 - action.Amount) * 0.01);
                 }
-
+                _dataContext.Products.Update(product);
                 _dataContext.SaveChanges();
             }
         }
@@ -90,6 +90,7 @@ public class ActionRepository : IActionRepository
                         {
                             product.CurrentPrice = (decimal)product.OriginalPrice * (decimal)((100 - action.Amount) * 0.01);
                         }
+                        _dataContext.Products.Update(product);
                     }
                     _dataContext.SaveChanges();
                 }
@@ -109,6 +110,7 @@ public class ActionRepository : IActionRepository
                 {
                     product.CurrentPrice = (decimal)product.OriginalPrice;
                     product.OriginalPrice = null;
+                    _dataContext.Products.Update(product);
                     _dataContext.SaveChanges();
                 }
             }
@@ -132,9 +134,10 @@ public class ActionRepository : IActionRepository
                         {
                             product.CurrentPrice = (decimal)product.OriginalPrice;
                             product.OriginalPrice = null;
-                            _dataContext.SaveChanges();
+                            _dataContext.Products.Update(product);
                         }
                     }
+                    _dataContext.SaveChanges();
                 }
             }
         }
